@@ -3,49 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Red Balloon Blaster</title>
+    <title>Galaxy Guardian</title>
     <style>
         /* --- CSS Styling --- */
-        * {
-            box-sizing: border-box;
-        }
-
         body {
             margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Space Mono', monospace; /* A space-y font feel */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            overflow: hidden;
-            -webkit-user-select: none;
+            background-color: #0d0d1a; /* Deep space blue */
+            color: #e0e0f0; /* Light, futuristic text */
+            overflow: hidden; /* Prevent scrollbars */
+            -webkit-user-select: none; /* Disable text selection for better game feel */
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            touch-action: none;
-            position: fixed;
-            width: 100%;
-            height: 100%;
+            touch-action: manipulation; /* Prevent browser double-tap zoom etc. */
         }
 
+        /* Parallax stars background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(2px 2px at 20% 30%, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 70% 80%, #eee, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 50% 50%, #eee, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 90% 10%, #eee, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 10% 90%, #eee, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 150px 150px, 200px 200px, 100px 100px, 250px 250px, 120px 120px;
+            animation: moveStars 100s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes moveStars {
+            from { background-position: 0 0; }
+            to { background-position: 0 100%; }
+        }
+
+
         #game-container {
-            width: 90vw;
-            max-width: 900px;
-            height: 95vh;
-            max-height: 800px;
-            border: 3px solid rgba(255,255,255,0.3);
-            background: rgba(0,0,0,0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
+            width: 80vw;
+            max-width: 600px; /* Adjusted max-width for phone portrait feel */
+            height: 90vh;
+            max-height: 800px; /* Adjusted max-height */
+            border: 5px solid #4a4a6b; /* Space frame */
+            background-color: rgba(13, 13, 26, 0.7); /* Slightly transparent for stars */
             position: relative;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            box-shadow: 0 0 25px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            touch-action: none;
+            border-radius: 10px;
         }
 
         .game-screen {
@@ -58,383 +73,338 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(15px);
+            background-color: rgba(0, 0, 0, 0.9);
             text-align: center;
-            z-index: 10;
-            border-radius: 17px;
+            z-index: 100; /* Ensure screens are on top */
+            border-radius: 5px; /* Match container border-radius */
         }
 
         .hidden {
             display: none !important;
         }
 
-        /* Start Screen */
-        #start-screen h1 {
-            font-size: 3em;
-            margin-bottom: 30px;
-            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-
-        #start-screen input {
-            padding: 15px 20px;
-            margin-bottom: 30px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 25px;
-            font-size: 1.2em;
-            width: 70%;
-            max-width: 350px;
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            text-align: center;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        #start-screen input::placeholder {
-            color: rgba(255,255,255,0.7);
-        }
-
-        #start-screen input:focus {
-            border-color: #4ecdc4;
-            box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
-        }
-
-        .btn {
-            padding: 15px 30px;
-            margin: 15px;
+        /* All Buttons */
+        button {
+            padding: 12px 25px;
+            margin: 10px;
             font-size: 1.3em;
             cursor: pointer;
-            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            background-color: #6a0dad; /* Purple accent */
             color: white;
-            border: none;
-            border-radius: 25px;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            border: 2px solid #9932cc;
+            border-radius: 8px;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            background: linear-gradient(45deg, #44a08d, #4ecdc4);
+        button:hover {
+            background-color: #9932cc;
+            transform: translateY(-2px);
         }
 
-        .btn:active {
-            transform: translateY(-1px);
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 3px rgba(0,0,0,0.3);
         }
 
-        /* Game Play Screen */
+        input[type="text"] {
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #9932cc;
+            border-radius: 5px;
+            font-size: 1.1em;
+            width: 70%;
+            max-width: 300px;
+            background-color: #333;
+            color: #eee;
+            text-align: center;
+        }
+
+        /* Game Play Screen Layout */
         #game-play-screen {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: stretch;
-            padding: 20px;
-            background: transparent;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: transparent; /* Show parallax background */
         }
 
         #game-info {
             display: flex;
             justify-content: space-around;
             width: 100%;
-            padding: 15px;
-            font-size: 1.2em;
-            font-weight: 600;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 0;
+            font-size: 1em;
+            background-color: rgba(0,0,0,0.5);
+            border-radius: 5px;
+            margin-bottom: 8px;
+            z-index: 10; /* Above game area */
         }
 
         #game-area {
             flex-grow: 1;
             position: relative;
             overflow: hidden;
-            background: linear-gradient(180deg, #87CEEB 0%, #98FB98 100%);
-            border-radius: 15px;
-            cursor: crosshair;
-            touch-action: none;
-            border: 2px solid rgba(255,255,255,0.3);
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+            background-color: transparent; /* Show parallax background */
+            border-radius: 5px;
+            cursor: crosshair; /* Indicate firing area */
+            touch-action: none; /* Crucial for preventing mobile scrolling */
         }
 
-        #cannon {
+        /* Spaceship */
+        #spaceship {
             position: absolute;
             bottom: 10px;
             width: 70px;
-            height: 50px;
-            background: linear-gradient(45deg, #8B4513, #A0522D);
-            border-radius: 15px 15px 5px 5px;
+            height: 60px;
+            background-color: #00bcd4; /* Cyan blue ship */
+            border-radius: 50% 50% 10px 10px;
             left: calc(50% - 35px);
-            cursor: pointer;
-            z-index: 5;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: grab;
+            z-index: 50;
+            box-shadow: 0 0 15px #00bcd4; /* Glow effect */
         }
 
-        #cannon::before {
+        #spaceship::before { /* Cockpit */
             content: '';
             position: absolute;
-            top: -25px;
-            left: 25px;
-            width: 20px;
-            height: 35px;
-            background: linear-gradient(45deg, #555, #777);
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 25px;
+            background-color: #333;
+            border-radius: 50%;
+            border: 2px solid #555;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
         }
 
-        #cannon.moving {
-            transform: scale(1.1);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+        #spaceship.firing .laser-muzzle { /* Laser muzzle flash */
+            animation: laserFlash 0.05s linear;
         }
 
+        .laser-muzzle {
+            position: absolute;
+            bottom: -5px; /* Just below ship */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 15px;
+            background-color: #f00; /* Red laser color */
+            border-radius: 2px;
+            opacity: 0;
+        }
+
+        @keyframes laserFlash {
+            0% { opacity: 1; transform: translateX(-50%) scaleY(1); }
+            100% { opacity: 0; transform: translateX(-50%) scaleY(0.5); }
+        }
+
+        /* Control Button (Pause) */
         #controls {
             display: flex;
             justify-content: center;
             width: 100%;
-            padding: 15px 0;
-            margin-top: 15px;
+            padding: 8px 0;
+            margin-top: 8px;
+            background-color: rgba(0,0,0,0.5);
+            border-radius: 5px;
+            z-index: 10;
+        }
+        #controls button {
+            padding: 8px 15px;
+            font-size: 1.1em;
+            margin: 0;
         }
 
-        /* Balloons - improved heart shape */
-        .balloon {
+
+        /* Game Objects (Enemies) */
+        .game-object {
             position: absolute;
-            width: 35px;
-            height: 35px;
-            animation: fall linear forwards, float 2s ease-in-out infinite alternate;
-            opacity: 1;
-            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
-            z-index: 2;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-        }
-
-        .balloon.popped {
-            opacity: 0;
-            transform: scale(0.2) rotate(180deg);
-        }
-
-        .balloon::before,
-        .balloon::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-color: inherit;
-            border-radius: 50%;
-        }
-
-        .balloon::before {
-            left: -50%;
-            transform: translateY(-50%);
-        }
-
-        .balloon::after {
-            left: 50%;
-            transform: translateY(-50%);
-        }
-
-        .balloon {
-            transform: rotate(-45deg);
+            border-radius: 50%; /* Default to round for asteroids */
+            z-index: 20; /* Above stars, below ship */
+            animation: fall linear forwards;
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
             transform-origin: center center;
         }
 
-        /* Balloon colors with gradients */
-        .balloon.red { 
-            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
-        }
-        .balloon.blue { 
-            background: linear-gradient(45deg, #4ecdc4, #44a08d);
-        }
-        .balloon.green { 
-            background: linear-gradient(45deg, #95e1d3, #6c5ce7);
-        }
-        .balloon.yellow { 
-            background: linear-gradient(45deg, #ffd93d, #f9ca24);
-        }
-        .balloon.purple { 
-            background: linear-gradient(45deg, #a29bfe, #6c5ce7);
+        .game-object.popped {
+            opacity: 0;
+            transform: scale(0.1) rotate(0deg); /* Shrink quickly for explosion */
         }
 
-        /* Cannonball */
-        .cannonball {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background: radial-gradient(circle at 30% 30%, #fff, #ccc, #666);
+        /* Specific enemy types */
+        .asteroid {
+            width: 40px;
+            height: 40px;
+            background-color: #8B4513; /* Brown */
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            animation: fall linear forwards, rotateAsteroid linear infinite;
+        }
+
+        .alien-small {
+            width: 35px;
+            height: 35px;
+            background-color: #00ff00; /* Green */
             border-radius: 50%;
-            z-index: 4;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 0 10px #00ff00;
         }
 
-        /* Particle effects */
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: #ffd93d;
+        .alien-large {
+            width: 50px;
+            height: 50px;
+            background-color: #800080; /* Purple */
             border-radius: 50%;
-            pointer-events: none;
-            animation: particle-explode 0.6s ease-out forwards;
+            box-shadow: 0 0 15px #800080;
         }
 
-        /* Tap indicator */
-        .tap-indicator {
+
+        /* Laser Projectile (from spaceship) */
+        .laser-projectile {
             position: absolute;
-            width: 30px;
-            height: 30px;
-            border: 3px solid rgba(255,255,255,0.8);
+            width: 6px;
+            height: 20px;
+            background-color: #ff0000; /* Red laser */
+            box-shadow: 0 0 10px #ff0000;
+            border-radius: 3px;
+            z-index: 30; /* Above enemies */
+        }
+
+        /* Explosion Effect */
+        .explosion {
+            position: absolute;
+            width: 60px; /* Size of explosion */
+            height: 60px;
+            background-color: transparent;
             border-radius: 50%;
-            pointer-events: none;
-            animation: tap-ripple 0.6s ease-out forwards;
-            z-index: 6;
+            animation: explode 0.3s forwards;
+            z-index: 40; /* On top of everything temporarily */
+            pointer-events: none; /* Don't block clicks */
         }
 
-        /* Animations */
-        @keyframes fall {
-            from { 
-                transform: translateY(-100px) rotate(-45deg); 
-            } 
-            to { 
-                transform: translateY(calc(100% + 50px)) rotate(-45deg); 
-            }
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateX(0) rotate(-45deg); }
-            50% { transform: translateX(10px) rotate(-45deg); }
-        }
-
-        @keyframes fire-animation {
-            0% { transform: scaleX(1) scaleY(1); }
-            50% { transform: scaleX(1.3) scaleY(0.8); }
-            100% { transform: scaleX(1) scaleY(1); }
-        }
-
-        @keyframes particle-explode {
+        @keyframes explode {
             0% {
+                transform: scale(0.1);
+                box-shadow: 0 0 0 0 orange, 0 0 0 0 red;
                 opacity: 1;
+            }
+            50% {
                 transform: scale(1);
+                box-shadow: 0 0 20px 10px yellow, 0 0 40px 15px orange, 0 0 60px 20px red;
+                opacity: 0.8;
             }
             100% {
-                opacity: 0;
-                transform: scale(0) translateY(-50px);
-            }
-        }
-
-        @keyframes tap-ripple {
-            0% {
-                transform: scale(0);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(3);
+                transform: scale(1.5);
+                box-shadow: 0 0 10px 5px yellow, 0 0 20px 10px orange, 0 0 30px 15px red;
                 opacity: 0;
             }
         }
 
-        #cannon.firing::before {
-            animation: fire-animation 0.2s ease-out;
+        @keyframes fall {
+            from { transform: translateY(-100px); }
+            to { transform: translateY(calc(100% + 50px)); }
         }
 
-        /* Instructions */
-        .instructions {
+        @keyframes rotateAsteroid {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Boss Specifics */
+        #boss {
             position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(5px);
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.2);
-            animation: pulse 2s infinite;
+            top: 20px;
+            width: 120px;
+            height: 120px;
+            background-color: #4b0082; /* Indigo */
+            border-radius: 15px;
+            left: calc(50% - 60px);
+            display: none;
+            z-index: 30;
+            transition: left 0.8s ease-in-out; /* Smooth boss movement */
+            box-shadow: 0 0 30px #4b0082, inset 0 0 15px rgba(255,255,255,0.3);
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 0.7; }
-            50% { opacity: 1; }
+        #boss-health-bar {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            width: 100%;
+            height: 12px;
+            background-color: #dc3545; /* Red (empty) */
+            border: 1px solid #000;
+            box-sizing: border-box;
+            border-radius: 3px;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            #game-container {
-                width: 95vw;
-                height: 98vh;
-            }
-            
-            #start-screen h1 {
-                font-size: 2.2em;
-            }
-            
-            .btn {
-                font-size: 1.1em;
-                padding: 12px 25px;
-            }
-            
-            #game-info {
-                font-size: 1em;
-            }
+        #boss-health-bar-fill {
+            width: 100%;
+            height: 100%;
+            background-color: #28a745; /* Green (full) */
+            transition: width 0.2s ease-out;
+            border-radius: 3px;
+        }
+
+        .boss-projectile {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #ffc107; /* Orange/Yellow */
+            border-radius: 50%;
+            z-index: 40; /* Above ship's projectiles */
+            box-shadow: 0 0 15px #ffc107;
         }
     </style>
 </head>
 <body>
     <div id="game-container">
         <div id="start-screen" class="game-screen">
-            <h1>🎈 Red Balloon Blaster</h1>
-            <p style="font-size: 1.2em; margin-bottom: 20px;">Enter your name:</p>
+            <h1>Galaxy Guardian</h1>
+            <p>Enter your callsign:</p>
             <input type="text" id="playerNameInput" placeholder="Your Name">
-            <button id="startButton" class="btn">Start Game</button>
+            <button id="startButton">Begin Mission</button>
         </div>
 
         <div id="game-play-screen" class="game-screen hidden">
             <div id="game-info">
-                <p>Player: <span id="playerNameDisplay"></span></p>
+                <p>Pilot: <span id="playerNameDisplay"></span></p>
                 <p>Score: <span id="scoreDisplay">0</span></p>
                 <p>Lives: <span id="livesDisplay">3</span></p>
                 <p>Level: <span id="levelDisplay">1</span></p>
             </div>
             <div id="game-area">
-                <div id="cannon"></div>
-                <div class="instructions">
-                    Tap anywhere to move cannon • Tap to fire • Shoot only red balloons!
+                <div id="spaceship">
+                    <div class="laser-muzzle"></div>
                 </div>
             </div>
             <div id="controls">
-                <button id="pauseButton" class="btn">Pause</button>
+                <button id="pauseButton">Pause</button>
             </div>
         </div>
 
         <div id="pause-screen" class="game-screen hidden">
-            <h1>⏸️ Game Paused</h1>
-            <button id="continueButton" class="btn">Continue</button>
-            <button id="restartButtonPause" class="btn">Restart</button>
+            <h1>Mission Paused</h1>
+            <button id="continueButton">Resume Mission</button>
+            <button id="restartButtonPause">Restart</button>
         </div>
 
         <div id="level-complete-screen" class="game-screen hidden">
-            <h1 id="levelCompleteMessage">🎉 Level 1 Complete!</h1>
-            <p style="font-size: 1.3em;">Good job, <span id="levelCompletePlayerName"></span>!</p>
-            <button id="nextLevelButton" class="btn">Next Level</button>
+            <h1 id="levelCompleteMessage">Level 1 Cleared!</h1>
+            <p>Good work, <span id="levelCompletePlayerName"></span>!</p>
+            <button id="nextLevelButton">Advance to Next Sector</button>
         </div>
 
         <div id="game-over-screen" class="game-screen hidden">
-            <h1>💥 Game Over!</h1>
-            <p id="finalScoreMessage" style="font-size: 1.3em;">You scored <span id="finalScoreDisplay">0</span> points.</p>
-            <button id="restartButtonGameOver" class="btn">Restart</button>
+            <h1>MISSION FAILED!</h1>
+            <p id="finalScoreMessage">Final Score: <span id="finalScoreDisplay">0</span></p>
+            <button id="restartButtonGameOver">Try Again</button>
         </div>
     </div>
 
     <script>
+        /* --- JavaScript Logic --- */
         // --- Game State Variables ---
         let playerName = '';
         let score = 0;
@@ -442,9 +412,20 @@
         let level = 1;
         let gameRunning = false;
         let gamePaused = false;
-        let gameLoopInterval;
-        let balloonGenerationInterval;
-        const balloonsOnScreen = [];
+        let gameLoopAnimationFrame; // For requestAnimationFrame
+        let enemyGenerationInterval;
+        let continuousFireInterval; // For continuous laser fire
+        let currentFireRateMS = 200; // Initial fire interval in ms (200ms = 5 shots/sec)
+        const MIN_FIRE_RATE_MS = 50; // Fastest fire rate possible (50ms = 20 shots/sec)
+        let activeGameObjects = []; // Array to hold active enemies and boss projectiles
+
+        // Boss variables
+        let boss = null;
+        let bossHealth = 0;
+        let bossMaxHealth = 0;
+        let bossFiringInterval;
+        let bossMovementInterval;
+        const BOSS_LEVEL = 3; // The level where the boss appears
 
         // --- DOM Elements ---
         const gameContainer = document.getElementById('game-container');
@@ -462,7 +443,8 @@
         const livesDisplay = document.getElementById('livesDisplay');
         const levelDisplay = document.getElementById('levelDisplay');
         const gameArea = document.getElementById('game-area');
-        const cannon = document.getElementById('cannon');
+        const spaceship = document.getElementById('spaceship');
+        const laserMuzzle = document.querySelector('#spaceship .laser-muzzle');
         const pauseButton = document.getElementById('pauseButton');
 
         const continueButton = document.getElementById('continueButton');
@@ -475,20 +457,60 @@
         const finalScoreDisplay = document.getElementById('finalScoreDisplay');
         const restartButtonGameOver = document.getElementById('restartButtonGameOver');
 
-        // --- Game Settings ---
+        // --- Game Settings (Adjust for difficulty) ---
         const LEVEL_SETTINGS = {
-            1: { balloonSpeed: 1.5, generationRate: 1500, nonRedChance: 0.2, balloonsToShoot: 10 },
-            2: { balloonSpeed: 2.0, generationRate: 1200, nonRedChance: 0.3, balloonsToShoot: 12 },
-            3: { balloonSpeed: 2.5, generationRate: 1000, nonRedChance: 0.4, balloonsToShoot: 15 },
-            4: { balloonSpeed: 3.0, generationRate: 800, nonRedChance: 0.5, balloonsToShoot: 18 },
-            5: { balloonSpeed: 3.5, generationRate: 600, nonRedChance: 0.6, balloonsToShoot: 20 }
+            1: {
+                enemySpeed: 1.5, generationRate: 1500, enemiesToClear: 20,
+                enemyTypes: ['asteroid', 'asteroid', 'alien-small'],
+                initialFireRate: 200
+            },
+            2: {
+                enemySpeed: 2.0, generationRate: 1200, enemiesToClear: 30,
+                enemyTypes: ['asteroid', 'alien-small', 'alien-small', 'alien-large'],
+                initialFireRate: 180
+            },
+            3: { // Boss Level
+                enemySpeed: 0, generationRate: 0, enemiesToClear: 1, // Cleared by defeating boss
+                bossHealth: 300, bossSpeed: 0.8, bossFireRate: 1200, bossProjectileSpeed: 4,
+                initialFireRate: 150
+            },
+            4: {
+                enemySpeed: 2.5, generationRate: 900, enemiesToClear: 40,
+                enemyTypes: ['alien-small', 'alien-small', 'alien-large', 'alien-large'],
+                initialFireRate: 120
+            },
+            5: {
+                enemySpeed: 3.0, generationRate: 700, enemiesToClear: 50,
+                enemyTypes: ['alien-small', 'alien-large', 'alien-large'],
+                initialFireRate: 100
+            }
         };
-        const BALLOON_SIZE = 35;
-        const CANNONBALL_SPEED = 12;
-        const SCORE_PER_RED_BALLOON = 10;
+
+        const ENEMY_HITS_REQUIRED = {
+            'asteroid': 1,
+            'alien-small': 1,
+            'alien-large': 3,
+            'boss': 1 // Each hit on boss is processed as damage
+        };
+
+        const ENEMY_SCORES = {
+            'asteroid': 10,
+            'alien-small': 20,
+            'alien-large': 50
+        };
+
+        const ENEMY_SIZES = {
+            'asteroid': 40,
+            'alien-small': 35,
+            'alien-large': 50
+        };
+
+        const SPACESHIP_PROJECTILE_SPEED = 15; // Pixels per frame
+        const BOSS_PROJECTILE_DAMAGE = 1; // Lives lost if hit by boss projectile
         const MAX_LEVEL = 5;
 
-        let redBalloonsShotInLevel = 0;
+        let enemiesClearedInLevel = 0;
+
 
         // --- Utility Functions ---
         function showScreen(screenElement) {
@@ -505,70 +527,36 @@
             levelDisplay.textContent = level;
         }
 
-        function getRandomColor() {
-            const colors = ['blue', 'green', 'yellow', 'purple'];
-            return colors[Math.floor(Math.random() * colors.length)];
-        }
-
-        function createTapIndicator(x, y) {
-            const indicator = document.createElement('div');
-            indicator.className = 'tap-indicator';
-            indicator.style.left = `${x - 15}px`;
-            indicator.style.top = `${y - 15}px`;
-            gameArea.appendChild(indicator);
-            
-            setTimeout(() => {
-                if (gameArea.contains(indicator)) {
-                    indicator.remove();
-                }
-            }, 600);
-        }
-
-        function createParticles(x, y, count = 6) {
-            for (let i = 0; i < count; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = `${x}px`;
-                particle.style.top = `${y}px`;
-                particle.style.animationDelay = `${Math.random() * 0.2}s`;
-                
-                // Random direction
-                const angle = (Math.PI * 2 * i) / count;
-                const distance = 20 + Math.random() * 30;
-                particle.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`;
-                
-                gameArea.appendChild(particle);
-                
-                setTimeout(() => {
-                    if (gameArea.contains(particle)) {
-                        particle.remove();
-                    }
-                }, 600);
-            }
+        function createExplosion(x, y, size = 60) {
+            const explosion = document.createElement('div');
+            explosion.className = 'explosion';
+            explosion.style.left = `${x - size / 2}px`;
+            explosion.style.top = `${y - size / 2}px`;
+            explosion.style.width = `${size}px`;
+            explosion.style.height = `${size}px`;
+            gameArea.appendChild(explosion);
+            setTimeout(() => explosion.remove(), 300); // Remove after animation
         }
 
         // --- Game Logic Functions ---
+
         function startGame() {
             playerName = playerNameInput.value.trim();
             if (playerName === '') {
-                alert('Please enter your name!');
+                alert('Please enter your callsign!');
                 return;
             }
             score = 0;
             lives = 3;
             level = 1;
-            redBalloonsShotInLevel = 0;
-            balloonsOnScreen.length = 0;
-            gameArea.innerHTML = '';
-            gameArea.appendChild(cannon);
-            
-            // Add instructions back
-            const instructions = document.createElement('div');
-            instructions.className = 'instructions';
-            instructions.textContent = 'Tap anywhere to move cannon • Tap to fire • Shoot only red balloons!';
-            gameArea.appendChild(instructions);
-            
-            cannon.style.left = `${gameArea.offsetWidth / 2 - cannon.offsetWidth / 2}px`;
+            enemiesClearedInLevel = 0;
+            activeGameObjects.length = 0; // Clear any existing objects
+            gameArea.innerHTML = ''; // Clear existing elements
+            gameArea.appendChild(spaceship); // Re-add spaceship
+            // Reset spaceship position
+            spaceship.style.left = `${gameArea.offsetWidth / 2 - spaceship.offsetWidth / 2}px`;
+
+            currentFireRateMS = LEVEL_SETTINGS[1].initialFireRate; // Reset fire rate
 
             showScreen(gamePlayScreen);
             gameRunning = true;
@@ -578,21 +566,39 @@
         }
 
         function startLevel() {
-            redBalloonsShotInLevel = 0;
-            balloonsOnScreen.length = 0;
-            gameArea.querySelectorAll('.balloon').forEach(b => b.remove());
-            gameArea.querySelectorAll('.cannonball').forEach(cb => cb.remove());
+            enemiesClearedInLevel = 0;
+            // Clear all active game objects (enemies, projectiles, boss)
+            gameArea.querySelectorAll('.game-object, .laser-projectile, .boss-projectile, #boss').forEach(el => el.remove());
+            activeGameObjects = []; // Ensure array is empty
+
+            clearInterval(enemyGenerationInterval);
+            clearInterval(bossFiringInterval);
+            clearInterval(bossMovementInterval);
+            if (boss) boss.remove(); // Remove boss if present from previous level
+            boss = null; // Clear boss reference
 
             const currentSettings = LEVEL_SETTINGS[level];
             if (!currentSettings) {
-                endGame(true);
+                endGame(true); // Should not happen if all levels covered, acts as a win
                 return;
             }
 
-            clearInterval(balloonGenerationInterval);
-            balloonGenerationInterval = setInterval(generateBalloon, currentSettings.generationRate);
-            if (gameLoopInterval) {
-                cancelAnimationFrame(gameLoopInterval);
+            // Set initial fire rate for the level
+            currentFireRateMS = currentSettings.initialFireRate;
+            if (isFiringContinuously) { // If player was holding fire, update rate
+                stopContinuousFire();
+                startContinuousFire();
+            }
+
+            if (level === BOSS_LEVEL) {
+                spawnBoss();
+            } else {
+                enemyGenerationInterval = setInterval(generateEnemy, currentSettings.generationRate);
+            }
+
+            // Ensure game loop is running
+            if (gameLoopAnimationFrame) {
+                cancelAnimationFrame(gameLoopAnimationFrame);
             }
             gameLoop();
         }
@@ -601,190 +607,314 @@
             if (!gameRunning) return;
             gamePaused = true;
             showScreen(pauseScreen);
-            clearInterval(balloonGenerationInterval);
-            cancelAnimationFrame(gameLoopInterval);
+            clearInterval(enemyGenerationInterval);
+            clearInterval(continuousFireInterval);
+            clearInterval(bossFiringInterval);
+            clearInterval(bossMovementInterval);
+            cancelAnimationFrame(gameLoopAnimationFrame);
         }
 
         function continueGame() {
             gamePaused = false;
             showScreen(gamePlayScreen);
             const currentSettings = LEVEL_SETTINGS[level];
-            balloonGenerationInterval = setInterval(generateBalloon, currentSettings.generationRate);
-            gameLoop();
+            if (level === BOSS_LEVEL) {
+                startBossFiring();
+                moveBoss();
+            } else {
+                enemyGenerationInterval = setInterval(generateEnemy, currentSettings.generationRate);
+            }
+            if (isFiringContinuously) { // Resume continuous fire if it was active
+                startContinuousFire();
+            }
+            gameLoop(); // Resume animation frame loop
         }
 
         function restartGame() {
-            clearInterval(balloonGenerationInterval);
-            cancelAnimationFrame(gameLoopInterval);
+            clearInterval(enemyGenerationInterval);
+            clearInterval(continuousFireInterval);
+            clearInterval(bossFiringInterval);
+            clearInterval(bossMovementInterval);
+            cancelAnimationFrame(gameLoopAnimationFrame);
             startGame();
         }
 
         function endGame(win = false) {
             gameRunning = false;
             gamePaused = false;
-            clearInterval(balloonGenerationInterval);
-            cancelAnimationFrame(gameLoopInterval);
-            gameArea.innerHTML = '';
-            gameArea.appendChild(cannon);
-            
-            // Add instructions back
-            const instructions = document.createElement('div');
-            instructions.className = 'instructions';
-            instructions.textContent = 'Tap anywhere to move cannon • Tap to fire • Shoot only red balloons!';
-            gameArea.appendChild(instructions);
+            clearInterval(enemyGenerationInterval);
+            clearInterval(continuousFireInterval);
+            clearInterval(bossFiringInterval);
+            clearInterval(bossMovementInterval);
+            cancelAnimationFrame(gameLoopAnimationFrame);
+
+            // Clean up all remaining game objects
+            gameArea.querySelectorAll('.game-object, .laser-projectile, .boss-projectile, #boss').forEach(el => el.remove());
+            activeGameObjects = [];
+            gameArea.appendChild(spaceship); // Ensure spaceship is back for next game
 
             if (win) {
-                if (level >= MAX_LEVEL) {
-                    levelCompleteMessage.textContent = "🏆 You Win! All Levels Complete!";
+                if (level > MAX_LEVEL) { // All levels truly completed
+                    levelCompleteMessage.textContent = "Galactic Victory Achieved!";
                     levelCompletePlayerName.textContent = playerName;
                     nextLevelButton.textContent = "Play Again!";
                     nextLevelButton.onclick = restartGame;
-                } else {
-                    levelCompleteMessage.textContent = `🎉 Level ${level} Complete!`;
+                } else { // Current level completed, going to next
+                    levelCompleteMessage.textContent = `Sector ${level} Cleared!`;
                     levelCompletePlayerName.textContent = playerName;
-                    nextLevelButton.textContent = "Next Level";
+                    nextLevelButton.textContent = "Advance to Next Sector";
                     nextLevelButton.onclick = nextLevel;
                 }
                 showScreen(levelCompleteScreen);
+
             } else {
                 finalScoreDisplay.textContent = score;
                 showScreen(gameOverScreen);
             }
         }
 
-        function generateBalloon() {
-            if (!gameRunning || gamePaused) return;
+        function generateEnemy() {
+            if (!gameRunning || gamePaused || level === BOSS_LEVEL) return;
 
-            const balloon = document.createElement('div');
-            const color = Math.random() < LEVEL_SETTINGS[level].nonRedChance ? getRandomColor() : 'red';
-            balloon.className = `balloon ${color}`;
-            balloon.dataset.color = color;
-            balloon.style.left = `${Math.random() * (gameArea.offsetWidth - BALLOON_SIZE)}px`;
-            balloon.style.top = `-50px`;
-            gameArea.appendChild(balloon);
-            balloonsOnScreen.push(balloon);
+            const currentSettings = LEVEL_SETTINGS[level];
+            const enemyType = currentSettings.enemyTypes[Math.floor(Math.random() * currentSettings.enemyTypes.length)];
+            const enemySize = ENEMY_SIZES[enemyType];
+
+            const enemy = document.createElement('div');
+            enemy.className = `game-object ${enemyType}`;
+            enemy.dataset.type = enemyType;
+            enemy.dataset.hits = ENEMY_HITS_REQUIRED[enemyType]; // Set initial hits required
+            enemy.style.width = `${enemySize}px`;
+            enemy.style.height = `${enemySize}px`;
+            enemy.style.left = `${Math.random() * (gameArea.offsetWidth - enemySize)}px`;
+            enemy.style.top = `-50px`; // Start above the screen
+            gameArea.appendChild(enemy);
+            activeGameObjects.push(enemy);
         }
 
-        function moveBalloons() {
+        function moveGameObjects() {
             const currentSettings = LEVEL_SETTINGS[level];
-            for (let i = balloonsOnScreen.length - 1; i >= 0; i--) {
-                const balloon = balloonsOnScreen[i];
-                let currentTop = parseFloat(balloon.style.top);
-                balloon.style.top = `${currentTop + currentSettings.balloonSpeed}px`;
+            // Iterate backwards when removing elements from an array
+            for (let i = activeGameObjects.length - 1; i >= 0; i--) {
+                const obj = activeGameObjects[i];
 
-                if (currentTop > gameArea.offsetHeight) {
-                    if (balloon.dataset.color === 'red' && !balloon.dataset.popped) {
+                if (!gameArea.contains(obj) || obj.dataset.popped) { // Check if already removed/popped
+                    activeGameObjects.splice(i, 1);
+                    continue;
+                }
+
+                let currentTop = parseFloat(obj.style.top);
+
+                if (obj.dataset.type && (obj.dataset.type.includes('asteroid') || obj.dataset.type.includes('alien'))) {
+                    obj.style.top = `${currentTop + currentSettings.enemySpeed}px`;
+
+                    // Check if enemy went off screen (missed)
+                    if (currentTop > gameArea.offsetHeight) {
                         lives--;
                         updateDisplay();
+                        createExplosion(obj.offsetLeft + obj.offsetWidth / 2, obj.offsetTop + obj.offsetHeight / 2, obj.offsetWidth); // Explosion at bottom
+                        obj.remove();
+                        activeGameObjects.splice(i, 1);
                         if (lives <= 0) {
                             endGame();
                             return;
                         }
                     }
-                    balloon.remove();
-                    balloonsOnScreen.splice(i, 1);
+                } else if (obj.dataset.type === 'bossProjectile') {
+                    obj.style.top = `${currentTop + currentSettings.bossProjectileSpeed}px`;
+
+                    // Check collision with spaceship
+                    const spaceshipRect = spaceship.getBoundingClientRect();
+                    const projectileRect = obj.getBoundingClientRect();
+                    const gameAreaRect = gameArea.getBoundingClientRect();
+
+                    const spaceshipRelRect = {
+                        left: spaceshipRect.left - gameAreaRect.left,
+                        right: spaceshipRect.right - gameAreaRect.left,
+                        top: spaceshipRect.top - gameAreaRect.top,
+                        bottom: spaceshipRect.bottom - gameAreaRect.top
+                    };
+                    const projectileRelRect = {
+                        left: projectileRect.left - gameAreaRect.left,
+                        right: projectileRect.right - gameAreaRect.left,
+                        top: projectileRect.top - gameAreaRect.top,
+                        bottom: projectileRect.bottom - gameAreaRect.top
+                    };
+
+                    if (
+                        projectileRelRect.left < spaceshipRelRect.right &&
+                        projectileRelRect.right > spaceshipRelRect.left &&
+                        projectileRelRect.top < spaceshipRelRect.bottom &&
+                        projectileRelRect.bottom > spaceshipRelRect.top
+                    ) {
+                        // Collision with spaceship!
+                        lives -= BOSS_PROJECTILE_DAMAGE;
+                        updateDisplay();
+                        createExplosion(obj.offsetLeft + obj.offsetWidth / 2, obj.offsetTop + obj.offsetHeight / 2, 40); // Small explosion
+                        obj.remove();
+                        activeGameObjects.splice(i, 1);
+                        if (lives <= 0) {
+                            endGame();
+                            return;
+                        }
+                    }
+                    // Remove if off screen
+                    else if (currentTop > gameArea.offsetHeight) {
+                        obj.remove();
+                        activeGameObjects.splice(i, 1);
+                    }
                 }
             }
         }
 
-        function moveCannonball(cannonball) {
-            let currentBottom = parseFloat(cannonball.style.bottom);
-            cannonball.style.bottom = `${currentBottom + CANNONBALL_SPEED}px`;
+        function moveLaserProjectile(projectile) {
+            let currentBottom = parseFloat(projectile.style.bottom);
+            projectile.style.bottom = `${currentBottom + SPACESHIP_PROJECTILE_SPEED}px`;
 
-            for (let i = balloonsOnScreen.length - 1; i >= 0; i--) {
-                const balloon = balloonsOnScreen[i];
-                if (balloon.dataset.popped || !gameArea.contains(balloon)) continue;
+            // Check collision with game objects (enemies or boss)
+            for (let i = activeGameObjects.length - 1; i >= 0; i--) {
+                const obj = activeGameObjects[i];
+                // Only consider non-popped enemies or boss
+                if ((obj.dataset.popped && obj.dataset.type !== 'boss') || !gameArea.contains(obj)) continue;
 
-                const balloonRect = balloon.getBoundingClientRect();
-                const cannonballRect = cannonball.getBoundingClientRect();
+                const objRect = obj.getBoundingClientRect();
+                const projectileRect = projectile.getBoundingClientRect();
+                const gameAreaRect = gameArea.getBoundingClientRect();
+
+                // Adjust rects to be relative to gameArea (important for accurate collision)
+                const objRelRect = {
+                    left: objRect.left - gameAreaRect.left,
+                    right: objRect.right - gameAreaRect.left,
+                    top: objRect.top - gameAreaRect.top,
+                    bottom: objRect.bottom - gameAreaRect.top
+                };
+                const projectileRelRect = {
+                    left: projectileRect.left - gameAreaRect.left,
+                    right: projectileRect.right - gameAreaRect.left,
+                    top: projectileRect.top - gameAreaRect.top,
+                    bottom: projectileRect.bottom - gameAreaRect.top
+                };
+
 
                 if (
-                    cannonballRect.left < balloonRect.right &&
-                    cannonballRect.right > balloonRect.left &&
-                    cannonballRect.top < balloonRect.bottom &&
-                    cannonballRect.bottom > balloonRect.top
+                    projectileRelRect.left < objRelRect.right &&
+                    projectileRelRect.right > objRelRect.left &&
+                    projectileRelRect.top < objRelRect.bottom &&
+                    projectileRelRect.bottom > objRelRect.top
                 ) {
-                    cannonball.remove();
-                    
-                    // Create particles at collision point
-                    const gameAreaRect = gameArea.getBoundingClientRect();
-                    createParticles(
-                        balloonRect.left - gameAreaRect.left + balloon.offsetWidth / 2,
-                        balloonRect.top - gameAreaRect.top + balloon.offsetHeight / 2
-                    );
+                    // Collision!
+                    projectile.remove(); // Remove laser projectile
 
-                    if (balloon.dataset.color === 'red') {
-                        score += SCORE_PER_RED_BALLOON;
-                        redBalloonsShotInLevel++;
-                        balloon.classList.add('popped');
-                        balloon.dataset.popped = 'true';
-                        setTimeout(() => {
-                            if (gameArea.contains(balloon)) {
-                                balloon.remove();
-                            }
-                        }, 300);
-                    } else {
-                        lives--;
-                        balloon.classList.add('popped');
-                        balloon.dataset.popped = 'true';
-                        setTimeout(() => {
-                            if (gameArea.contains(balloon)) {
-                                balloon.remove();
-                            }
-                        }, 300);
+                    if (obj.dataset.type && (obj.dataset.type.includes('asteroid') || obj.dataset.type.includes('alien'))) {
+                        obj.dataset.hits--;
+                        if (obj.dataset.hits <= 0) {
+                            score += ENEMY_SCORES[obj.dataset.type];
+                            enemiesClearedInLevel++;
+                            createExplosion(obj.offsetLeft + obj.offsetWidth / 2, obj.offsetTop + obj.offsetHeight / 2, obj.offsetWidth);
+                            obj.classList.add('popped');
+                            obj.dataset.popped = 'true';
+                            // Remove from DOM after explosion animation completes
+                            setTimeout(() => {
+                                if (gameArea.contains(obj)) obj.remove();
+                            }, 200);
+                        }
+                    } else if (obj.id === 'boss') {
+                        bossHealth -= 10; // Each laser hit does 10 damage
+                        updateBossHealthBar();
+                        if (bossHealth <= 0) {
+                            score += 500; // Bonus points for boss kill
+                            enemiesClearedInLevel++; // Count boss as one cleared object
+                            createExplosion(boss.offsetLeft + boss.offsetWidth / 2, boss.offsetTop + boss.offsetHeight / 2, 150); // Large explosion
+                            boss.remove();
+                            clearInterval(bossFiringInterval);
+                            clearInterval(bossMovementInterval);
+                            boss = null; // Clear boss reference
+                        }
                     }
                     updateDisplay();
-                    if (lives <= 0) {
-                        endGame();
-                        return;
-                    }
+                    increaseFireRate(); // Check for fire rate increase
                     checkLevelCompletion();
-                    return;
+                    return; // Projectile hit an object, stop checking for this projectile
                 }
             }
 
+            // Remove projectile if it goes off screen
             if (currentBottom > gameArea.offsetHeight) {
-                cannonball.remove();
+                projectile.remove();
             }
         }
 
-        function fireCannon() {
+        function fireSpaceshipProjectile() {
             if (!gameRunning || gamePaused) return;
 
-            cannon.classList.add('firing');
-            setTimeout(() => cannon.classList.remove('firing'), 200);
+            spaceship.classList.add('firing'); // Trigger muzzle flash
+            laserMuzzle.style.opacity = 1;
+            setTimeout(() => {
+                spaceship.classList.remove('firing');
+                laserMuzzle.style.opacity = 0;
+            }, 50); // Muzzle flash duration
 
-            const cannonball = document.createElement('div');
-            cannonball.className = 'cannonball';
-            cannonball.style.left = `${cannon.offsetLeft + cannon.offsetWidth / 2 - 6}px`;
-            cannonball.style.bottom = `${cannon.offsetHeight + 5}px`;
-            gameArea.appendChild(cannonball);
+            const projectile = document.createElement('div');
+            projectile.className = 'laser-projectile';
+            // Position projectile from the tip of the spaceship's barrel
+            projectile.style.left = `${spaceship.offsetLeft + spaceship.offsetWidth / 2 - 3}px`; // Center horizontally
+            projectile.style.bottom = `${spaceship.offsetHeight - 5}px`; // Just above spaceship
+            gameArea.appendChild(projectile);
+            // Projectiles are not added to activeGameObjects; they are handled by querySelectorAll
         }
 
-        function moveCannon(targetX) {
-            if (!gameRunning || gamePaused) return;
-            
-            // Constrain to game area
-            const maxX = gameArea.offsetWidth - cannon.offsetWidth;
-            const newX = Math.max(0, Math.min(maxX, targetX - cannon.offsetWidth / 2));
-            
-            cannon.style.left = `${newX}px`;
-            cannon.classList.add('moving');
-            setTimeout(() => cannon.classList.remove('moving'), 300);
+        // --- Continuous Fire Logic ---
+        function startContinuousFire() {
+            if (isFiringContinuously) return; // Prevent multiple intervals
+            isFiringContinuously = true;
+            fireSpaceshipProjectile(); // Fire immediately on hold
+            continuousFireInterval = setInterval(fireSpaceshipProjectile, currentFireRateMS);
         }
+
+        function stopContinuousFire() {
+            isFiringContinuously = false;
+            clearInterval(continuousFireInterval);
+        }
+
+        function increaseFireRate() {
+            // Gradually increase fire rate based on score
+            // For every 100 points, reduce fire interval by 5ms
+            const baseFireRate = LEVEL_SETTINGS[level].initialFireRate;
+            const scoreMultiplier = Math.floor(score / 100);
+            let newFireRate = baseFireRate - (scoreMultiplier * 5);
+            currentFireRateMS = Math.max(newFireRate, MIN_FIRE_RATE_MS);
+
+            // If actively firing, reset interval with new rate
+            if (isFiringContinuously) {
+                stopContinuousFire();
+                startContinuousFire();
+            }
+        }
+
 
         function checkLevelCompletion() {
             const currentSettings = LEVEL_SETTINGS[level];
-            if (redBalloonsShotInLevel >= currentSettings.balloonsToShoot) {
-                gameRunning = false;
-                clearInterval(balloonGenerationInterval);
-                cancelAnimationFrame(gameLoopInterval);
-
-                if (level < MAX_LEVEL) {
-                    showScreen(levelCompleteScreen);
-                } else {
-                    endGame(true);
+            if (level === BOSS_LEVEL) {
+                if (boss === null) { // Boss is removed from DOM when defeated
+                    advanceLevelOrWin();
                 }
+            } else if (enemiesClearedInLevel >= currentSettings.enemiesToClear) {
+                advanceLevelOrWin();
+            }
+        }
+
+        function advanceLevelOrWin() {
+            gameRunning = false;
+            clearInterval(enemyGenerationInterval);
+            clearInterval(continuousFireInterval);
+            clearInterval(bossFiringInterval);
+            clearInterval(bossMovementInterval);
+            cancelAnimationFrame(gameLoopAnimationFrame);
+
+            if (level < MAX_LEVEL) {
+                showScreen(levelCompleteScreen);
+            } else {
+                endGame(true); // All levels completed, you win!
             }
         }
 
@@ -801,82 +931,182 @@
             startLevel();
         }
 
-        // --- Game Loop ---
+        // --- Boss Logic ---
+        function spawnBoss() {
+            boss = document.createElement('div');
+            boss.id = 'boss';
+            boss.style.display = 'block';
+
+            const healthBar = document.createElement('div');
+            healthBar.id = 'boss-health-bar';
+            const healthFill = document.createElement('div');
+            healthFill.id = 'boss-health-bar-fill';
+            healthBar.appendChild(healthFill);
+            boss.appendChild(healthBar);
+
+            gameArea.appendChild(boss);
+            activeGameObjects.push(boss); // Add boss to active game objects
+
+            const currentSettings = LEVEL_SETTINGS[BOSS_LEVEL];
+            bossMaxHealth = currentSettings.bossHealth;
+            bossHealth = bossMaxHealth;
+            updateBossHealthBar();
+
+            // Initial boss position
+            boss.style.left = `${Math.random() * (gameArea.offsetWidth - boss.offsetWidth)}px`;
+
+            startBossFiring();
+            moveBoss(); // Start moving the boss
+        }
+
+        function updateBossHealthBar() {
+            if (boss && document.getElementById('boss-health-bar-fill')) {
+                const healthFill = document.getElementById('boss-health-bar-fill');
+                const percentage = (bossHealth / bossMaxHealth) * 100;
+                healthFill.style.width = `${Math.max(0, percentage)}%`;
+                healthFill.style.backgroundColor = percentage > 50 ? '#28a745' : percentage > 20 ? '#ffc107' : '#dc3545'; // Color changes
+            }
+        }
+
+        function startBossFiring() {
+            const currentSettings = LEVEL_SETTINGS[BOSS_LEVEL];
+            clearInterval(bossFiringInterval);
+            bossFiringInterval = setInterval(fireBossProjectile, currentSettings.bossFireRate);
+        }
+
+        function fireBossProjectile() {
+            if (!gameRunning || gamePaused || !boss || bossHealth <= 0) return;
+
+            const projectile = document.createElement('div');
+            projectile.className = 'boss-projectile';
+            projectile.dataset.type = 'bossProjectile';
+
+            // Position projectile from the boss's bottom center
+            projectile.style.left = `${boss.offsetLeft + boss.offsetWidth / 2 - 10}px`; // Centered
+            projectile.style.top = `${boss.offsetTop + boss.offsetHeight - 5}px`; // Just below boss
+
+            gameArea.appendChild(projectile);
+            activeGameObjects.push(projectile);
+        }
+
+        function moveBoss() {
+            if (!gameRunning || gamePaused || !boss || bossHealth <= 0) return;
+
+            const currentSettings = LEVEL_SETTINGS[BOSS_LEVEL];
+            // Boss moves randomly horizontally
+            let targetX = Math.random() * (gameArea.offsetWidth - boss.offsetWidth);
+            boss.style.left = `${targetX}px`;
+
+            // Adjust movement speed / frequency if needed for difficulty
+            bossMovementInterval = setTimeout(moveBoss, 1500 + Math.random() * 1000); // Move every 1.5-2.5 seconds
+        }
+
+
+        // --- Game Loop (requestAnimationFrame for smooth animations) ---
         function gameLoop() {
             if (!gameRunning || gamePaused) return;
 
-            moveBalloons();
-            gameArea.querySelectorAll('.cannonball').forEach(cb => {
-                moveCannonball(cb);
+            moveGameObjects(); // Move enemies and boss projectiles
+
+            // Move all active spaceship projectiles (lasers)
+            gameArea.querySelectorAll('.laser-projectile').forEach(lp => {
+                moveLaserProjectile(lp);
             });
 
-            gameLoopInterval = requestAnimationFrame(gameLoop);
+            gameLoopAnimationFrame = requestAnimationFrame(gameLoop);
         }
 
         // --- Event Listeners ---
+
+        // Start Screen
         startButton.addEventListener('click', startGame);
         playerNameInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') startGame();
         });
 
-        // Prevent default touch behaviors on the entire document
-        document.addEventListener('touchstart', (e) => {
-            if (e.target === gameArea || gameArea.contains(e.target)) {
-                // Allow game area touches to be handled by game
-                return;
-            }
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') {
-                // Allow input and button interactions
-                return;
-            }
-            e.preventDefault();
-        }, { passive: false });
+        // Game Play Screen - Tap/Hold to Fire & Spaceship Drag
+        let isDraggingSpaceship = false;
+        let initialSpaceshipX;
+        let initialClientX; // Can be mouseX or touchX
 
-        document.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-        }, { passive: false });
-
-        // New tap-to-move and tap-to-fire system
-        gameArea.addEventListener('click', (e) => {
+        // Mouse/Touch Down on game area
+        gameArea.addEventListener('mousedown', (e) => {
             if (!gameRunning || gamePaused) return;
-            
-            const gameAreaRect = gameArea.getBoundingClientRect();
-            const clickX = e.clientX - gameAreaRect.left;
-            const clickY = e.clientY - gameAreaRect.top;
-            
-            // Create tap indicator
-            createTapIndicator(clickX, clickY);
-            
-            // Move cannon to tap position
-            moveCannon(clickX);
-            
-            // Fire after a short delay to allow cannon to move
-            setTimeout(() => {
-                fireCannon();
-            }, 150);
+
+            // If click is on spaceship, initiate drag
+            if (e.target === spaceship || spaceship.contains(e.target)) {
+                isDraggingSpaceship = true;
+                spaceship.style.cursor = 'grabbing';
+                initialSpaceshipX = spaceship.offsetLeft;
+                initialClientX = e.clientX;
+            } else { // Otherwise, fire
+                startContinuousFire();
+            }
         });
 
-        // Touch support
         gameArea.addEventListener('touchstart', (e) => {
             if (!gameRunning || gamePaused || e.touches.length === 0) return;
-            e.preventDefault();
-            
-            const gameAreaRect = gameArea.getBoundingClientRect();
-            const touchX = e.touches[0].clientX - gameAreaRect.left;
-            const touchY = e.touches[0].clientY - gameAreaRect.top;
-            
-            createTapIndicator(touchX, touchY);
-            moveCannon(touchX);
-            
-            setTimeout(() => {
-                fireCannon();
-            }, 150);
+            e.preventDefault(); // Prevent default browser touch actions (scrolling, zooming)
+
+            // If touch starts on spaceship, initiate drag
+            if (e.target === spaceship || spaceship.contains(e.target)) {
+                isDraggingSpaceship = true;
+                initialSpaceshipX = spaceship.offsetLeft;
+                initialClientX = e.touches[0].clientX;
+            } else { // Otherwise, fire
+                startContinuousFire();
+            }
         }, { passive: false });
 
+
+        // Mouse/Touch Move on the entire gameArea to allow drag
+        gameArea.addEventListener('mousemove', (e) => {
+            if (isDraggingSpaceship && gameRunning && !gamePaused) {
+                const dx = e.clientX - initialClientX;
+                let newX = initialSpaceshipX + dx;
+
+                // Constrain spaceship to game area boundaries
+                if (newX < 0) newX = 0;
+                if (newX > gameArea.offsetWidth - spaceship.offsetWidth) newX = gameArea.offsetWidth - spaceship.offsetWidth;
+                spaceship.style.left = `${newX}px`;
+            }
+        });
+
+        gameArea.addEventListener('touchmove', (e) => {
+            if (isDraggingSpaceship && gameRunning && !gamePaused && e.touches.length > 0) {
+                e.preventDefault(); // Prevent default browser touch actions (scrolling)
+                const dx = e.touches[0].clientX - initialClientX;
+                let newX = initialSpaceshipX + dx;
+
+                if (newX < 0) newX = 0;
+                if (newX > gameArea.offsetWidth - spaceship.offsetWidth) newX = gameArea.offsetWidth - spaceship.offsetWidth;
+                spaceship.style.left = `${newX}px`;
+            }
+        }, { passive: false });
+
+        // Mouse/Touch Up to stop continuous fire and drag
+        document.addEventListener('mouseup', () => {
+            isDraggingSpaceship = false;
+            spaceship.style.cursor = 'grab';
+            stopContinuousFire();
+        });
+
+        document.addEventListener('touchend', () => {
+            isDraggingSpaceship = false;
+            stopContinuousFire();
+        });
+
+        // Pause Button
         pauseButton.addEventListener('click', pauseGame);
+
+        // Pause Screen
         continueButton.addEventListener('click', continueGame);
         restartButtonPause.addEventListener('click', restartGame);
+
+        // Level Complete Screen
         nextLevelButton.addEventListener('click', nextLevel);
+
+        // Game Over Screen
         restartButtonGameOver.addEventListener('click', restartGame);
 
         // Initial setup
