@@ -1,781 +1,855 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>KaKaReza Elite Shooting Game</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-    
-    * { margin:0; padding:0; box-sizing:border-box; }
-    
-    body { 
-      overflow:hidden; 
-      background: linear-gradient(45deg, #0a0a0a, #1a0a2e, #16213e);
-      font-family: 'Orbitron', monospace; 
-      color:#00ffff;
-      cursor: none;
-    }
-    
-    #scoreboard {
-      position:fixed; top:0; left:0; right:0;
-      height:100px;
-      background: linear-gradient(180deg, rgba(0,0,0,0.95), rgba(0,20,40,0.8));
-      backdrop-filter: blur(10px);
-      border-bottom: 2px solid #00ffff;
-      display:grid; 
-      grid-template-columns: repeat(6, 1fr);
-      align-items:center; 
-      padding: 0 20px;
-      user-select:none; 
-      z-index:10;
-      box-shadow: 0 0 30px rgba(0,255,255,0.3);
-    }
-    
-    .stat-item {
-      text-align: center;
-      padding: 10px;
-      background: rgba(0,255,255,0.1);
-      border-radius: 8px;
-      margin: 5px;
-      border: 1px solid rgba(0,255,255,0.3);
-      box-shadow: inset 0 0 10px rgba(0,255,255,0.1);
-    }
-    
-    .stat-label {
-      font-size: 12px;
-      opacity: 0.8;
-      display: block;
-      margin-bottom: 5px;
-    }
-    
-    .stat-value {
-      font-size: 18px;
-      font-weight: 700;
-      text-shadow: 0 0 10px #00ffff;
-    }
-    
-    .game-title {
-      font-size: 16px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-    
-    .control-btn {
-      background: linear-gradient(45deg, #ff006e, #8338ec);
-      border: none;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-family: 'Orbitron', monospace;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 20px rgba(255,0,110,0.5);
-      font-size: 12px;
-      margin: 2px;
-    }
-    
-    .control-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 30px rgba(255,0,110,0.8);
-    }
-    
-    canvas { 
-      position:absolute; 
-      top:100px; 
-      left:0; 
-      touch-action:none;
-      filter: drop-shadow(0 0 20px rgba(0,255,255,0.3));
-    }
-    
-    .overlay {
-      position:absolute; 
-      top:100px; 
-      left:0;
-      width:100%; 
-      height:calc(100% - 100px);
-      background: radial-gradient(circle, rgba(0,0,0,0.9), rgba(10,10,30,0.95));
-      backdrop-filter: blur(15px);
-      display:flex; 
-      align-items:center; 
-      justify-content:center;
-      flex-direction:column; 
-      z-index:5;
-    }
-    
-    .overlay-content {
-      text-align: center;
-      padding: 40px;
-      background: linear-gradient(135deg, rgba(0,255,255,0.1), rgba(255,0,255,0.1));
-      border-radius: 20px;
-      border: 2px solid rgba(0,255,255,0.5);
-      box-shadow: 0 0 50px rgba(0,255,255,0.3);
-      backdrop-filter: blur(10px);
-      max-width: 600px;
-      margin: 20px;
-    }
-    
-    .overlay-title {
-      font-size: 48px;
-      font-weight: 900;
-      margin-bottom: 20px;
-      background: linear-gradient(45deg, #00ffff, #ff00ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-shadow: 0 0 30px rgba(0,255,255,0.8);
-    }
-    
-    .overlay-subtitle {
-      font-size: 24px;
-      margin-bottom: 30px;
-      color: #00ffff;
-      opacity: 0.8;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Red Balloon Blaster</title>
+    <style>
+        /* --- CSS Styling --- */
+        * {
+            box-sizing: border-box;
+        }
 
-    .instructions {
-      font-size: 16px;
-      color: #ffffff;
-      margin-bottom: 30px;
-      line-height: 1.6;
-      text-align: left;
-      background: rgba(0,0,0,0.3);
-      padding: 20px;
-      border-radius: 10px;
-      border: 1px solid rgba(0,255,255,0.3);
-    }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            overflow: hidden;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+        }
 
-    .instruction-line {
-      margin-bottom: 8px;
-    }
+        #game-container {
+            width: 90vw;
+            max-width: 900px;
+            height: 95vh;
+            max-height: 800px;
+            border: 3px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-    .key-hint {
-      background: rgba(0,255,255,0.2);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: bold;
-      color: #00ffff;
-    }
-    
-    .overlay-btn {
-      background: linear-gradient(45deg, #00ffff, #ff00ff);
-      border: none;
-      color: #000;
-      padding: 15px 40px;
-      font-size: 20px;
-      font-weight: 700;
-      border-radius: 30px;
-      cursor: pointer;
-      font-family: 'Orbitron', monospace;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 30px rgba(0,255,255,0.5);
-      margin: 10px;
-    }
-    
-    .overlay-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 50px rgba(0,255,255,0.8);
-    }
-    
-    .crosshair {
-      position: fixed;
-      width: 30px;
-      height: 30px;
-      pointer-events: none;
-      z-index: 1000;
-      filter: drop-shadow(0 0 10px #00ffff);
-    }
-    
-    .crosshair::before,
-    .crosshair::after {
-      content: '';
-      position: absolute;
-      background: #00ffff;
-      box-shadow: 0 0 10px #00ffff;
-    }
-    
-    .crosshair::before {
-      width: 2px;
-      height: 30px;
-      left: 14px;
-      top: 0;
-    }
-    
-    .crosshair::after {
-      width: 30px;
-      height: 2px;
-      left: 0;
-      top: 14px;
-    }
+        .game-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(15px);
+            text-align: center;
+            z-index: 10;
+            border-radius: 17px;
+        }
 
-    .level-indicator {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 72px;
-      font-weight: 900;
-      color: #00ffff;
-      text-shadow: 0 0 50px #00ffff;
-      z-index: 1000;
-      pointer-events: none;
-      opacity: 0;
-      animation: levelAnnounce 3s ease-out;
-    }
-    
-    @keyframes levelAnnounce {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-      20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-      80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-    }
+        .hidden {
+            display: none !important;
+        }
 
-    .objective-hud {
-      position: fixed;
-      top: 110px;
-      right: 20px;
-      background: rgba(0,0,0,0.8);
-      border: 2px solid #00ffff;
-      border-radius: 10px;
-      padding: 15px;
-      color: #00ffff;
-      font-size: 14px;
-      z-index: 15;
-      min-width: 200px;
-    }
+        /* Start Screen */
+        #start-screen h1 {
+            font-size: 3em;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
 
-    .objective-title {
-      font-weight: bold;
-      color: #ffff00;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-    }
+        #start-screen input {
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            font-size: 1.2em;
+            width: 70%;
+            max-width: 350px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
+        }
 
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 4px;
-      margin: 5px 0;
-      overflow: hidden;
-    }
+        #start-screen input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
 
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(45deg, #00ffff, #ff00ff);
-      border-radius: 4px;
-      transition: width 0.3s ease;
-    }
-  </style>
+        #start-screen input:focus {
+            border-color: #4ecdc4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            margin: 15px;
+            font-size: 1.3em;
+            cursor: pointer;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #44a08d, #4ecdc4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* Game Play Screen */
+        #game-play-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: stretch;
+            padding: 20px;
+            background: transparent;
+        }
+
+        #game-info {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        #game-area {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #87CEEB 0%, #98FB98 100%);
+            border-radius: 15px;
+            cursor: crosshair;
+            touch-action: none;
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        #cannon {
+            position: absolute;
+            bottom: 10px;
+            width: 70px;
+            height: 50px;
+            background: linear-gradient(45deg, #8B4513, #A0522D);
+            border-radius: 15px 15px 5px 5px;
+            left: calc(50% - 35px);
+            cursor: pointer;
+            z-index: 5;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        #cannon::before {
+            content: '';
+            position: absolute;
+            top: -25px;
+            left: 25px;
+            width: 20px;
+            height: 35px;
+            background: linear-gradient(45deg, #555, #777);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        #cannon.moving {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+        }
+
+        #controls {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            padding: 15px 0;
+            margin-top: 15px;
+        }
+
+        /* Balloons - improved heart shape */
+        .balloon {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            animation: fall linear forwards, float 2s ease-in-out infinite alternate;
+            opacity: 1;
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+            z-index: 2;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .balloon.popped {
+            opacity: 0;
+            transform: scale(0.2) rotate(180deg);
+        }
+
+        .balloon::before,
+        .balloon::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: inherit;
+            border-radius: 50%;
+        }
+
+        .balloon::before {
+            left: -50%;
+            transform: translateY(-50%);
+        }
+
+        .balloon::after {
+            left: 50%;
+            transform: translateY(-50%);
+        }
+
+        .balloon {
+            transform: rotate(-45deg);
+            transform-origin: center center;
+        }
+
+        /* Balloon colors with gradients */
+        .balloon.red { 
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+        }
+        .balloon.blue { 
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+        .balloon.green { 
+            background: linear-gradient(45deg, #95e1d3, #6c5ce7);
+        }
+        .balloon.yellow { 
+            background: linear-gradient(45deg, #ffd93d, #f9ca24);
+        }
+        .balloon.purple { 
+            background: linear-gradient(45deg, #a29bfe, #6c5ce7);
+        }
+
+        /* Cannonball */
+        .cannonball {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle at 30% 30%, #fff, #ccc, #666);
+            border-radius: 50%;
+            z-index: 4;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Particle effects */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ffd93d;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particle-explode 0.6s ease-out forwards;
+        }
+
+        /* Tap indicator */
+        .tap-indicator {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255,255,255,0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: tap-ripple 0.6s ease-out forwards;
+            z-index: 6;
+        }
+
+        /* Animations */
+        @keyframes fall {
+            from { 
+                transform: translateY(-100px) rotate(-45deg); 
+            } 
+            to { 
+                transform: translateY(calc(100% + 50px)) rotate(-45deg); 
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateX(0) rotate(-45deg); }
+            50% { transform: translateX(10px) rotate(-45deg); }
+        }
+
+        @keyframes fire-animation {
+            0% { transform: scaleX(1) scaleY(1); }
+            50% { transform: scaleX(1.3) scaleY(0.8); }
+            100% { transform: scaleX(1) scaleY(1); }
+        }
+
+        @keyframes particle-explode {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0) translateY(-50px);
+            }
+        }
+
+        @keyframes tap-ripple {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        #cannon.firing::before {
+            animation: fire-animation 0.2s ease-out;
+        }
+
+        /* Instructions */
+        .instructions {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            #game-container {
+                width: 95vw;
+                height: 98vh;
+            }
+            
+            #start-screen h1 {
+                font-size: 2.2em;
+            }
+            
+            .btn {
+                font-size: 1.1em;
+                padding: 12px 25px;
+            }
+            
+            #game-info {
+                font-size: 1em;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="crosshair"></div>
-  
-  <div id="scoreboard">
-    <div class="stat-item">
-      <span class="stat-label">Elite Defender</span>
-      <div class="game-title">KaKaReza</div>
+    <div id="game-container">
+        <div id="start-screen" class="game-screen">
+            <h1>🎈 Red Balloon Blaster</h1>
+            <p style="font-size: 1.2em; margin-bottom: 20px;">Enter your name:</p>
+            <input type="text" id="playerNameInput" placeholder="Your Name">
+            <button id="startButton" class="btn">Start Game</button>
+        </div>
+
+        <div id="game-play-screen" class="game-screen hidden">
+            <div id="game-info">
+                <p>Player: <span id="playerNameDisplay"></span></p>
+                <p>Score: <span id="scoreDisplay">0</span></p>
+                <p>Lives: <span id="livesDisplay">3</span></p>
+                <p>Level: <span id="levelDisplay">1</span></p>
+            </div>
+            <div id="game-area">
+                <div id="cannon"></div>
+                <div class="instructions">
+                    Tap anywhere to move cannon • Tap to fire • Shoot only red balloons!
+                </div>
+            </div>
+            <div id="controls">
+                <button id="pauseButton" class="btn">Pause</button>
+            </div>
+        </div>
+
+        <div id="pause-screen" class="game-screen hidden">
+            <h1>⏸️ Game Paused</h1>
+            <button id="continueButton" class="btn">Continue</button>
+            <button id="restartButtonPause" class="btn">Restart</button>
+        </div>
+
+        <div id="level-complete-screen" class="game-screen hidden">
+            <h1 id="levelCompleteMessage">🎉 Level 1 Complete!</h1>
+            <p style="font-size: 1.3em;">Good job, <span id="levelCompletePlayerName"></span>!</p>
+            <button id="nextLevelButton" class="btn">Next Level</button>
+        </div>
+
+        <div id="game-over-screen" class="game-screen hidden">
+            <h1>💥 Game Over!</h1>
+            <p id="finalScoreMessage" style="font-size: 1.3em;">You scored <span id="finalScoreDisplay">0</span> points.</p>
+            <button id="restartButtonGameOver" class="btn">Restart</button>
+        </div>
     </div>
-    <div class="stat-item">
-      <span class="stat-label">Score</span>
-      <span class="stat-value" id="score">0</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-label">Level</span>
-      <span class="stat-value" id="level">1</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-label">Health</span>
-      <span class="stat-value" id="health">100</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-label">Combo</span>
-      <span class="stat-value" id="combo">0</span>
-    </div>
-    <div class="stat-item">
-      <button class="control-btn" id="pauseBtn">Pause</button>
-      <button class="control-btn" id="restartBtn">Restart</button>
-    </div>
-  </div>
 
-  <div id="objectiveHud" class="objective-hud" style="display:none;">
-    <div class="objective-title">Mission Objective</div>
-    <div id="objectiveText">Destroy incoming alien ships</div>
-    <div class="progress-bar">
-      <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-    </div>
-    <div id="progressText">0 / 10 enemies destroyed</div>
-  </div>
-  
-  <canvas id="gameCanvas"></canvas>
-  
-  <div id="startOverlay" class="overlay">
-    <div class="overlay-content">
-      <div class="overlay-title">ELITE DEFENDER</div>
-      <div class="overlay-subtitle">Protect Earth from the Alien Invasion</div>
-      
-      <div class="instructions">
-        <div class="instruction-line"><span class="key-hint">WASD</span> or <span class="key-hint">Arrow Keys</span> - Move your ship</div>
-        <div class="instruction-line"><span class="key-hint">SPACE</span> or <span class="key-hint">Mouse Click</span> - Fire weapons</div>
-        <div class="instruction-line"><span class="key-hint">Mouse</span> - Aim crosshair</div>
-        <br>
-        <div class="instruction-line"><strong>OBJECTIVE:</strong> Destroy alien ships before they reach Earth!</div>
-        <div class="instruction-line"><strong>SURVIVAL:</strong> Avoid enemy contact - they damage your ship!</div>
-        <div class="instruction-line"><strong>PROGRESSION:</strong> Complete each level by destroying target enemies</div>
-        <div class="instruction-line"><strong>POWER:</strong> Build combos for higher scores!</div>
-      </div>
-      
-      <button class="overlay-btn" id="startBtn">Launch Mission</button>
-    </div>
-  </div>
-  
-  <div id="endOverlay" class="overlay" style="display:none;">
-    <div class="overlay-content">
-      <div class="overlay-title" id="endTitle">Mission Status</div>
-      <div class="overlay-subtitle" id="endMsg">Report</div>
-      <div id="finalStats" style="margin: 20px 0; font-size: 18px;"></div>
-      <button class="overlay-btn" id="endRestartBtn">Retry Mission</button>
-    </div>
-  </div>
+    <script>
+        // --- Game State Variables ---
+        let playerName = '';
+        let score = 0;
+        let lives = 3;
+        let level = 1;
+        let gameRunning = false;
+        let gamePaused = false;
+        let gameLoopInterval;
+        let balloonGenerationInterval;
+        const balloonsOnScreen = [];
 
-<script>
-(() => {
-  // ---- SETUP & RESIZE ----
-  const canvas = document.getElementById('gameCanvas');
-  const ctx = canvas.getContext('2d');
-  const HEADER = 100;
-  
-  function resize(){
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight - HEADER;
-    if (tank) {
-      tank.y = canvas.height - tank.h - 30;
-    }
-  }
-  window.addEventListener('resize', resize);
+        // --- DOM Elements ---
+        const gameContainer = document.getElementById('game-container');
+        const startScreen = document.getElementById('start-screen');
+        const gamePlayScreen = document.getElementById('game-play-screen');
+        const pauseScreen = document.getElementById('pause-screen');
+        const levelCompleteScreen = document.getElementById('level-complete-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
 
-  // ---- CUSTOM CURSOR ----
-  const crosshair = document.querySelector('.crosshair');
-  document.addEventListener('mousemove', (e) => {
-    crosshair.style.left = (e.clientX - 15) + 'px';
-    crosshair.style.top = (e.clientY - 15) + 'px';
-  });
+        const playerNameInput = document.getElementById('playerNameInput');
+        const startButton = document.getElementById('startButton');
 
-  // ---- OVERLAYS & STATE ----
-  let gameState = 'start';
-  const startOv = document.getElementById('startOverlay');
-  const endOv = document.getElementById('endOverlay');
-  const objectiveHud = document.getElementById('objectiveHud');
-  const startBtn = document.getElementById('startBtn');
-  const pauseBtn = document.getElementById('pauseBtn');
-  const restartBtn = document.getElementById('restartBtn');
-  const endRestartBtn = document.getElementById('endRestartBtn');
-  const endMsg = document.getElementById('endMsg');
-  const endTitle = document.getElementById('endTitle');
-  const finalStats = document.getElementById('finalStats');
+        const playerNameDisplay = document.getElementById('playerNameDisplay');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const livesDisplay = document.getElementById('livesDisplay');
+        const levelDisplay = document.getElementById('levelDisplay');
+        const gameArea = document.getElementById('game-area');
+        const cannon = document.getElementById('cannon');
+        const pauseButton = document.getElementById('pauseButton');
 
-  function showOverlay(ov){ ov.style.display = 'flex'; }
-  function hideOverlay(ov){ ov.style.display = 'none'; }
+        const continueButton = document.getElementById('continueButton');
+        const restartButtonPause = document.getElementById('restartButtonPause');
 
-  startBtn.addEventListener('click', () => {
-    console.log('Starting game...');
-    hideOverlay(startOv);
-    objectiveHud.style.display = 'block';
-    gameState = 'playing';
-    showLevelIndicator(1);
-    lastTime = performance.now();
-    requestAnimationFrame(loop);
-  });
+        const levelCompleteMessage = document.getElementById('levelCompleteMessage');
+        const levelCompletePlayerName = document.getElementById('levelCompletePlayerName');
+        const nextLevelButton = document.getElementById('nextLevelButton');
 
-  pauseBtn.addEventListener('click', () => {
-    if (gameState === 'playing') {
-      gameState = 'paused';
-      pauseBtn.textContent = 'Resume';
-    } else if (gameState === 'paused') {
-      gameState = 'playing';
-      pauseBtn.textContent = 'Pause';
-      lastTime = performance.now();
-      requestAnimationFrame(loop);
-    }
-  });
+        const finalScoreDisplay = document.getElementById('finalScoreDisplay');
+        const restartButtonGameOver = document.getElementById('restartButtonGameOver');
 
-  restartBtn.addEventListener('click', () => resetAll());
-  
-  endRestartBtn.addEventListener('click', () => {
-    resetAll();
-    hideOverlay(endOv);
-    objectiveHud.style.display = 'block';
-    gameState = 'playing';
-    showLevelIndicator(level);
-    lastTime = performance.now();
-    requestAnimationFrame(loop);
-  });
+        // --- Game Settings ---
+        const LEVEL_SETTINGS = {
+            1: { balloonSpeed: 1.5, generationRate: 1500, nonRedChance: 0.2, balloonsToShoot: 10 },
+            2: { balloonSpeed: 2.0, generationRate: 1200, nonRedChance: 0.3, balloonsToShoot: 12 },
+            3: { balloonSpeed: 2.5, generationRate: 1000, nonRedChance: 0.4, balloonsToShoot: 15 },
+            4: { balloonSpeed: 3.0, generationRate: 800, nonRedChance: 0.5, balloonsToShoot: 18 },
+            5: { balloonSpeed: 3.5, generationRate: 600, nonRedChance: 0.6, balloonsToShoot: 20 }
+        };
+        const BALLOON_SIZE = 35;
+        const CANNONBALL_SPEED = 12;
+        const SCORE_PER_RED_BALLOON = 10;
+        const MAX_LEVEL = 5;
 
-  // ---- ENHANCED STARFIELD ----
-  const stars = [];
-  const nebula = [];
-  
-  for (let i = 0; i < 200; i++) {
-    stars.push({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * (window.innerHeight - HEADER),
-      z: Math.random() * 1000,
-      prevX: 0,
-      prevY: 0
-    });
-  }
-  
-  for (let i = 0; i < 50; i++) {
-    nebula.push({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * (window.innerHeight - HEADER),
-      size: Math.random() * 100 + 50,
-      hue: Math.random() * 360,
-      alpha: Math.random() * 0.3 + 0.1
-    });
-  }
+        let redBalloonsShotInLevel = 0;
 
-  function drawBackground() {
-    // Clear with gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, '#000011');
-    gradient.addColorStop(0.5, '#001122');
-    gradient.addColorStop(1, '#000033');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw nebula
-    nebula.forEach(n => {
-      ctx.globalAlpha = n.alpha;
-      const gradient = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.size);
-      gradient.addColorStop(0, `hsla(${n.hue}, 70%, 50%, 0.3)`);
-      gradient.addColorStop(1, 'transparent');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(n.x - n.size, n.y - n.size, n.size * 2, n.size * 2);
-    });
-    
-    // Draw hyperspace stars
-    ctx.globalAlpha = 1;
-    stars.forEach(star => {
-      const x = (star.x - canvas.width/2) * (200/star.z) + canvas.width/2;
-      const y = (star.y - canvas.height/2) * (200/star.z) + canvas.height/2;
-      
-      const size = (1 - star.z/1000) * 2;
-      const opacity = 1 - star.z/1000;
-      
-      if (star.z < 200) {
-        ctx.strokeStyle = `rgba(0, 255, 255, ${opacity})`;
-        ctx.lineWidth = size;
-        ctx.beginPath();
-        ctx.moveTo(star.prevX, star.prevY);
-        ctx.lineTo(x, y);
-        ctx.stroke();
-      }
-      
-      star.prevX = x;
-      star.prevY = y;
-      star.z -= 8;
-      
-      if (star.z <= 0) {
-        star.z = 1000;
-        star.x = Math.random() * canvas.width;
-        star.y = Math.random() * canvas.height;
-      }
-    });
-  }
+        // --- Utility Functions ---
+        function showScreen(screenElement) {
+            document.querySelectorAll('.game-screen').forEach(screen => {
+                screen.classList.add('hidden');
+            });
+            screenElement.classList.remove('hidden');
+        }
 
-  // ---- GAME STATE ----
-  let tank = { w: 80, h: 40, x: 0, y: 0, speed: 8, health: 100, maxHealth: 100 };
-  let bullets = [];
-  let enemies = [];
-  let powerups = [];
-  let particles = [];
-  let explosions = [];
-  
-  let score = 0;
-  let level = 1;
-  let combo = 0;
-  let maxCombo = 0;
-  let enemiesKilled = 0;
-  let totalShots = 0;
-  let hits = 0;
-  let gameTime = 0;
-  
-  // Level progression
-  const levelTargets = [10, 25, 50, 100, 200];
-  let levelProgress = 0;
+        function updateDisplay() {
+            playerNameDisplay.textContent = playerName;
+            scoreDisplay.textContent = score;
+            livesDisplay.textContent = lives;
+            levelDisplay.textContent = level;
+        }
 
-  // ---- INPUT HANDLING ----
-  const keys = {};
-  
-  document.addEventListener('keydown', e => {
-    keys[e.key.toLowerCase()] = true;
-    keys[e.code.toLowerCase()] = true;
-    
-    if (e.key === ' ' || e.code === 'Space') {
-      e.preventDefault();
-      fireBullet();
-    }
-  });
-  
-  document.addEventListener('keyup', e => {
-    keys[e.key.toLowerCase()] = false;
-    keys[e.code.toLowerCase()] = false;
-  });
+        function getRandomColor() {
+            const colors = ['blue', 'green', 'yellow', 'purple'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
 
-  let mouseX = 0;
-  let mouseY = 0;
-  canvas.addEventListener('mousemove', e => {
-    const rect = canvas.getBoundingClientRect();
-    mouseX = e.clientX - rect.left;
-    mouseY = e.clientY - rect.top;
-  });
-  
-  canvas.addEventListener('click', fireBullet);
+        function createTapIndicator(x, y) {
+            const indicator = document.createElement('div');
+            indicator.className = 'tap-indicator';
+            indicator.style.left = `${x - 15}px`;
+            indicator.style.top = `${y - 15}px`;
+            gameArea.appendChild(indicator);
+            
+            setTimeout(() => {
+                if (gameArea.contains(indicator)) {
+                    indicator.remove();
+                }
+            }, 600);
+        }
 
-  // ---- ENHANCED VISUALS ----
-  function drawTank() {
-    const centerX = tank.x + tank.w/2;
-    const centerY = tank.y + tank.h/2;
-    
-    // Tank body with gradient
-    const gradient = ctx.createLinearGradient(tank.x, tank.y, tank.x, tank.y + tank.h);
-    gradient.addColorStop(0, '#00ffff');
-    gradient.addColorStop(0.5, '#0080ff');
-    gradient.addColorStop(1, '#0040ff');
-    
-    ctx.fillStyle = gradient;
-    ctx.fillRect(tank.x, tank.y, tank.w, tank.h);
-    
-    // Tank outline
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(tank.x, tank.y, tank.w, tank.h);
-    
-    // Cannon
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(centerX - 3, tank.y - 15, 6, 20);
-    
-    // Engine glow
-    ctx.fillStyle = '#ff4400';
-    ctx.fillRect(tank.x + 10, tank.y + tank.h, 15, 5);
-    ctx.fillRect(tank.x + tank.w - 25, tank.y + tank.h, 15, 5);
-    
-    // Health bar
-    const barWidth = tank.w;
-    const barHeight = 6;
-    const healthRatio = tank.health / tank.maxHealth;
-    
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-    ctx.fillRect(tank.x, tank.y - 15, barWidth, barHeight);
-    
-    ctx.fillStyle = healthRatio > 0.5 ? '#00ff00' : healthRatio > 0.25 ? '#ffff00' : '#ff0000';
-    ctx.fillRect(tank.x, tank.y - 15, barWidth * healthRatio, barHeight);
-  }
+        function createParticles(x, y, count = 6) {
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                particle.style.animationDelay = `${Math.random() * 0.2}s`;
+                
+                // Random direction
+                const angle = (Math.PI * 2 * i) / count;
+                const distance = 20 + Math.random() * 30;
+                particle.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`;
+                
+                gameArea.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (gameArea.contains(particle)) {
+                        particle.remove();
+                    }
+                }, 600);
+            }
+        }
 
-  function drawBullets() {
-    bullets.forEach(bullet => {
-      // Bullet trail
-      ctx.strokeStyle = `rgba(255, 255, 0, 0.8)`;
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(bullet.x, bullet.y);
-      ctx.lineTo(bullet.x, bullet.y + 15);
-      ctx.stroke();
-      
-      // Bullet core
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(bullet.x, bullet.y, 3, 0, Math.PI * 2);
-      ctx.fill();
-    });
-  }
+        // --- Game Logic Functions ---
+        function startGame() {
+            playerName = playerNameInput.value.trim();
+            if (playerName === '') {
+                alert('Please enter your name!');
+                return;
+            }
+            score = 0;
+            lives = 3;
+            level = 1;
+            redBalloonsShotInLevel = 0;
+            balloonsOnScreen.length = 0;
+            gameArea.innerHTML = '';
+            gameArea.appendChild(cannon);
+            
+            // Add instructions back
+            const instructions = document.createElement('div');
+            instructions.className = 'instructions';
+            instructions.textContent = 'Tap anywhere to move cannon • Tap to fire • Shoot only red balloons!';
+            gameArea.appendChild(instructions);
+            
+            cannon.style.left = `${gameArea.offsetWidth / 2 - cannon.offsetWidth / 2}px`;
 
-  function drawEnemies() {
-    enemies.forEach(enemy => {
-      ctx.save();
-      ctx.translate(enemy.x, enemy.y);
-      ctx.rotate(enemy.rotation || 0);
-      
-      // Enemy ship with type-based appearance
-      switch(enemy.type) {
-        case 'basic':
-          ctx.fillStyle = '#ff4444';
-          ctx.fillRect(-15, -10, 30, 20);
-          ctx.fillStyle = '#ff8888';
-          ctx.fillRect(-8, -15, 16, 10);
-          break;
-        case 'fast':
-          ctx.fillStyle = '#44ff44';
-          ctx.beginPath();
-          ctx.moveTo(-12, -8);
-          ctx.lineTo(12, 0);
-          ctx.lineTo(-12, 8);
-          ctx.closePath();
-          ctx.fill();
-          break;
-        case 'tank':
-          ctx.fillStyle = '#4444ff';
-          ctx.fillRect(-20, -15, 40, 30);
-          ctx.fillStyle = '#8888ff';
-          ctx.fillRect(-15, -20, 30, 10);
-          break;
-        case 'boss':
-          ctx.fillStyle = '#ff00ff';
-          ctx.fillRect(-40, -30, 80, 60);
-          ctx.fillStyle = '#ff88ff';
-          ctx.fillRect(-30, -35, 60, 20);
-          // Boss health bar
-          ctx.restore();
-          const healthRatio = enemy.health / enemy.maxHealth;
-          ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
-          ctx.fillRect(enemy.x - 40, enemy.y - 50, 80, 8);
-          ctx.fillStyle = '#ff0000';
-          ctx.fillRect(enemy.x - 40, enemy.y - 50, 80 * healthRatio, 8);
-          ctx.save();
-          ctx.translate(enemy.x, enemy.y);
-          break;
-      }
-      
-      ctx.restore();
-    });
-  }
+            showScreen(gamePlayScreen);
+            gameRunning = true;
+            gamePaused = false;
+            updateDisplay();
+            startLevel();
+        }
 
-  function drawParticles() {
-    particles.forEach((p, i) => {
-      ctx.globalAlpha = p.life;
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
-      
-      p.x += p.vx;
-      p.y += p.vy;
-      p.life -= 0.02;
-      p.size *= 0.98;
-      
-      if (p.life <= 0) particles.splice(i, 1);
-    });
-    ctx.globalAlpha = 1;
-  }
+        function startLevel() {
+            redBalloonsShotInLevel = 0;
+            balloonsOnScreen.length = 0;
+            gameArea.querySelectorAll('.balloon').forEach(b => b.remove());
+            gameArea.querySelectorAll('.cannonball').forEach(cb => cb.remove());
 
-  function drawExplosions() {
-    explosions.forEach((exp, i) => {
-      const progress = (exp.maxLife - exp.life) / exp.maxLife;
-      const size = exp.size * (1 + progress * 2);
-      
-      ctx.globalAlpha = exp.life / exp.maxLife;
-      
-      // Outer ring
-      ctx.strokeStyle = exp.color;
-      ctx.lineWidth = 8;
-      ctx.beginPath();
-      ctx.arc(exp.x, exp.y, size, 0, Math.PI * 2);
-      ctx.stroke();
-      
-      // Inner flash
-      const gradient = ctx.createRadialGradient(exp.x, exp.y, 0, exp.x, exp.y, size/2);
-      gradient.addColorStop(0, exp.color);
-      gradient.addColorStop(1, 'transparent');
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(exp.x, exp.y, size/2, 0, Math.PI * 2);
-      ctx.fill();
-      
-      exp.life--;
-      if (exp.life <= 0) explosions.splice(i, 1);
-    });
-    ctx.globalAlpha = 1;
-  }
+            const currentSettings = LEVEL_SETTINGS[level];
+            if (!currentSettings) {
+                endGame(true);
+                return;
+            }
 
-  // ---- LEVEL INDICATOR ----
-  function showLevelIndicator(lvl) {
-    const indicator = document.createElement('div');
-    indicator.className = 'level-indicator';
-    indicator.textContent = `LEVEL ${lvl}`;
-    document.body.appendChild(indicator);
-    
-    setTimeout(() => {
-      if (document.body.contains(indicator)) {
-        document.body.removeChild(indicator);
-      }
-    }, 3000);
-  }
+            clearInterval(balloonGenerationInterval);
+            balloonGenerationInterval = setInterval(generateBalloon, currentSettings.generationRate);
+            if (gameLoopInterval) {
+                cancelAnimationFrame(gameLoopInterval);
+            }
+            gameLoop();
+        }
 
-  // ---- OBJECTIVE HUD ----
-  function updateObjectiveHud() {
-    const target = levelTargets[Math.min(level - 1, levelTargets.length - 1)];
-    const progressPercent = (levelProgress / target) * 100;
-    
-    document.getElementById('objectiveText').textContent = `Level ${level}: Destroy alien invasion force`;
-    document.getElementById('progressFill').style.width = progressPercent + '%';
-    document.getElementById('progressText').textContent = `${levelProgress} / ${target} enemies destroyed`;
-  }
+        function pauseGame() {
+            if (!gameRunning) return;
+            gamePaused = true;
+            showScreen(pauseScreen);
+            clearInterval(balloonGenerationInterval);
+            cancelAnimationFrame(gameLoopInterval);
+        }
 
-  // ---- GAME LOGIC ----
-  function moveTank() {
-    let moved = false;
-    
-    // Check all possible movement keys
-    if (keys['a'] || keys['arrowleft'] || keys['keya']) {
-      tank.x -= tank.speed;
-      moved = true;
-    }
-    if (keys['d'] || keys['arrowright'] || keys['keyd']) {
-      tank.x += tank.speed;
-      moved = true;
-    }
-    if (keys['w'] || keys['arrowup'] || keys['keyw']) {
-      tank.y -= tank.speed;
-      moved = true;
-    }
-    if (keys['s'] || keys['arrowdown'] || keys['keys']) {
-      tank.y += tank.speed;
-      moved = true;
-    }
-    
-    // Constrain tank position
-    tank.x = Math.max(0, Math.min(canvas.width - tank.w, tank.x));
-    tank.y = Math.max(canvas.height/2, Math.min(canvas.height - tank.h, tank.y));
-  }
+        function continueGame() {
+            gamePaused = false;
+            showScreen(gamePlayScreen);
+            const currentSettings = LEVEL_SETTINGS[level];
+            balloonGenerationInterval = setInterval(generateBalloon, currentSettings.generationRate);
+            gameLoop();
+        }
 
-  function fireBullet() {
-    if (gameState !== 'playing') return;
-    
-    totalShots++;
-    bullets.push({
-      x: tank.x + tank.w/2,
-      y: tank.y,
-      speed: 20,
-      damage: 1
-    });
-    
-    // Screen shake
-    canvas.style.transform = `translate(${Math.random()*4-2}px, ${Math.random()*4-2}px)`;
-    setTimeout(() => canvas.style.transform = '', 50);
-  }
+        function restartGame() {
+            clearInterval(balloonGenerationInterval);
+            cancelAnimationFrame(gameLoopInterval);
+            startGame();
+        }
 
-  function updateBullets() {
-    bullets = bullets.filter(bullet => {
-      bullet.y -= bullet.speed;
-      return bullet.y > -10;
-    });
-  }
+        function endGame(win = false) {
+            gameRunning = false;
+            gamePaused = false;
+            clearInterval(balloonGenerationInterval);
+            cancelAnimationFrame(gameLoopInterval);
+            gameArea.innerHTML = '';
+            gameArea.appendChild(cannon);
+            
+            // Add instructions back
+            const instructions = document.createElement('div');
+            instructions.className = 'instructions';
+            instructions.textContent = 'Tap anywhere to move cannon • Tap to fire • Shoot only red balloons!';
+            gameArea.appendChild(instructions);
 
-  function spawnEn
+            if (win) {
+                if (level >= MAX_LEVEL) {
+                    levelCompleteMessage.textContent = "🏆 You Win! All Levels Complete!";
+                    levelCompletePlayerName.textContent = playerName;
+                    nextLevelButton.textContent = "Play Again!";
+                    nextLevelButton.onclick = restartGame;
+                } else {
+                    levelCompleteMessage.textContent = `🎉 Level ${level} Complete!`;
+                    levelCompletePlayerName.textContent = playerName;
+                    nextLevelButton.textContent = "Next Level";
+                    nextLevelButton.onclick = nextLevel;
+                }
+                showScreen(levelCompleteScreen);
+            } else {
+                finalScoreDisplay.textContent = score;
+                showScreen(gameOverScreen);
+            }
+        }
+
+        function generateBalloon() {
+            if (!gameRunning || gamePaused) return;
+
+            const balloon = document.createElement('div');
+            const color = Math.random() < LEVEL_SETTINGS[level].nonRedChance ? getRandomColor() : 'red';
+            balloon.className = `balloon ${color}`;
+            balloon.dataset.color = color;
+            balloon.style.left = `${Math.random() * (gameArea.offsetWidth - BALLOON_SIZE)}px`;
+            balloon.style.top = `-50px`;
+            gameArea.appendChild(balloon);
+            balloonsOnScreen.push(balloon);
+        }
+
+        function moveBalloons() {
+            const currentSettings = LEVEL_SETTINGS[level];
+            for (let i = balloonsOnScreen.length - 1; i >= 0; i--) {
+                const balloon = balloonsOnScreen[i];
+                let currentTop = parseFloat(balloon.style.top);
+                balloon.style.top = `${currentTop + currentSettings.balloonSpeed}px`;
+
+                if (currentTop > gameArea.offsetHeight) {
+                    if (balloon.dataset.color === 'red' && !balloon.dataset.popped) {
+                        lives--;
+                        updateDisplay();
+                        if (lives <= 0) {
+                            endGame();
+                            return;
+                        }
+                    }
+                    balloon.remove();
+                    balloonsOnScreen.splice(i, 1);
+                }
+            }
+        }
+
+        function moveCannonball(cannonball) {
+            let currentBottom = parseFloat(cannonball.style.bottom);
+            cannonball.style.bottom = `${currentBottom + CANNONBALL_SPEED}px`;
+
+            for (let i = balloonsOnScreen.length - 1; i >= 0; i--) {
+                const balloon = balloonsOnScreen[i];
+                if (balloon.dataset.popped || !gameArea.contains(balloon)) continue;
+
+                const balloonRect = balloon.getBoundingClientRect();
+                const cannonballRect = cannonball.getBoundingClientRect();
+
+                if (
+                    cannonballRect.left < balloonRect.right &&
+                    cannonballRect.right > balloonRect.left &&
+                    cannonballRect.top < balloonRect.bottom &&
+                    cannonballRect.bottom > balloonRect.top
+                ) {
+                    cannonball.remove();
+                    
+                    // Create particles at collision point
+                    const gameAreaRect = gameArea.getBoundingClientRect();
+                    createParticles(
+                        balloonRect.left - gameAreaRect.left + balloon.offsetWidth / 2,
+                        balloonRect.top - gameAreaRect.top + balloon.offsetHeight / 2
+                    );
+
+                    if (balloon.dataset.color === 'red') {
+                        score += SCORE_PER_RED_BALLOON;
+                        redBalloonsShotInLevel++;
+                        balloon.classList.add('popped');
+                        balloon.dataset.popped = 'true';
+                        setTimeout(() => {
+                            if (gameArea.contains(balloon)) {
+                                balloon.remove();
+                            }
+                        }, 300);
+                    } else {
+                        lives--;
+                        balloon.classList.add('popped');
+                        balloon.dataset.popped = 'true';
+                        setTimeout(() => {
+                            if (gameArea.contains(balloon)) {
+                                balloon.remove();
+                            }
+                        }, 300);
+                    }
+                    updateDisplay();
+                    if (lives <= 0) {
+                        endGame();
+                        return;
+                    }
+                    checkLevelCompletion();
+                    return;
+                }
+            }
+
+            if (currentBottom > gameArea.offsetHeight) {
+                cannonball.remove();
+            }
+        }
+
+        function fireCannon() {
+            if (!gameRunning || gamePaused) return;
+
+            cannon.classList.add('firing');
+            setTimeout(() => cannon.classList.remove('firing'), 200);
+
+            const cannonball = document.createElement('div');
+            cannonball.className = 'cannonball';
+            cannonball.style.left = `${cannon.offsetLeft + cannon.offsetWidth / 2 - 6}px`;
+            cannonball.style.bottom = `${cannon.offsetHeight + 5}px`;
+            gameArea.appendChild(cannonball);
+        }
+
+        function moveCannon(targetX) {
+            if (!gameRunning || gamePaused) return;
+            
+            // Constrain to game area
+            const maxX = gameArea.offsetWidth - cannon.offsetWidth;
+            const newX = Math.max(0, Math.min(maxX, targetX - cannon.offsetWidth / 2));
+            
+            cannon.style.left = `${newX}px`;
+            cannon.classList.add('moving');
+            setTimeout(() => cannon.classList.remove('moving'), 300);
+        }
+
+        function checkLevelCompletion() {
+            const currentSettings = LEVEL_SETTINGS[level];
+            if (redBalloonsShotInLevel >= currentSettings.balloonsToShoot) {
+                gameRunning = false;
+                clearInterval(balloonGenerationInterval);
+                cancelAnimationFrame(gameLoopInterval);
+
+                if (level < MAX_LEVEL) {
+                    showScreen(levelCompleteScreen);
+                } else {
+                    endGame(true);
+                }
+            }
+        }
+
+        function nextLevel() {
+            level++;
+            if (level > MAX_LEVEL) {
+                endGame(true);
+                return;
+            }
+            showScreen(gamePlayScreen);
+            gameRunning = true;
+            gamePaused = false;
+            updateDisplay();
+            startLevel();
+        }
+
+        // --- Game Loop ---
+        function gameLoop() {
+            if (!gameRunning || gamePaused) return;
+
+            moveBalloons();
+            gameArea.querySelectorAll('.cannonball').forEach(cb => {
+                moveCannonball(cb);
+            });
+
+            gameLoopInterval = requestAnimationFrame(gameLoop);
+        }
+
+        // --- Event Listeners ---
+        startButton.addEventListener('click', startGame);
+        playerNameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') startGame();
+        });
+
+        // New tap-to-move and tap-to-fire system
+        gameArea.addEventListener('click', (e) => {
+            if (!gameRunning || gamePaused) return;
+            
+            const gameAreaRect = gameArea.getBoundingClientRect();
+            const clickX = e.clientX - gameAreaRect.left;
+            const clickY = e.clientY - gameAreaRect.top;
+            
+            // Create tap indicator
+            createTapIndicator(clickX, clickY);
+            
+            // Move cannon to tap position
+            moveCannon(clickX);
+            
+            // Fire after a short delay to allow cannon to move
+            setTimeout(() => {
+                fireCannon();
+            }, 150);
+        });
+
+        // Touch support
+        gameArea.addEventListener('touchstart', (e) => {
+            if (!gameRunning || gamePaused || e.touches.length === 0) return;
+            e.preventDefault();
+            
+            const gameAreaRect = gameArea.getBoundingClientRect();
+            const touchX = e.touches[0].clientX - gameAreaRect.left;
+            const touchY = e.touches[0].clientY - gameAreaRect.top;
+            
+            createTapIndicator(touchX, touchY);
+            moveCannon(touchX);
+            
+            setTimeout(() => {
+                fireCannon();
+            }, 150);
+        }, { passive: false });
+
+        pauseButton.addEventListener('click', pauseGame);
+        continueButton.addEventListener('click', continueGame);
