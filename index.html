@@ -12,6 +12,7 @@
 
         body {
             margin: 0;
+            padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
@@ -24,7 +25,10 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            touch-action: manipulation;
+            touch-action: none;
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
 
         #game-container {
@@ -41,6 +45,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            touch-action: none;
         }
 
         .game-screen {
@@ -814,6 +819,23 @@
             if (e.key === 'Enter') startGame();
         });
 
+        // Prevent default touch behaviors on the entire document
+        document.addEventListener('touchstart', (e) => {
+            if (e.target === gameArea || gameArea.contains(e.target)) {
+                // Allow game area touches to be handled by game
+                return;
+            }
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') {
+                // Allow input and button interactions
+                return;
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
         // New tap-to-move and tap-to-fire system
         gameArea.addEventListener('click', (e) => {
             if (!gameRunning || gamePaused) return;
@@ -853,3 +875,13 @@
 
         pauseButton.addEventListener('click', pauseGame);
         continueButton.addEventListener('click', continueGame);
+        restartButtonPause.addEventListener('click', restartGame);
+        nextLevelButton.addEventListener('click', nextLevel);
+        restartButtonGameOver.addEventListener('click', restartGame);
+
+        // Initial setup
+        showScreen(startScreen);
+        updateDisplay();
+    </script>
+</body>
+</html>
