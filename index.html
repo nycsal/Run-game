@@ -3,66 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Galaxy Guardian</title>
+    <title>Aether Weaver</title>
     <style>
-        /* --- CSS Styling --- */
+        /* --- General Body & Game Container Styling --- */
         body {
             margin: 0;
-            font-family: 'Space Mono', monospace; /* A space-y font feel */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Clean, modern font */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #0d0d1a; /* Deep space blue */
-            color: #e0e0f0; /* Light, futuristic text */
+            background: linear-gradient(to bottom, #1a0033, #0d0d1a); /* Deep space gradient */
+            color: #e6e6ff; /* Soft white/purple text */
             overflow: hidden; /* Prevent scrollbars */
             -webkit-user-select: none; /* Disable text selection for better game feel */
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            touch-action: manipulation; /* Prevent browser double-tap zoom etc. */
+            touch-action: none; /* Crucial: Prevents browser scrolling/zooming on touch */
         }
-
-        /* Parallax stars background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image:
-                radial-gradient(2px 2px at 20% 30%, #eee, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 70% 80%, #eee, rgba(0,0,0,0)),
-                radial-gradient(1px 1px at 50% 50%, #eee, rgba(0,0,0,0)),
-                radial-gradient(1px 1px at 90% 10%, #eee, rgba(0,0,0,0)),
-                radial-gradient(1px 1px at 10% 90%, #eee, rgba(0,0,0,0));
-            background-repeat: repeat;
-            background-size: 150px 150px, 200px 200px, 100px 100px, 250px 250px, 120px 120px;
-            animation: moveStars 100s linear infinite;
-            z-index: -1;
-        }
-
-        @keyframes moveStars {
-            from { background-position: 0 0; }
-            to { background-position: 0 100%; }
-        }
-
 
         #game-container {
             width: 80vw;
-            max-width: 600px; /* Adjusted max-width for phone portrait feel */
+            max-width: 500px; /* Portrait phone size focus */
             height: 90vh;
-            max-height: 800px; /* Adjusted max-height */
-            border: 5px solid #4a4a6b; /* Space frame */
-            background-color: rgba(13, 13, 26, 0.7); /* Slightly transparent for stars */
+            max-height: 750px;
+            border: 4px solid #6a0dad; /* Mystical border */
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent game background */
             position: relative;
-            box-shadow: 0 0 25px rgba(0,0,0,0.8);
+            box-shadow: 0 0 30px rgba(106, 0, 173, 0.8); /* Strong glow */
             display: flex;
             flex-direction: column;
-            border-radius: 10px;
+            border-radius: 15px;
+            overflow: hidden; /* Ensure orbs don't render outside */
         }
 
+        /* --- Game Screens (Start, Pause, Level Complete, Game Over) --- */
         .game-screen {
             position: absolute;
             top: 0;
@@ -73,54 +49,61 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background-color: rgba(0, 0, 0, 0.9);
+            background-color: rgba(0, 0, 0, 0.95);
             text-align: center;
-            z-index: 100; /* Ensure screens are on top */
-            border-radius: 5px; /* Match container border-radius */
+            z-index: 100; /* Always on top */
+            border-radius: 12px; /* Match container */
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .hidden {
             display: none !important;
         }
 
-        /* All Buttons */
+        /* --- Buttons & Input --- */
         button {
-            padding: 12px 25px;
-            margin: 10px;
-            font-size: 1.3em;
+            padding: 12px 28px;
+            margin: 12px;
+            font-size: 1.35em;
             cursor: pointer;
-            background-color: #6a0dad; /* Purple accent */
+            background-color: #9932cc; /* Purple accent */
             color: white;
-            border: 2px solid #9932cc;
+            border: 2px solid #ce93d8;
             border-radius: 8px;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            outline: none; /* Remove focus outline */
         }
 
         button:hover {
-            background-color: #9932cc;
-            transform: translateY(-2px);
+            background-color: #a042d3;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
         }
 
         button:active {
             transform: translateY(0);
-            box-shadow: 0 2px 3px rgba(0,0,0,0.3);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
         }
 
         input[type="text"] {
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 2px solid #9932cc;
-            border-radius: 5px;
-            font-size: 1.1em;
-            width: 70%;
-            max-width: 300px;
-            background-color: #333;
-            color: #eee;
+            padding: 12px;
+            margin-bottom: 25px;
+            border: 2px solid #ce93d8;
+            border-radius: 8px;
+            font-size: 1.2em;
+            width: 80%;
+            max-width: 280px;
+            background-color: #2a0040;
+            color: #e6e6ff;
             text-align: center;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            outline: none;
         }
 
-        /* Game Play Screen Layout */
+        /* --- Game Play Screen Layout --- */
         #game-play-screen {
             display: flex;
             flex-direction: column;
@@ -128,89 +111,169 @@
             align-items: stretch;
             padding: 10px;
             box-sizing: border-box;
-            background-color: transparent; /* Show parallax background */
+            background-color: transparent; /* Allows gradient background to show */
         }
 
         #game-info {
             display: flex;
             justify-content: space-around;
             width: 100%;
+            padding: 10px 0;
+            font-size: 1.1em;
+            background-color: rgba(0,0,0,0.6);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            z-index: 10;
+        }
+
+        #current-target-color {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
             padding: 8px 0;
-            font-size: 1em;
-            background-color: rgba(0,0,0,0.5);
-            border-radius: 5px;
-            margin-bottom: 8px;
-            z-index: 10; /* Above game area */
+            background-color: rgba(0,0,0,0.6);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            z-index: 10;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        #current-target-color .orb-sample {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            margin-left: 10px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.2s ease-out; /* For changing color */
         }
 
         #game-area {
             flex-grow: 1;
             position: relative;
-            overflow: hidden;
-            background-color: transparent; /* Show parallax background */
-            border-radius: 5px;
-            cursor: crosshair; /* Indicate firing area */
-            touch-action: none; /* Crucial for preventing mobile scrolling */
+            overflow: hidden; /* Crucial for preventing orbs from drawing outside */
+            background-color: transparent;
+            border-radius: 8px;
+            cursor: pointer; /* Indicates interaction */
+            touch-action: none; /* Again, crucial for mobile */
         }
 
-        /* Spaceship */
-        #spaceship {
+        /* --- Collector --- */
+        #collector {
             position: absolute;
-            bottom: 10px;
-            width: 70px;
-            height: 60px;
-            background-color: #00bcd4; /* Cyan blue ship */
-            border-radius: 50% 50% 10px 10px;
-            left: calc(50% - 35px);
-            cursor: grab;
-            z-index: 50;
-            box-shadow: 0 0 15px #00bcd4; /* Glow effect */
-        }
-
-        #spaceship::before { /* Cockpit */
-            content: '';
-            position: absolute;
-            top: 5px;
+            bottom: 0px; /* Sit right at the bottom edge */
             left: 50%;
             transform: translateX(-50%);
-            width: 30px;
-            height: 25px;
-            background-color: #333;
-            border-radius: 50%;
-            border: 2px solid #555;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+            width: 120px; /* Base width */
+            height: 30px;
+            background: linear-gradient(to right, #6a0dad, #9932cc, #6a0dad);
+            border-radius: 15px 15px 0 0; /* Rounded top, flat bottom */
+            box-shadow: 0 0 20px #9932cc, inset 0 0 10px rgba(255,255,255,0.5);
+            z-index: 50; /* On top of falling orbs */
+            transition: width 0.3s ease, box-shadow 0.3s ease; /* For size/power change */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8em;
+            opacity: 0.9;
         }
 
-        #spaceship.firing .laser-muzzle { /* Laser muzzle flash */
-            animation: laserFlash 0.05s linear;
-        }
-
-        .laser-muzzle {
+        #collector .collector-effect {
             position: absolute;
-            bottom: -5px; /* Just below ship */
-            left: 50%;
-            transform: translateX(-50%);
-            width: 10px;
-            height: 15px;
-            background-color: #f00; /* Red laser color */
-            border-radius: 2px;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 20px solid #ce93d8; /* Triangle pointing up */
             opacity: 0;
+            animation: pulseEffect 1s infinite alternate;
         }
 
-        @keyframes laserFlash {
-            0% { opacity: 1; transform: translateX(-50%) scaleY(1); }
-            100% { opacity: 0; transform: translateX(-50%) scaleY(0.5); }
+        @keyframes pulseEffect {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.2); opacity: 0.8; }
         }
 
-        /* Control Button (Pause) */
+
+        /* --- Aether Orbs (Falling Objects) --- */
+        .aether-orb {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out; /* For destruction */
+            box-shadow: 0 0 15px rgba(255,255,255,0.7); /* Subtle glow */
+            border: 2px solid rgba(255,255,255,0.3);
+            z-index: 20;
+        }
+
+        /* Orb Colors */
+        .orb-red { background-color: #ff0000; }
+        .orb-blue { background-color: #0000ff; }
+        .orb-green { background-color: #00ff00; }
+        .orb-yellow { background-color: #ffff00; }
+        .orb-purple { background-color: #800080; }
+
+        /* Orb Destruction Effect */
+        .aether-orb.destroyed {
+            opacity: 0;
+            transform: scale(0.1);
+        }
+
+        /* --- Aether Path (Drawn by player) --- */
+        #aether-path-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 40; /* Above orbs, below collector */
+            pointer-events: none; /* Don't block interaction with elements below */
+            overflow: hidden;
+        }
+
+        .aether-path-segment {
+            position: absolute;
+            background-color: rgba(200, 100, 255, 0.7); /* Glowing purple path */
+            box-shadow: 0 0 10px #c864ff;
+            height: 5px; /* Thickness of the path */
+            transform-origin: 0 0; /* For rotation */
+            transition: background-color 0.1s ease; /* For color change on wrong orb */
+        }
+
+        .aether-path-segment.wrong-orb-hit {
+            background-color: rgba(255, 50, 50, 0.8);
+            box-shadow: 0 0 10px #ff3232;
+        }
+
+        /* --- Level Specific Elements (Final Orb) --- */
+        .final-orb {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: gold;
+            box-shadow: 0 0 25px gold, inset 0 0 10px rgba(255,255,0,0.8);
+            z-index: 60; /* Higher than other orbs */
+            animation: rotateGold 5s linear infinite;
+        }
+
+        @keyframes rotateGold {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- Pause Button (always visible during gameplay) --- */
         #controls {
             display: flex;
             justify-content: center;
             width: 100%;
             padding: 8px 0;
-            margin-top: 8px;
-            background-color: rgba(0,0,0,0.5);
-            border-radius: 5px;
+            margin-top: 10px;
+            background-color: rgba(0,0,0,0.6);
+            border-radius: 8px;
             z-index: 10;
         }
         #controls button {
@@ -218,166 +281,30 @@
             font-size: 1.1em;
             margin: 0;
         }
-
-
-        /* Game Objects (Enemies) */
-        .game-object {
-            position: absolute;
-            border-radius: 50%; /* Default to round for asteroids */
-            z-index: 20; /* Above stars, below ship */
-            animation: fall linear forwards;
-            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
-            transform-origin: center center;
-        }
-
-        .game-object.popped {
-            opacity: 0;
-            transform: scale(0.1) rotate(0deg); /* Shrink quickly for explosion */
-        }
-
-        /* Specific enemy types */
-        .asteroid {
-            width: 40px;
-            height: 40px;
-            background-color: #8B4513; /* Brown */
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-            animation: fall linear forwards, rotateAsteroid linear infinite;
-        }
-
-        .alien-small {
-            width: 35px;
-            height: 35px;
-            background-color: #00ff00; /* Green */
-            border-radius: 50%;
-            box-shadow: 0 0 10px #00ff00;
-        }
-
-        .alien-large {
-            width: 50px;
-            height: 50px;
-            background-color: #800080; /* Purple */
-            border-radius: 50%;
-            box-shadow: 0 0 15px #800080;
-        }
-
-
-        /* Laser Projectile (from spaceship) */
-        .laser-projectile {
-            position: absolute;
-            width: 6px;
-            height: 20px;
-            background-color: #ff0000; /* Red laser */
-            box-shadow: 0 0 10px #ff0000;
-            border-radius: 3px;
-            z-index: 30; /* Above enemies */
-        }
-
-        /* Explosion Effect */
-        .explosion {
-            position: absolute;
-            width: 60px; /* Size of explosion */
-            height: 60px;
-            background-color: transparent;
-            border-radius: 50%;
-            animation: explode 0.3s forwards;
-            z-index: 40; /* On top of everything temporarily */
-            pointer-events: none; /* Don't block clicks */
-        }
-
-        @keyframes explode {
-            0% {
-                transform: scale(0.1);
-                box-shadow: 0 0 0 0 orange, 0 0 0 0 red;
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1);
-                box-shadow: 0 0 20px 10px yellow, 0 0 40px 15px orange, 0 0 60px 20px red;
-                opacity: 0.8;
-            }
-            100% {
-                transform: scale(1.5);
-                box-shadow: 0 0 10px 5px yellow, 0 0 20px 10px orange, 0 0 30px 15px red;
-                opacity: 0;
-            }
-        }
-
-        @keyframes fall {
-            from { transform: translateY(-100px); }
-            to { transform: translateY(calc(100% + 50px)); }
-        }
-
-        @keyframes rotateAsteroid {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Boss Specifics */
-        #boss {
-            position: absolute;
-            top: 20px;
-            width: 120px;
-            height: 120px;
-            background-color: #4b0082; /* Indigo */
-            border-radius: 15px;
-            left: calc(50% - 60px);
-            display: none;
-            z-index: 30;
-            transition: left 0.8s ease-in-out; /* Smooth boss movement */
-            box-shadow: 0 0 30px #4b0082, inset 0 0 15px rgba(255,255,255,0.3);
-        }
-
-        #boss-health-bar {
-            position: absolute;
-            bottom: -25px;
-            left: 0;
-            width: 100%;
-            height: 12px;
-            background-color: #dc3545; /* Red (empty) */
-            border: 1px solid #000;
-            box-sizing: border-box;
-            border-radius: 3px;
-        }
-
-        #boss-health-bar-fill {
-            width: 100%;
-            height: 100%;
-            background-color: #28a745; /* Green (full) */
-            transition: width 0.2s ease-out;
-            border-radius: 3px;
-        }
-
-        .boss-projectile {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: #ffc107; /* Orange/Yellow */
-            border-radius: 50%;
-            z-index: 40; /* Above ship's projectiles */
-            box-shadow: 0 0 15px #ffc107;
-        }
     </style>
 </head>
 <body>
     <div id="game-container">
         <div id="start-screen" class="game-screen">
-            <h1>Galaxy Guardian</h1>
-            <p>Enter your callsign:</p>
-            <input type="text" id="playerNameInput" placeholder="Your Name">
-            <button id="startButton">Begin Mission</button>
+            <h1>Aether Weaver</h1>
+            <p>Enter your Weaver Name:</p>
+            <input type="text" id="playerNameInput" placeholder="Aether Seeker">
+            <button id="startButton">Begin Weaving</button>
         </div>
 
         <div id="game-play-screen" class="game-screen hidden">
             <div id="game-info">
-                <p>Pilot: <span id="playerNameDisplay"></span></p>
-                <p>Score: <span id="scoreDisplay">0</span></p>
-                <p>Lives: <span id="livesDisplay">3</span></p>
-                <p>Level: <span id="levelDisplay">1</span></p>
+                <p>Weaver: <span id="playerNameDisplay"></span></p>
+                <p>Essence: <span id="scoreDisplay">0</span></p>
+                <p>Focus: <span id="livesDisplay">3</span></p>
+                <p>Realm: <span id="levelDisplay">1</span></p>
+            </div>
+            <div id="current-target-color">
+                Collect: <span id="targetColorText"></span> <div class="orb-sample" id="targetColorOrb"></div>
             </div>
             <div id="game-area">
-                <div id="spaceship">
-                    <div class="laser-muzzle"></div>
-                </div>
+                <div id="aether-path-container"></div>
+                <div id="collector"></div>
             </div>
             <div id="controls">
                 <button id="pauseButton">Pause</button>
@@ -385,27 +312,26 @@
         </div>
 
         <div id="pause-screen" class="game-screen hidden">
-            <h1>Mission Paused</h1>
-            <button id="continueButton">Resume Mission</button>
-            <button id="restartButtonPause">Restart</button>
+            <h1>Weaving Paused</h1>
+            <button id="continueButton">Resume Weaving</button>
+            <button id="restartButtonPause">Start Over</button>
         </div>
 
         <div id="level-complete-screen" class="game-screen hidden">
-            <h1 id="levelCompleteMessage">Level 1 Cleared!</h1>
-            <p>Good work, <span id="levelCompletePlayerName"></span>!</p>
-            <button id="nextLevelButton">Advance to Next Sector</button>
+            <h1 id="levelCompleteMessage">Realm 1 Stabilized!</h1>
+            <p>Excellent work, <span id="levelCompletePlayerName"></span>!</p>
+            <button id="nextLevelButton">Weave to Next Realm</button>
         </div>
 
         <div id="game-over-screen" class="game-screen hidden">
-            <h1>MISSION FAILED!</h1>
-            <p id="finalScoreMessage">Final Score: <span id="finalScoreDisplay">0</span></p>
-            <button id="restartButtonGameOver">Try Again</button>
+            <h1>AETHER STORM!</h1>
+            <p id="finalScoreMessage">Essence Collected: <span id="finalScoreDisplay">0</span></p>
+            <button id="restartButtonGameOver">Re-attune</button>
         </div>
     </div>
 
     <script>
-        /* --- JavaScript Logic --- */
-        // --- Game State Variables ---
+        /* --- Game State Variables --- */
         let playerName = '';
         let score = 0;
         let lives = 3;
@@ -413,19 +339,15 @@
         let gameRunning = false;
         let gamePaused = false;
         let gameLoopAnimationFrame; // For requestAnimationFrame
-        let enemyGenerationInterval;
-        let continuousFireInterval; // For continuous laser fire
-        let currentFireRateMS = 200; // Initial fire interval in ms (200ms = 5 shots/sec)
-        const MIN_FIRE_RATE_MS = 50; // Fastest fire rate possible (50ms = 20 shots/sec)
-        let activeGameObjects = []; // Array to hold active enemies and boss projectiles
+        let orbGenerationInterval;
+        let collectorPower = 0; // Increases magnetic pull/size of collector
+        const MAX_COLLECTOR_POWER = 100; // Max value for collector power
 
-        // Boss variables
-        let boss = null;
-        let bossHealth = 0;
-        let bossMaxHealth = 0;
-        let bossFiringInterval;
-        let bossMovementInterval;
-        const BOSS_LEVEL = 3; // The level where the boss appears
+        let targetColors = ['blue']; // Current target colors for the level
+        let collectedTargetOrbs = 0; // How many target orbs collected this level
+
+        const activeOrbs = []; // Array to hold active orb elements
+        let currentAetherPath = []; // Stores the segments of the drawn path
 
         // --- DOM Elements ---
         const gameContainer = document.getElementById('game-container');
@@ -442,9 +364,11 @@
         const scoreDisplay = document.getElementById('scoreDisplay');
         const livesDisplay = document.getElementById('livesDisplay');
         const levelDisplay = document.getElementById('levelDisplay');
+        const targetColorText = document.getElementById('targetColorText');
+        const targetColorOrb = document.getElementById('targetColorOrb');
         const gameArea = document.getElementById('game-area');
-        const spaceship = document.getElementById('spaceship');
-        const laserMuzzle = document.querySelector('#spaceship .laser-muzzle');
+        const collector = document.getElementById('collector');
+        const aetherPathContainer = document.getElementById('aether-path-container');
         const pauseButton = document.getElementById('pauseButton');
 
         const continueButton = document.getElementById('continueButton');
@@ -458,59 +382,43 @@
         const restartButtonGameOver = document.getElementById('restartButtonGameOver');
 
         // --- Game Settings (Adjust for difficulty) ---
+        const ORB_COLORS = ['red', 'blue', 'green', 'yellow', 'purple'];
+        const ORB_SIZE = 35; // px
+        const PATH_SEGMENT_LENGTH = 15; // How long each path segment is drawn
+        const COLLECTOR_BASE_WIDTH = 120; // Initial width of collector
+        const COLLECTOR_POWER_EFFECT_MULTIPLIER = 0.5; // How much collector power adds to width
+
         const LEVEL_SETTINGS = {
             1: {
-                enemySpeed: 1.5, generationRate: 1500, enemiesToClear: 20,
-                enemyTypes: ['asteroid', 'asteroid', 'alien-small'],
-                initialFireRate: 200
+                orbSpeed: 1.5, generationRate: 1800, orbsToCollect: 10,
+                targetColors: ['blue'], orbTypes: ['blue', 'red', 'green']
             },
             2: {
-                enemySpeed: 2.0, generationRate: 1200, enemiesToClear: 30,
-                enemyTypes: ['asteroid', 'alien-small', 'alien-small', 'alien-large'],
-                initialFireRate: 180
+                orbSpeed: 2.0, generationRate: 1500, orbsToCollect: 15,
+                targetColors: ['blue'], orbTypes: ['blue', 'red', 'green', 'yellow']
             },
-            3: { // Boss Level
-                enemySpeed: 0, generationRate: 0, enemiesToClear: 1, // Cleared by defeating boss
-                bossHealth: 300, bossSpeed: 0.8, bossFireRate: 1200, bossProjectileSpeed: 4,
-                initialFireRate: 150
+            3: {
+                orbSpeed: 2.2, generationRate: 1300, orbsToCollect: 20,
+                targetColors: ['blue', 'green'], orbTypes: ['blue', 'green', 'red', 'yellow', 'purple']
             },
             4: {
-                enemySpeed: 2.5, generationRate: 900, enemiesToClear: 40,
-                enemyTypes: ['alien-small', 'alien-small', 'alien-large', 'alien-large'],
-                initialFireRate: 120
+                orbSpeed: 2.5, generationRate: 1100, orbsToCollect: 25,
+                targetColors: ['red', 'yellow'], orbTypes: ['blue', 'green', 'red', 'yellow', 'purple']
             },
-            5: {
-                enemySpeed: 3.0, generationRate: 700, enemiesToClear: 50,
-                enemyTypes: ['alien-small', 'alien-large', 'alien-large'],
-                initialFireRate: 100
+            5: { // Aether Storm
+                orbSpeed: 3.0, generationRate: 900, orbsToCollect: 30,
+                targetColors: ['blue', 'red', 'green'], orbTypes: ['blue', 'green', 'red', 'yellow', 'purple']
             }
         };
 
-        const ENEMY_HITS_REQUIRED = {
-            'asteroid': 1,
-            'alien-small': 1,
-            'alien-large': 3,
-            'boss': 1 // Each hit on boss is processed as damage
-        };
-
-        const ENEMY_SCORES = {
-            'asteroid': 10,
-            'alien-small': 20,
-            'alien-large': 50
-        };
-
-        const ENEMY_SIZES = {
-            'asteroid': 40,
-            'alien-small': 35,
-            'alien-large': 50
-        };
-
-        const SPACESHIP_PROJECTILE_SPEED = 15; // Pixels per frame
-        const BOSS_PROJECTILE_DAMAGE = 1; // Lives lost if hit by boss projectile
+        const SCORE_PER_ORB = 10;
+        const PENALTY_FOR_WRONG_ORB = 20; // Points lost for destroying wrong orb
+        const FOCUS_LOSS_PER_MISS = 1; // Lives lost for missing any orb
         const MAX_LEVEL = 5;
 
-        let enemiesClearedInLevel = 0;
-
+        let lastPathPoint = null; // Stores coordinates of the last drawn path segment end
+        let isDrawingPath = false; // Is the player currently holding down to draw?
+        let isOrbMovingToCollector = false; // Is an orb currently being drawn to collector?
 
         // --- Utility Functions ---
         function showScreen(screenElement) {
@@ -525,17 +433,39 @@
             scoreDisplay.textContent = score;
             livesDisplay.textContent = lives;
             levelDisplay.textContent = level;
+
+            const currentSettings = LEVEL_SETTINGS[level];
+            if (currentSettings) {
+                targetColorText.textContent = currentSettings.targetColors.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(' & ');
+                // For simplicity, just show the first target color in the orb sample
+                targetColorOrb.className = `orb-sample orb-${currentSettings.targetColors[0]}`;
+            }
         }
 
-        function createExplosion(x, y, size = 60) {
-            const explosion = document.createElement('div');
-            explosion.className = 'explosion';
-            explosion.style.left = `${x - size / 2}px`;
-            explosion.style.top = `${y - size / 2}px`;
-            explosion.style.width = `${size}px`;
-            explosion.style.height = `${size}px`;
-            gameArea.appendChild(explosion);
-            setTimeout(() => explosion.remove(), 300); // Remove after animation
+        function createAetherSparkle(x, y, color = '#e0e0ff', type = 'collection') {
+            const sparkle = document.createElement('div');
+            sparkle.style.position = 'absolute';
+            sparkle.style.left = `${x}px`;
+            sparkle.style.top = `${y}px`;
+            sparkle.style.width = '10px';
+            sparkle.style.height = '10px';
+            sparkle.style.borderRadius = '50%';
+            sparkle.style.backgroundColor = color;
+            sparkle.style.boxShadow = `0 0 15px ${color}, 0 0 5px ${color}`;
+            sparkle.style.opacity = '1';
+            sparkle.style.zIndex = '90';
+            sparkle.style.transform = `translate(-50%, -50%) scale(0.1)`;
+            sparkle.style.transition = 'all 0.4s ease-out';
+
+            gameArea.appendChild(sparkle);
+
+            // Animate
+            requestAnimationFrame(() => {
+                sparkle.style.transform = `translate(-50%, -50%) scale(${type === 'collection' ? 1.5 : 0.8})`;
+                sparkle.style.opacity = '0';
+            });
+
+            setTimeout(() => sparkle.remove(), 400);
         }
 
         // --- Game Logic Functions ---
@@ -543,20 +473,19 @@
         function startGame() {
             playerName = playerNameInput.value.trim();
             if (playerName === '') {
-                alert('Please enter your callsign!');
+                alert('Please enter your Weaver Name!');
                 return;
             }
             score = 0;
             lives = 3;
             level = 1;
-            enemiesClearedInLevel = 0;
-            activeGameObjects.length = 0; // Clear any existing objects
-            gameArea.innerHTML = ''; // Clear existing elements
-            gameArea.appendChild(spaceship); // Re-add spaceship
-            // Reset spaceship position
-            spaceship.style.left = `${gameArea.offsetWidth / 2 - spaceship.offsetWidth / 2}px`;
+            collectedTargetOrbs = 0;
+            activeOrbs.length = 0; // Clear any existing objects
+            aetherPathContainer.innerHTML = ''; // Clear existing paths
+            gameArea.querySelectorAll('.aether-orb, .final-orb').forEach(el => el.remove());
 
-            currentFireRateMS = LEVEL_SETTINGS[1].initialFireRate; // Reset fire rate
+            collectorPower = 0; // Reset collector power
+            updateCollectorSize(); // Reset collector size
 
             showScreen(gamePlayScreen);
             gameRunning = true;
@@ -566,51 +495,34 @@
         }
 
         function startLevel() {
-            enemiesClearedInLevel = 0;
-            // Clear all active game objects (enemies, projectiles, boss)
-            gameArea.querySelectorAll('.game-object, .laser-projectile, .boss-projectile, #boss').forEach(el => el.remove());
-            activeGameObjects = []; // Ensure array is empty
-
-            clearInterval(enemyGenerationInterval);
-            clearInterval(bossFiringInterval);
-            clearInterval(bossMovementInterval);
-            if (boss) boss.remove(); // Remove boss if present from previous level
-            boss = null; // Clear boss reference
+            collectedTargetOrbs = 0;
+            activeOrbs.length = 0;
+            aetherPathContainer.innerHTML = ''; // Clear paths from previous level
+            gameArea.querySelectorAll('.aether-orb, .final-orb').forEach(el => el.remove());
 
             const currentSettings = LEVEL_SETTINGS[level];
             if (!currentSettings) {
-                endGame(true); // Should not happen if all levels covered, acts as a win
+                endGame(true); // Win if no more levels
                 return;
             }
 
-            // Set initial fire rate for the level
-            currentFireRateMS = currentSettings.initialFireRate;
-            if (isFiringContinuously) { // If player was holding fire, update rate
-                stopContinuousFire();
-                startContinuousFire();
-            }
+            targetColors = [...currentSettings.targetColors]; // Set new target colors for the level
 
-            if (level === BOSS_LEVEL) {
-                spawnBoss();
-            } else {
-                enemyGenerationInterval = setInterval(generateEnemy, currentSettings.generationRate);
-            }
+            clearInterval(orbGenerationInterval);
+            orbGenerationInterval = setInterval(generateOrb, currentSettings.generationRate);
 
-            // Ensure game loop is running
             if (gameLoopAnimationFrame) {
-                cancelAnimationFrame(gameLoopAnimationFrame);
+                cancelAnimationFrame(gameLoopAnimationFrame); // Stop previous loop if running
             }
-            gameLoop();
+            gameLoop(); // Start game loop for new level
+            updateDisplay(); // Update target color display
         }
 
         function pauseGame() {
             if (!gameRunning) return;
             gamePaused = true;
             showScreen(pauseScreen);
-            clearInterval(enemyGenerationInterval);
-            clearInterval(continuousFireInterval);
-            clearInterval(bossFiringInterval);
-            clearInterval(bossMovementInterval);
+            clearInterval(orbGenerationInterval);
             cancelAnimationFrame(gameLoopAnimationFrame);
         }
 
@@ -618,51 +530,36 @@
             gamePaused = false;
             showScreen(gamePlayScreen);
             const currentSettings = LEVEL_SETTINGS[level];
-            if (level === BOSS_LEVEL) {
-                startBossFiring();
-                moveBoss();
-            } else {
-                enemyGenerationInterval = setInterval(generateEnemy, currentSettings.generationRate);
-            }
-            if (isFiringContinuously) { // Resume continuous fire if it was active
-                startContinuousFire();
-            }
+            orbGenerationInterval = setInterval(generateOrb, currentSettings.generationRate);
             gameLoop(); // Resume animation frame loop
         }
 
         function restartGame() {
-            clearInterval(enemyGenerationInterval);
-            clearInterval(continuousFireInterval);
-            clearInterval(bossFiringInterval);
-            clearInterval(bossMovementInterval);
+            clearInterval(orbGenerationInterval);
             cancelAnimationFrame(gameLoopAnimationFrame);
-            startGame();
+            startGame(); // Simply restart from the beginning
         }
 
         function endGame(win = false) {
             gameRunning = false;
             gamePaused = false;
-            clearInterval(enemyGenerationInterval);
-            clearInterval(continuousFireInterval);
-            clearInterval(bossFiringInterval);
-            clearInterval(bossMovementInterval);
+            clearInterval(orbGenerationInterval);
             cancelAnimationFrame(gameLoopAnimationFrame);
 
             // Clean up all remaining game objects
-            gameArea.querySelectorAll('.game-object, .laser-projectile, .boss-projectile, #boss').forEach(el => el.remove());
-            activeGameObjects = [];
-            gameArea.appendChild(spaceship); // Ensure spaceship is back for next game
+            gameArea.querySelectorAll('.aether-orb, .final-orb, .aether-path-segment').forEach(el => el.remove());
+            activeOrbs.length = 0; // Clear array
 
             if (win) {
                 if (level > MAX_LEVEL) { // All levels truly completed
-                    levelCompleteMessage.textContent = "Galactic Victory Achieved!";
+                    levelCompleteMessage.textContent = "All Realms Stabilized! Master Weaver!";
                     levelCompletePlayerName.textContent = playerName;
-                    nextLevelButton.textContent = "Play Again!";
+                    nextLevelButton.textContent = "Weave Again?";
                     nextLevelButton.onclick = restartGame;
                 } else { // Current level completed, going to next
-                    levelCompleteMessage.textContent = `Sector ${level} Cleared!`;
+                    levelCompleteMessage.textContent = `Realm ${level} Stabilized!`;
                     levelCompletePlayerName.textContent = playerName;
-                    nextLevelButton.textContent = "Advance to Next Sector";
+                    nextLevelButton.textContent = "Weave to Next Realm";
                     nextLevelButton.onclick = nextLevel;
                 }
                 showScreen(levelCompleteScreen);
@@ -673,242 +570,122 @@
             }
         }
 
-        function generateEnemy() {
-            if (!gameRunning || gamePaused || level === BOSS_LEVEL) return;
+        function generateOrb() {
+            if (!gameRunning || gamePaused) return;
 
             const currentSettings = LEVEL_SETTINGS[level];
-            const enemyType = currentSettings.enemyTypes[Math.floor(Math.random() * currentSettings.enemyTypes.length)];
-            const enemySize = ENEMY_SIZES[enemyType];
+            const orbColor = currentSettings.orbTypes[Math.floor(Math.random() * currentSettings.orbTypes.length)];
 
-            const enemy = document.createElement('div');
-            enemy.className = `game-object ${enemyType}`;
-            enemy.dataset.type = enemyType;
-            enemy.dataset.hits = ENEMY_HITS_REQUIRED[enemyType]; // Set initial hits required
-            enemy.style.width = `${enemySize}px`;
-            enemy.style.height = `${enemySize}px`;
-            enemy.style.left = `${Math.random() * (gameArea.offsetWidth - enemySize)}px`;
-            enemy.style.top = `-50px`; // Start above the screen
-            gameArea.appendChild(enemy);
-            activeGameObjects.push(enemy);
+            const orb = document.createElement('div');
+            orb.className = `aether-orb orb-${orbColor}`;
+            orb.dataset.color = orbColor;
+            orb.dataset.state = 'falling'; // 'falling', 'collecting', 'destroyed'
+            orb.style.left = `${Math.random() * (gameArea.offsetWidth - ORB_SIZE)}px`;
+            orb.style.top = `-50px`; // Start above the screen
+            gameArea.appendChild(orb);
+            activeOrbs.push(orb);
         }
 
-        function moveGameObjects() {
+        function updateOrbs() {
             const currentSettings = LEVEL_SETTINGS[level];
-            // Iterate backwards when removing elements from an array
-            for (let i = activeGameObjects.length - 1; i >= 0; i--) {
-                const obj = activeGameObjects[i];
+            const collectorRect = collector.getBoundingClientRect();
+            const gameAreaRect = gameArea.getBoundingClientRect();
 
-                if (!gameArea.contains(obj) || obj.dataset.popped) { // Check if already removed/popped
-                    activeGameObjects.splice(i, 1);
+            // Loop backwards for safe removal
+            for (let i = activeOrbs.length - 1; i >= 0; i--) {
+                const orb = activeOrbs[i];
+                if (!gameArea.contains(orb) || orb.dataset.state === 'destroyed') {
+                    activeOrbs.splice(i, 1);
                     continue;
                 }
 
-                let currentTop = parseFloat(obj.style.top);
+                let currentTop = parseFloat(orb.style.top);
+                let currentLeft = parseFloat(orb.style.left);
 
-                if (obj.dataset.type && (obj.dataset.type.includes('asteroid') || obj.dataset.type.includes('alien'))) {
-                    obj.style.top = `${currentTop + currentSettings.enemySpeed}px`;
+                if (orb.dataset.state === 'falling') {
+                    orb.style.top = `${currentTop + currentSettings.orbSpeed}px`;
 
-                    // Check if enemy went off screen (missed)
+                    // Check if orb went off screen (missed)
                     if (currentTop > gameArea.offsetHeight) {
                         lives--;
                         updateDisplay();
-                        createExplosion(obj.offsetLeft + obj.offsetWidth / 2, obj.offsetTop + obj.offsetHeight / 2, obj.offsetWidth); // Explosion at bottom
-                        obj.remove();
-                        activeGameObjects.splice(i, 1);
+                        createAetherSparkle(orb.offsetLeft + ORB_SIZE / 2, orb.offsetTop + ORB_SIZE / 2, '#dc3545', 'miss');
+                        orb.remove();
+                        activeOrbs.splice(i, 1);
                         if (lives <= 0) {
                             endGame();
                             return;
                         }
                     }
-                } else if (obj.dataset.type === 'bossProjectile') {
-                    obj.style.top = `${currentTop + currentSettings.bossProjectileSpeed}px`;
+                } else if (orb.dataset.state === 'collecting') {
+                    // Move orb towards the center of the collector
+                    const collectorCenterX = collector.offsetLeft + collector.offsetWidth / 2;
+                    const collectorCenterY = collector.offsetTop + collector.offsetHeight / 2;
 
-                    // Check collision with spaceship
-                    const spaceshipRect = spaceship.getBoundingClientRect();
-                    const projectileRect = obj.getBoundingClientRect();
-                    const gameAreaRect = gameArea.getBoundingClientRect();
+                    const orbCenterX = currentLeft + ORB_SIZE / 2;
+                    const orbCenterY = currentTop + ORB_SIZE / 2;
 
-                    const spaceshipRelRect = {
-                        left: spaceshipRect.left - gameAreaRect.left,
-                        right: spaceshipRect.right - gameAreaRect.left,
-                        top: spaceshipRect.top - gameAreaRect.top,
-                        bottom: spaceshipRect.bottom - gameAreaRect.top
-                    };
-                    const projectileRelRect = {
-                        left: projectileRect.left - gameAreaRect.left,
-                        right: projectileRect.right - gameAreaRect.left,
-                        top: projectileRect.top - gameAreaRect.top,
-                        bottom: projectileRect.bottom - gameAreaRect.top
-                    };
+                    const dx = collectorCenterX - orbCenterX;
+                    const dy = collectorCenterY - orbCenterY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
 
-                    if (
-                        projectileRelRect.left < spaceshipRelRect.right &&
-                        projectileRelRect.right > spaceshipRelRect.left &&
-                        projectileRelRect.top < spaceshipRelRect.bottom &&
-                        projectileRelRect.bottom > spaceshipRelRect.top
-                    ) {
-                        // Collision with spaceship!
-                        lives -= BOSS_PROJECTILE_DAMAGE;
-                        updateDisplay();
-                        createExplosion(obj.offsetLeft + obj.offsetWidth / 2, obj.offsetTop + obj.offsetHeight / 2, 40); // Small explosion
-                        obj.remove();
-                        activeGameObjects.splice(i, 1);
-                        if (lives <= 0) {
-                            endGame();
-                            return;
-                        }
-                    }
-                    // Remove if off screen
-                    else if (currentTop > gameArea.offsetHeight) {
-                        obj.remove();
-                        activeGameObjects.splice(i, 1);
+                    const COLLECT_SPEED = currentSettings.orbSpeed * 3 + (collectorPower / MAX_COLLECTOR_POWER) * 5; // Faster based on collector power
+
+                    if (distance < COLLECT_SPEED) { // Close enough to snap to collector
+                        collectOrb(orb);
+                    } else {
+                        orb.style.left = `${currentLeft + (dx / distance) * COLLECT_SPEED}px`;
+                        orb.style.top = `${currentTop + (dy / distance) * COLLECT_SPEED}px`;
                     }
                 }
             }
         }
 
-        function moveLaserProjectile(projectile) {
-            let currentBottom = parseFloat(projectile.style.bottom);
-            projectile.style.bottom = `${currentBottom + SPACESHIP_PROJECTILE_SPEED}px`;
+        function collectOrb(orb) {
+            const orbColor = orb.dataset.color;
+            orb.remove();
+            activeOrbs.splice(activeOrbs.indexOf(orb), 1); // Remove from activeOrbs array
 
-            // Check collision with game objects (enemies or boss)
-            for (let i = activeGameObjects.length - 1; i >= 0; i--) {
-                const obj = activeGameObjects[i];
-                // Only consider non-popped enemies or boss
-                if ((obj.dataset.popped && obj.dataset.type !== 'boss') || !gameArea.contains(obj)) continue;
-
-                const objRect = obj.getBoundingClientRect();
-                const projectileRect = projectile.getBoundingClientRect();
-                const gameAreaRect = gameArea.getBoundingClientRect();
-
-                // Adjust rects to be relative to gameArea (important for accurate collision)
-                const objRelRect = {
-                    left: objRect.left - gameAreaRect.left,
-                    right: objRect.right - gameAreaRect.left,
-                    top: objRect.top - gameAreaRect.top,
-                    bottom: objRect.bottom - gameAreaRect.top
-                };
-                const projectileRelRect = {
-                    left: projectileRect.left - gameAreaRect.left,
-                    right: projectileRect.right - gameAreaRect.left,
-                    top: projectileRect.top - gameAreaRect.top,
-                    bottom: projectileRect.bottom - gameAreaRect.top
-                };
-
-
-                if (
-                    projectileRelRect.left < objRelRect.right &&
-                    projectileRelRect.right > objRelRect.left &&
-                    projectileRelRect.top < objRelRect.bottom &&
-                    projectileRelRect.bottom > objRelRect.top
-                ) {
-                    // Collision!
-                    projectile.remove(); // Remove laser projectile
-
-                    if (obj.dataset.type && (obj.dataset.type.includes('asteroid') || obj.dataset.type.includes('alien'))) {
-                        obj.dataset.hits--;
-                        if (obj.dataset.hits <= 0) {
-                            score += ENEMY_SCORES[obj.dataset.type];
-                            enemiesClearedInLevel++;
-                            createExplosion(obj.offsetLeft + obj.offsetWidth / 2, obj.offsetTop + obj.offsetHeight / 2, obj.offsetWidth);
-                            obj.classList.add('popped');
-                            obj.dataset.popped = 'true';
-                            // Remove from DOM after explosion animation completes
-                            setTimeout(() => {
-                                if (gameArea.contains(obj)) obj.remove();
-                            }, 200);
-                        }
-                    } else if (obj.id === 'boss') {
-                        bossHealth -= 10; // Each laser hit does 10 damage
-                        updateBossHealthBar();
-                        if (bossHealth <= 0) {
-                            score += 500; // Bonus points for boss kill
-                            enemiesClearedInLevel++; // Count boss as one cleared object
-                            createExplosion(boss.offsetLeft + boss.offsetWidth / 2, boss.offsetTop + boss.offsetHeight / 2, 150); // Large explosion
-                            boss.remove();
-                            clearInterval(bossFiringInterval);
-                            clearInterval(bossMovementInterval);
-                            boss = null; // Clear boss reference
-                        }
-                    }
-                    updateDisplay();
-                    increaseFireRate(); // Check for fire rate increase
-                    checkLevelCompletion();
-                    return; // Projectile hit an object, stop checking for this projectile
+            if (targetColors.includes(orbColor)) {
+                score += SCORE_PER_ORB;
+                collectedTargetOrbs++;
+                createAetherSparkle(collector.offsetLeft + collector.offsetWidth / 2, collector.offsetTop + collector.offsetHeight / 2, orbColor, 'collection');
+                increaseCollectorPower();
+            } else {
+                // This scenario shouldn't happen with the current logic (wrong orbs are destroyed by path)
+                // but as a fallback, if a wrong orb somehow gets collected, penalize.
+                lives--;
+                updateDisplay();
+                createAetherSparkle(collector.offsetLeft + collector.offsetWidth / 2, collector.offsetTop + collector.offsetHeight / 2, '#dc3545', 'miss');
+                if (lives <= 0) {
+                    endGame();
                 }
             }
-
-            // Remove projectile if it goes off screen
-            if (currentBottom > gameArea.offsetHeight) {
-                projectile.remove();
-            }
+            updateDisplay();
+            checkLevelCompletion();
         }
 
-        function fireSpaceshipProjectile() {
-            if (!gameRunning || gamePaused) return;
-
-            spaceship.classList.add('firing'); // Trigger muzzle flash
-            laserMuzzle.style.opacity = 1;
-            setTimeout(() => {
-                spaceship.classList.remove('firing');
-                laserMuzzle.style.opacity = 0;
-            }, 50); // Muzzle flash duration
-
-            const projectile = document.createElement('div');
-            projectile.className = 'laser-projectile';
-            // Position projectile from the tip of the spaceship's barrel
-            projectile.style.left = `${spaceship.offsetLeft + spaceship.offsetWidth / 2 - 3}px`; // Center horizontally
-            projectile.style.bottom = `${spaceship.offsetHeight - 5}px`; // Just above spaceship
-            gameArea.appendChild(projectile);
-            // Projectiles are not added to activeGameObjects; they are handled by querySelectorAll
+        function increaseCollectorPower() {
+            collectorPower = Math.min(MAX_COLLECTOR_POWER, collectorPower + 2); // Increase by 2 for each correct orb
+            updateCollectorSize();
         }
 
-        // --- Continuous Fire Logic ---
-        function startContinuousFire() {
-            if (isFiringContinuously) return; // Prevent multiple intervals
-            isFiringContinuously = true;
-            fireSpaceshipProjectile(); // Fire immediately on hold
-            continuousFireInterval = setInterval(fireSpaceshipProjectile, currentFireRateMS);
+        function updateCollectorSize() {
+            const newWidth = COLLECTOR_BASE_WIDTH + (collectorPower * COLLECTOR_POWER_EFFECT_MULTIPLIER);
+            collector.style.width = `${newWidth}px`;
+            collector.style.left = `calc(50% - ${newWidth / 2}px)`; // Re-center
         }
-
-        function stopContinuousFire() {
-            isFiringContinuously = false;
-            clearInterval(continuousFireInterval);
-        }
-
-        function increaseFireRate() {
-            // Gradually increase fire rate based on score
-            // For every 100 points, reduce fire interval by 5ms
-            const baseFireRate = LEVEL_SETTINGS[level].initialFireRate;
-            const scoreMultiplier = Math.floor(score / 100);
-            let newFireRate = baseFireRate - (scoreMultiplier * 5);
-            currentFireRateMS = Math.max(newFireRate, MIN_FIRE_RATE_MS);
-
-            // If actively firing, reset interval with new rate
-            if (isFiringContinuously) {
-                stopContinuousFire();
-                startContinuousFire();
-            }
-        }
-
 
         function checkLevelCompletion() {
             const currentSettings = LEVEL_SETTINGS[level];
-            if (level === BOSS_LEVEL) {
-                if (boss === null) { // Boss is removed from DOM when defeated
-                    advanceLevelOrWin();
-                }
-            } else if (enemiesClearedInLevel >= currentSettings.enemiesToClear) {
+            if (collectedTargetOrbs >= currentSettings.orbsToCollect) {
                 advanceLevelOrWin();
             }
         }
 
         function advanceLevelOrWin() {
             gameRunning = false;
-            clearInterval(enemyGenerationInterval);
-            clearInterval(continuousFireInterval);
-            clearInterval(bossFiringInterval);
-            clearInterval(bossMovementInterval);
+            clearInterval(orbGenerationInterval);
             cancelAnimationFrame(gameLoopAnimationFrame);
 
             if (level < MAX_LEVEL) {
@@ -927,78 +704,173 @@
             showScreen(gamePlayScreen);
             gameRunning = true;
             gamePaused = false;
-            updateDisplay();
+            updateDisplay(); // Update display for new level
             startLevel();
         }
 
-        // --- Boss Logic ---
-        function spawnBoss() {
-            boss = document.createElement('div');
-            boss.id = 'boss';
-            boss.style.display = 'block';
+        // --- Aether Path Drawing Logic ---
+        let pathStartX = 0;
+        let pathStartY = 0;
+        let drawingTimeout = null; // Timeout to clear path if no orb is touched
 
-            const healthBar = document.createElement('div');
-            healthBar.id = 'boss-health-bar';
-            const healthFill = document.createElement('div');
-            healthFill.id = 'boss-health-bar-fill';
-            healthBar.appendChild(healthFill);
-            boss.appendChild(healthBar);
+        function startPathDrawing(clientX, clientY) {
+            if (!gameRunning || gamePaused) return;
 
-            gameArea.appendChild(boss);
-            activeGameObjects.push(boss); // Add boss to active game objects
+            isDrawingPath = true;
+            lastPathPoint = {
+                x: clientX - gameArea.getBoundingClientRect().left,
+                y: clientY - gameArea.getBoundingClientRect().top
+            };
 
-            const currentSettings = LEVEL_SETTINGS[BOSS_LEVEL];
-            bossMaxHealth = currentSettings.bossHealth;
-            bossHealth = bossMaxHealth;
-            updateBossHealthBar();
+            // Clear any old path segments
+            currentAetherPath.forEach(seg => seg.remove());
+            currentAetherPath = [];
 
-            // Initial boss position
-            boss.style.left = `${Math.random() * (gameArea.offsetWidth - boss.offsetWidth)}px`;
-
-            startBossFiring();
-            moveBoss(); // Start moving the boss
-        }
-
-        function updateBossHealthBar() {
-            if (boss && document.getElementById('boss-health-bar-fill')) {
-                const healthFill = document.getElementById('boss-health-bar-fill');
-                const percentage = (bossHealth / bossMaxHealth) * 100;
-                healthFill.style.width = `${Math.max(0, percentage)}%`;
-                healthFill.style.backgroundColor = percentage > 50 ? '#28a745' : percentage > 20 ? '#ffc107' : '#dc3545'; // Color changes
+            // Find closest orb to start the path
+            const startOrb = findClosestOrb(lastPathPoint.x, lastPathPoint.y);
+            if (startOrb) {
+                // Adjust start point to be from the orb's center
+                lastPathPoint.x = startOrb.offsetLeft + ORB_SIZE / 2;
+                lastPathPoint.y = startOrb.offsetTop + ORB_SIZE / 2;
+                orbToWeave = startOrb; // Set the orb that is being drawn
+                orbToWeave.dataset.state = 'collecting';
+                isOrbMovingToCollector = true; // Flag that an orb is being collected
+            } else {
+                // If no orb near start, just start drawing from touch point
+                orbToWeave = null;
             }
+
+            // Set a timeout to clear the path if it's not connected to an orb or released quickly
+            clearTimeout(drawingTimeout);
+            drawingTimeout = setTimeout(clearAetherPath, 500); // Clear after 0.5s if nothing happens
         }
 
-        function startBossFiring() {
-            const currentSettings = LEVEL_SETTINGS[BOSS_LEVEL];
-            clearInterval(bossFiringInterval);
-            bossFiringInterval = setInterval(fireBossProjectile, currentSettings.bossFireRate);
+
+        function drawPathSegment(clientX, clientY) {
+            if (!isDrawingPath || !gameRunning || gamePaused) return;
+
+            const gameAreaRect = gameArea.getBoundingClientRect();
+            const currentX = clientX - gameAreaRect.left;
+            const currentY = clientY - gameAreaRect.top;
+
+            const distance = Math.sqrt(Math.pow(currentX - lastPathPoint.x, 2) + Math.pow(currentY - lastPathPoint.y, 2));
+
+            if (distance < PATH_SEGMENT_LENGTH) {
+                // Don't draw too many tiny segments
+                return;
+            }
+
+            // Calculate angle and length for the segment
+            const angle = Math.atan2(currentY - lastPathPoint.y, currentX - lastPathPoint.x);
+            const length = distance;
+
+            const segment = document.createElement('div');
+            segment.className = 'aether-path-segment';
+            segment.style.left = `${lastPathPoint.x}px`;
+            segment.style.top = `${lastPathPoint.y}px`;
+            segment.style.width = `${length}px`;
+            segment.style.transform = `rotate(${angle}rad)`;
+            aetherPathContainer.appendChild(segment);
+            currentAetherPath.push(segment);
+
+            lastPathPoint = { x: currentX, y: currentY };
+
+            // Check for orb collisions with the new path segment
+            checkPathOrbCollisions(segment);
         }
 
-        function fireBossProjectile() {
-            if (!gameRunning || gamePaused || !boss || bossHealth <= 0) return;
-
-            const projectile = document.createElement('div');
-            projectile.className = 'boss-projectile';
-            projectile.dataset.type = 'bossProjectile';
-
-            // Position projectile from the boss's bottom center
-            projectile.style.left = `${boss.offsetLeft + boss.offsetWidth / 2 - 10}px`; // Centered
-            projectile.style.top = `${boss.offsetTop + boss.offsetHeight - 5}px`; // Just below boss
-
-            gameArea.appendChild(projectile);
-            activeGameObjects.push(projectile);
+        function endPathDrawing() {
+            isDrawingPath = false;
+            isOrbMovingToCollector = false; // Reset orb collection state
+            clearAetherPath(); // Clear all path segments
+            clearTimeout(drawingTimeout); // Clear any pending clear timeout
         }
 
-        function moveBoss() {
-            if (!gameRunning || gamePaused || !boss || bossHealth <= 0) return;
+        function clearAetherPath() {
+            currentAetherPath.forEach(seg => seg.remove());
+            currentAetherPath = [];
+            lastPathPoint = null;
+        }
 
-            const currentSettings = LEVEL_SETTINGS[BOSS_LEVEL];
-            // Boss moves randomly horizontally
-            let targetX = Math.random() * (gameArea.offsetWidth - boss.offsetWidth);
-            boss.style.left = `${targetX}px`;
+        let orbToWeave = null; // The orb currently being influenced by the path
 
-            // Adjust movement speed / frequency if needed for difficulty
-            bossMovementInterval = setTimeout(moveBoss, 1500 + Math.random() * 1000); // Move every 1.5-2.5 seconds
+        function findClosestOrb(x, y) {
+            let closestOrb = null;
+            let minDistance = Infinity;
+
+            for (const orb of activeOrbs) {
+                if (orb.dataset.state !== 'falling') continue; // Only consider falling orbs
+
+                const orbCenterX = orb.offsetLeft + ORB_SIZE / 2;
+                const orbCenterY = orb.offsetTop + ORB_SIZE / 2;
+                const distance = Math.sqrt(Math.pow(x - orbCenterX, 2) + Math.pow(y - orbCenterY, 2));
+
+                if (distance < minDistance && distance < 70) { // Only consider orbs within a certain radius
+                    minDistance = distance;
+                    closestOrb = orb;
+                }
+            }
+            return closestOrb;
+        }
+
+        function checkPathOrbCollisions(pathSegment) {
+            const pathRect = pathSegment.getBoundingClientRect();
+            const gameAreaRect = gameArea.getBoundingClientRect();
+
+            const pathRelRect = {
+                left: pathRect.left - gameAreaRect.left,
+                right: pathRect.right - gameAreaRect.left,
+                top: pathRect.top - gameAreaRect.top,
+                bottom: pathRect.bottom - gameAreaRect.top
+            };
+
+            for (let i = activeOrbs.length - 1; i >= 0; i--) {
+                const orb = activeOrbs[i];
+                if (orb.dataset.state !== 'falling' && orb.dataset.state !== 'collecting') continue; // Already handled or destroyed
+
+                const orbRect = orb.getBoundingClientRect();
+                const orbRelRect = {
+                    left: orbRect.left - gameAreaRect.left,
+                    right: orbRect.right - gameAreaRect.left,
+                    top: orbRect.top - gameAreaRect.top,
+                    bottom: orbRect.bottom - gameAreaRect.top
+                };
+
+                // Simple AABB collision check
+                if (
+                    pathRelRect.left < orbRelRect.right &&
+                    pathRelRect.right > orbRelRect.left &&
+                    pathRelRect.top < orbRelRect.bottom &&
+                    pathRelRect.bottom > orbRelRect.top
+                ) {
+                    // Collision detected!
+                    clearTimeout(drawingTimeout); // An orb was hit, keep path visible for a moment
+
+                    if (targetColors.includes(orb.dataset.color)) {
+                        // Correct orb hit, start collecting if not already
+                        if (orb.dataset.state === 'falling') {
+                            orb.dataset.state = 'collecting';
+                        }
+                    } else {
+                        // Wrong orb hit, destroy it and penalize
+                        if (orb.dataset.state !== 'destroyed') {
+                            score = Math.max(0, score - PENALTY_FOR_WRONG_ORB); // Don't go below zero
+                            updateDisplay();
+                            createAetherSparkle(orb.offsetLeft + ORB_SIZE / 2, orb.offsetTop + ORB_SIZE / 2, '#ff3232', 'destruction');
+                            orb.classList.add('destroyed');
+                            orb.dataset.state = 'destroyed';
+                            pathSegment.classList.add('wrong-orb-hit'); // Visually indicate wrong hit
+                            setTimeout(() => {
+                                if (gameArea.contains(orb)) orb.remove();
+                                const orbIndex = activeOrbs.indexOf(orb);
+                                if (orbIndex > -1) activeOrbs.splice(orbIndex, 1);
+                            }, 200); // Remove after short delay for animation
+                            endPathDrawing(); // End path on wrong hit
+                            return; // Don't process other orbs with this segment
+                        }
+                    }
+                }
+            }
         }
 
 
@@ -1006,12 +878,7 @@
         function gameLoop() {
             if (!gameRunning || gamePaused) return;
 
-            moveGameObjects(); // Move enemies and boss projectiles
-
-            // Move all active spaceship projectiles (lasers)
-            gameArea.querySelectorAll('.laser-projectile').forEach(lp => {
-                moveLaserProjectile(lp);
-            });
+            updateOrbs();
 
             gameLoopAnimationFrame = requestAnimationFrame(gameLoop);
         }
@@ -1024,77 +891,32 @@
             if (e.key === 'Enter') startGame();
         });
 
-        // Game Play Screen - Tap/Hold to Fire & Spaceship Drag
-        let isDraggingSpaceship = false;
-        let initialSpaceshipX;
-        let initialClientX; // Can be mouseX or touchX
-
-        // Mouse/Touch Down on game area
+        // Game Play Screen - Touch/Mouse Interactions
         gameArea.addEventListener('mousedown', (e) => {
-            if (!gameRunning || gamePaused) return;
-
-            // If click is on spaceship, initiate drag
-            if (e.target === spaceship || spaceship.contains(e.target)) {
-                isDraggingSpaceship = true;
-                spaceship.style.cursor = 'grabbing';
-                initialSpaceshipX = spaceship.offsetLeft;
-                initialClientX = e.clientX;
-            } else { // Otherwise, fire
-                startContinuousFire();
-            }
+            startPathDrawing(e.clientX, e.clientY);
         });
 
         gameArea.addEventListener('touchstart', (e) => {
-            if (!gameRunning || gamePaused || e.touches.length === 0) return;
-            e.preventDefault(); // Prevent default browser touch actions (scrolling, zooming)
-
-            // If touch starts on spaceship, initiate drag
-            if (e.target === spaceship || spaceship.contains(e.target)) {
-                isDraggingSpaceship = true;
-                initialSpaceshipX = spaceship.offsetLeft;
-                initialClientX = e.touches[0].clientX;
-            } else { // Otherwise, fire
-                startContinuousFire();
+            e.preventDefault(); // Prevents scrolling/zooming
+            if (e.touches.length > 0) {
+                startPathDrawing(e.touches[0].clientX, e.touches[0].clientY);
             }
         }, { passive: false });
 
-
-        // Mouse/Touch Move on the entire gameArea to allow drag
         gameArea.addEventListener('mousemove', (e) => {
-            if (isDraggingSpaceship && gameRunning && !gamePaused) {
-                const dx = e.clientX - initialClientX;
-                let newX = initialSpaceshipX + dx;
-
-                // Constrain spaceship to game area boundaries
-                if (newX < 0) newX = 0;
-                if (newX > gameArea.offsetWidth - spaceship.offsetWidth) newX = gameArea.offsetWidth - spaceship.offsetWidth;
-                spaceship.style.left = `${newX}px`;
-            }
+            drawPathSegment(e.clientX, e.clientY);
         });
 
         gameArea.addEventListener('touchmove', (e) => {
-            if (isDraggingSpaceship && gameRunning && !gamePaused && e.touches.length > 0) {
-                e.preventDefault(); // Prevent default browser touch actions (scrolling)
-                const dx = e.touches[0].clientX - initialClientX;
-                let newX = initialSpaceshipX + dx;
-
-                if (newX < 0) newX = 0;
-                if (newX > gameArea.offsetWidth - spaceship.offsetWidth) newX = gameArea.offsetWidth - spaceship.offsetWidth;
-                spaceship.style.left = `${newX}px`;
+            e.preventDefault(); // Prevents scrolling/zooming
+            if (e.touches.length > 0) {
+                drawPathSegment(e.touches[0].clientX, e.touches[0].clientY);
             }
         }, { passive: false });
 
-        // Mouse/Touch Up to stop continuous fire and drag
-        document.addEventListener('mouseup', () => {
-            isDraggingSpaceship = false;
-            spaceship.style.cursor = 'grab';
-            stopContinuousFire();
-        });
-
-        document.addEventListener('touchend', () => {
-            isDraggingSpaceship = false;
-            stopContinuousFire();
-        });
+        document.addEventListener('mouseup', endPathDrawing);
+        document.addEventListener('touchend', endPathDrawing);
+        document.addEventListener('touchcancel', endPathDrawing); // Handle when touch leaves screen
 
         // Pause Button
         pauseButton.addEventListener('click', pauseGame);
@@ -1112,6 +934,7 @@
         // Initial setup
         showScreen(startScreen);
         updateDisplay();
+        updateCollectorSize(); // Initial collector size
     </script>
 </body>
 </html>
