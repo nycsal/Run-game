@@ -63,6 +63,7 @@
       background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
       animation: pulse 2s infinite;
     }
     
@@ -84,6 +85,8 @@
       letter-spacing: 1px;
       transition: all 0.3s ease;
       box-shadow: 0 0 20px rgba(255,0,110,0.5);
+      font-size: 12px;
+      margin: 2px;
     }
     
     .control-btn:hover {
@@ -122,6 +125,8 @@
       border: 2px solid rgba(0,255,255,0.5);
       box-shadow: 0 0 50px rgba(0,255,255,0.3);
       backdrop-filter: blur(10px);
+      max-width: 600px;
+      margin: 20px;
     }
     
     .overlay-title {
@@ -131,6 +136,7 @@
       background: linear-gradient(45deg, #00ffff, #ff00ff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
       text-shadow: 0 0 30px rgba(0,255,255,0.8);
     }
     
@@ -139,6 +145,30 @@
       margin-bottom: 30px;
       color: #00ffff;
       opacity: 0.8;
+    }
+
+    .instructions {
+      font-size: 16px;
+      color: #ffffff;
+      margin-bottom: 30px;
+      line-height: 1.6;
+      text-align: left;
+      background: rgba(0,0,0,0.3);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,255,255,0.3);
+    }
+
+    .instruction-line {
+      margin-bottom: 8px;
+    }
+
+    .key-hint {
+      background: rgba(0,255,255,0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+      color: #00ffff;
     }
     
     .overlay-btn {
@@ -215,6 +245,43 @@
       80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
       100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
     }
+
+    .objective-hud {
+      position: fixed;
+      top: 110px;
+      right: 20px;
+      background: rgba(0,0,0,0.8);
+      border: 2px solid #00ffff;
+      border-radius: 10px;
+      padding: 15px;
+      color: #00ffff;
+      font-size: 14px;
+      z-index: 15;
+      min-width: 200px;
+    }
+
+    .objective-title {
+      font-weight: bold;
+      color: #ffff00;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+      margin: 5px 0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(45deg, #00ffff, #ff00ff);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
   </style>
 </head>
 <body>
@@ -246,6 +313,15 @@
       <button class="control-btn" id="restartBtn">Restart</button>
     </div>
   </div>
+
+  <div id="objectiveHud" class="objective-hud" style="display:none;">
+    <div class="objective-title">Mission Objective</div>
+    <div id="objectiveText">Destroy incoming alien ships</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+    <div id="progressText">0 / 10 enemies destroyed</div>
+  </div>
   
   <canvas id="gameCanvas"></canvas>
   
@@ -253,6 +329,18 @@
     <div class="overlay-content">
       <div class="overlay-title">ELITE DEFENDER</div>
       <div class="overlay-subtitle">Protect Earth from the Alien Invasion</div>
+      
+      <div class="instructions">
+        <div class="instruction-line"><span class="key-hint">WASD</span> or <span class="key-hint">Arrow Keys</span> - Move your ship</div>
+        <div class="instruction-line"><span class="key-hint">SPACE</span> or <span class="key-hint">Mouse Click</span> - Fire weapons</div>
+        <div class="instruction-line"><span class="key-hint">Mouse</span> - Aim crosshair</div>
+        <br>
+        <div class="instruction-line"><strong>OBJECTIVE:</strong> Destroy alien ships before they reach Earth!</div>
+        <div class="instruction-line"><strong>SURVIVAL:</strong> Avoid enemy contact - they damage your ship!</div>
+        <div class="instruction-line"><strong>PROGRESSION:</strong> Complete each level by destroying target enemies</div>
+        <div class="instruction-line"><strong>POWER:</strong> Build combos for higher scores!</div>
+      </div>
+      
       <button class="overlay-btn" id="startBtn">Launch Mission</button>
     </div>
   </div>
@@ -276,7 +364,9 @@
   function resize(){
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight - HEADER;
-    tank.y = canvas.height - tank.h - 30;
+    if (tank) {
+      tank.y = canvas.height - tank.h - 30;
+    }
   }
   window.addEventListener('resize', resize);
 
@@ -291,6 +381,7 @@
   let gameState = 'start';
   const startOv = document.getElementById('startOverlay');
   const endOv = document.getElementById('endOverlay');
+  const objectiveHud = document.getElementById('objectiveHud');
   const startBtn = document.getElementById('startBtn');
   const pauseBtn = document.getElementById('pauseBtn');
   const restartBtn = document.getElementById('restartBtn');
@@ -303,11 +394,12 @@
   function hideOverlay(ov){ ov.style.display = 'none'; }
 
   startBtn.addEventListener('click', () => {
-    console.log('Start button clicked'); // Debug log
+    console.log('Starting game...');
     hideOverlay(startOv);
+    objectiveHud.style.display = 'block';
     gameState = 'playing';
     showLevelIndicator(1);
-    lastTime = performance.now(); // Initialize timing
+    lastTime = performance.now();
     requestAnimationFrame(loop);
   });
 
@@ -318,6 +410,7 @@
     } else if (gameState === 'paused') {
       gameState = 'playing';
       pauseBtn.textContent = 'Pause';
+      lastTime = performance.now();
       requestAnimationFrame(loop);
     }
   });
@@ -327,6 +420,7 @@
   endRestartBtn.addEventListener('click', () => {
     resetAll();
     hideOverlay(endOv);
+    objectiveHud.style.display = 'block';
     gameState = 'playing';
     showLevelIndicator(level);
     lastTime = performance.now();
@@ -407,7 +501,7 @@
   }
 
   // ---- GAME STATE ----
-  const tank = { w: 80, h: 40, x: 0, y: 0, speed: 15, health: 100, maxHealth: 100 };
+  let tank = { w: 80, h: 40, x: 0, y: 0, speed: 8, health: 100, maxHealth: 100 };
   let bullets = [];
   let enemies = [];
   let powerups = [];
@@ -424,20 +518,25 @@
   let gameTime = 0;
   
   // Level progression
-  const levelTargets = [10, 25, 50, 100, 200]; // enemies to kill per level
+  const levelTargets = [10, 25, 50, 100, 200];
   let levelProgress = 0;
 
-  // ---- INPUT ----
+  // ---- INPUT HANDLING ----
   const keys = {};
+  
   document.addEventListener('keydown', e => {
     keys[e.key.toLowerCase()] = true;
-    if (e.key === ' ') {
+    keys[e.code.toLowerCase()] = true;
+    
+    if (e.key === ' ' || e.code === 'Space') {
       e.preventDefault();
       fireBullet();
     }
   });
+  
   document.addEventListener('keyup', e => {
     keys[e.key.toLowerCase()] = false;
+    keys[e.code.toLowerCase()] = false;
   });
 
   let mouseX = 0;
@@ -613,17 +712,45 @@
     document.body.appendChild(indicator);
     
     setTimeout(() => {
-      document.body.removeChild(indicator);
+      if (document.body.contains(indicator)) {
+        document.body.removeChild(indicator);
+      }
     }, 3000);
+  }
+
+  // ---- OBJECTIVE HUD ----
+  function updateObjectiveHud() {
+    const target = levelTargets[Math.min(level - 1, levelTargets.length - 1)];
+    const progressPercent = (levelProgress / target) * 100;
+    
+    document.getElementById('objectiveText').textContent = `Level ${level}: Destroy alien invasion force`;
+    document.getElementById('progressFill').style.width = progressPercent + '%';
+    document.getElementById('progressText').textContent = `${levelProgress} / ${target} enemies destroyed`;
   }
 
   // ---- GAME LOGIC ----
   function moveTank() {
-    if (keys['a'] || keys['arrowleft']) tank.x -= tank.speed;
-    if (keys['d'] || keys['arrowright']) tank.x += tank.speed;
-    if (keys['w'] || keys['arrowup']) tank.y -= tank.speed;
-    if (keys['s'] || keys['arrowdown']) tank.y += tank.speed;
+    let moved = false;
     
+    // Check all possible movement keys
+    if (keys['a'] || keys['arrowleft'] || keys['keya']) {
+      tank.x -= tank.speed;
+      moved = true;
+    }
+    if (keys['d'] || keys['arrowright'] || keys['keyd']) {
+      tank.x += tank.speed;
+      moved = true;
+    }
+    if (keys['w'] || keys['arrowup'] || keys['keyw']) {
+      tank.y -= tank.speed;
+      moved = true;
+    }
+    if (keys['s'] || keys['arrowdown'] || keys['keys']) {
+      tank.y += tank.speed;
+      moved = true;
+    }
+    
+    // Constrain tank position
     tank.x = Math.max(0, Math.min(canvas.width - tank.w, tank.x));
     tank.y = Math.max(canvas.height/2, Math.min(canvas.height - tank.h, tank.y));
   }
@@ -651,264 +778,4 @@
     });
   }
 
-  function spawnEnemy() {
-    const types = ['basic', 'fast', 'tank'];
-    if (level >= 5 && Math.random() < 0.1) types.push('boss');
-    
-    const type = types[Math.floor(Math.random() * types.length)];
-    const enemy = {
-      x: Math.random() * (canvas.width - 40) + 20,
-      y: -30,
-      type: type,
-      rotation: 0,
-      rotationSpeed: (Math.random() - 0.5) * 0.1
-    };
-    
-    switch(type) {
-      case 'basic':
-        enemy.speed = 2 + level * 0.5;
-        enemy.health = 1;
-        enemy.maxHealth = 1;
-        enemy.points = 10;
-        break;
-      case 'fast':
-        enemy.speed = 4 + level * 0.5;
-        enemy.health = 1;
-        enemy.maxHealth = 1;
-        enemy.points = 20;
-        break;
-      case 'tank':
-        enemy.speed = 1 + level * 0.3;
-        enemy.health = 3;
-        enemy.maxHealth = 3;
-        enemy.points = 50;
-        break;
-      case 'boss':
-        enemy.speed = 0.5;
-        enemy.health = 20;
-        enemy.maxHealth = 20;
-        enemy.points = 500;
-        break;
-    }
-    
-    enemies.push(enemy);
-  }
-
-  function updateEnemies() {
-    enemies = enemies.filter(enemy => {
-      enemy.y += enemy.speed;
-      enemy.rotation += enemy.rotationSpeed;
-      
-      // Check collision with tank
-      const dist = Math.hypot(enemy.x - (tank.x + tank.w/2), enemy.y - (tank.y + tank.h/2));
-      if (dist < 30) {
-        tank.health -= 20;
-        createExplosion(enemy.x, enemy.y, '#ff4444');
-        combo = 0;
-        return false;
-      }
-      
-      // Remove enemies that passed
-      if (enemy.y > canvas.height + 50) {
-        combo = Math.max(0, combo - 1);
-        return false;
-      }
-      
-      return true;
-    });
-  }
-
-  function detectCollisions() {
-    for (let bi = bullets.length - 1; bi >= 0; bi--) {
-      const bullet = bullets[bi];
-      
-      for (let ei = enemies.length - 1; ei >= 0; ei--) {
-        const enemy = enemies[ei];
-        const dist = Math.hypot(bullet.x - enemy.x, bullet.y - enemy.y);
-        
-        if (dist < 20) {
-          bullets.splice(bi, 1);
-          enemy.health -= bullet.damage;
-          hits++;
-          
-          if (enemy.health <= 0) {
-            score += enemy.points * (combo + 1);
-            combo++;
-            maxCombo = Math.max(maxCombo, combo);
-            enemiesKilled++;
-            levelProgress++;
-            
-            createExplosion(enemy.x, enemy.y, enemy.type === 'boss' ? '#ff00ff' : '#ffff00');
-            enemies.splice(ei, 1);
-            
-            // Check level progression
-            if (levelProgress >= levelTargets[Math.min(level - 1, levelTargets.length - 1)]) {
-              level++;
-              levelProgress = 0;
-              showLevelIndicator(level);
-              tank.health = Math.min(tank.maxHealth, tank.health + 20); // Heal on level up
-            }
-          } else {
-            createParticleEffect(enemy.x, enemy.y, '#ffffff');
-          }
-          break;
-        }
-      }
-    }
-  }
-
-  function createExplosion(x, y, color) {
-    explosions.push({
-      x: x,
-      y: y,
-      size: 20,
-      color: color,
-      life: 30,
-      maxLife: 30
-    });
-    
-    // Create particle burst
-    for (let i = 0; i < 20; i++) {
-      const angle = (Math.PI * 2 * i) / 20;
-      particles.push({
-        x: x,
-        y: y,
-        vx: Math.cos(angle) * (Math.random() * 5 + 2),
-        vy: Math.sin(angle) * (Math.random() * 5 + 2),
-        size: Math.random() * 4 + 2,
-        color: color,
-        life: 1
-      });
-    }
-  }
-
-  function createParticleEffect(x, y, color) {
-    for (let i = 0; i < 5; i++) {
-      particles.push({
-        x: x,
-        y: y,
-        vx: (Math.random() - 0.5) * 4,
-        vy: (Math.random() - 0.5) * 4,
-        size: Math.random() * 3 + 1,
-        color: color,
-        life: 0.8
-      });
-    }
-  }
-
-  function updateScoreboard() {
-    document.getElementById('score').textContent = score;
-    document.getElementById('level').textContent = level;
-    document.getElementById('health').textContent = tank.health;
-    document.getElementById('combo').textContent = combo;
-  }
-
-  function resetAll() {
-    bullets = [];
-    enemies = [];
-    particles = [];
-    explosions = [];
-    powerups = [];
-    
-    score = 0;
-    level = 1;
-    combo = 0;
-    maxCombo = 0;
-    enemiesKilled = 0;
-    levelProgress = 0;
-    totalShots = 0;
-    hits = 0;
-    gameTime = 0;
-    
-    tank.health = tank.maxHealth;
-    tank.x = (canvas.width - tank.w) / 2;
-    tank.y = canvas.height - tank.h - 30;
-    
-    gameState = 'start';
-    pauseBtn.textContent = 'Pause';
-    showOverlay(startOv);
-    updateScoreboard();
-  }
-
-  function gameOver(victory = false) {
-    gameState = 'ended';
-    
-    if (victory) {
-      endTitle.textContent = 'MISSION ACCOMPLISHED';
-      endMsg.textContent = 'You have successfully defended Earth!';
-    } else {
-      endTitle.textContent = 'MISSION FAILED';
-      endMsg.textContent = 'Earth has fallen to the alien invasion...';
-    }
-    
-    const accuracy = totalShots > 0 ? Math.round((hits / totalShots) * 100) : 0;
-    finalStats.innerHTML = `
-      <div>Final Score: ${score}</div>
-      <div>Levels Completed: ${level - 1}</div>
-      <div>Enemies Destroyed: ${enemiesKilled}</div>
-      <div>Max Combo: ${maxCombo}</div>
-      <div>Accuracy: ${accuracy}%</div>
-      <div>Survival Time: ${Math.floor(gameTime / 60)}s</div>
-    `;
-    
-    showOverlay(endOv);
-  }
-
-  // ---- MAIN LOOP ----
-  let lastTime = 0;
-  let spawnTimer = 0;
-  
-  function loop(currentTime) {
-    if (gameState !== 'playing') return;
-    
-    const deltaTime = currentTime - lastTime;
-    lastTime = currentTime;
-    gameTime += deltaTime;
-    
-    // Game logic
-    moveTank();
-    updateBullets();
-    updateEnemies();
-    detectCollisions();
-    
-    // Spawn enemies
-    spawnTimer += deltaTime;
-    const spawnRate = Math.max(500 - level * 30, 200); // Faster spawning as level increases
-    if (spawnTimer > spawnRate) {
-      spawnEnemy();
-      spawnTimer = 0;
-    }
-    
-    // Check game over conditions
-    if (tank.health <= 0) {
-      gameOver(false);
-      return;
-    }
-    
-    // Victory condition (survive 10 levels)
-    if (level > 10) {
-      gameOver(true);
-      return;
-    }
-    
-    // Rendering
-    drawBackground();
-    drawTank();
-    drawEnemies();
-    drawBullets();
-    drawParticles();
-    drawExplosions();
-    updateScoreboard();
-    
-    requestAnimationFrame(loop);
-  }
-
-  // ---- INITIALIZATION ----
-  resize();
-  tank.x = (canvas.width - tank.w) / 2;
-  showOverlay(startOv);
-  updateScoreboard();
-})();
-</script>
-</body>
-</html>
+  function spawnEn
