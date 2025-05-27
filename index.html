@@ -413,7 +413,7 @@
         const gamePlayScreen = document.getElementById('game-play-screen');
         const pauseScreen = document.getElementById('pause-screen');
         const levelCompleteScreen = document.getElementById('level-complete-screen');
-        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameOverScreen = document.getElementById('gameOver-screen');
 
         const playerNameInput = document.getElementById('playerNameInput');
         const startButton = document.getElementById('startButton');
@@ -987,6 +987,9 @@
                 }
             });
         }
+
+        // --- Event Listeners ---
+        startButton.addEventListener('click', startGame);
 
         // --- Pause Button
         pauseButton.addEventListener('click', pauseGame);
