@@ -191,7 +191,7 @@
             justify-content: center;
             align-items: center;
             font-size: 1.5em; /* Adjusted font size for gems */
-            cursor: pointer;
+            cursor: grab; /* Indicates draggable */
             transition: transform 0.1s ease, box-shadow 0.1s ease; /* Smooth hover effects */
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
             position: relative;
@@ -205,18 +205,25 @@
             box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5); /* More pronounced shadow on hover */
         }
 
+        /* Dragging feedback */
+        .gem.dragging {
+            opacity: 0.5; /* Make dragged gem semi-transparent */
+            cursor: grabbing;
+        }
+
+        /* Drag over target feedback */
+        .gem.drag-over {
+            border: 2px solid #ffd700; /* Gold border for valid drop target */
+            transform: scale(1.05);
+        }
+
         /* Gem colors */
         .gem.red { background-color: #ff4d4d; }
         .gem.blue { background-color: #4d4dff; }
         .gem.green { background-color: #4dff4d; }
         .gem.yellow { background-color: #ffff4d; }
         .gem.purple { background-color: #8a2be2; }
-
-        /* Highlight for selected gems */
-        .gem.selected {
-            border: 2px solid white; /* White border when selected */
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.7); /* Glowing effect when selected */
-        }
+        .gem.empty { background-color: transparent; border: none; box-shadow: none;} /* For "removed" gems */
 
         /* Game Messages */
         .message {
@@ -328,9 +335,12 @@
         let progress = 0;
         const maxProgress = 100; // Represents 100% completion for a level
         let timerInterval; // To store the timer ID for clearing it
-        let selectedGems = []; // Array to store the currently clicked gems
+
         const gemColors = ['red', 'blue', 'green', 'yellow', 'purple']; // Available gem colors
         const gridSize = 8; // The grid will be 8x8
+        let gems = []; // 2D array to represent the game board state (colors)
+        let activeGem = null; // The gem being dragged
+        let targetGem = null; // The gem being dragged over
 
         // --- Game State Functions ---
 
@@ -367,11 +377,12 @@
         function startLevel() {
             timeLeft = 60; // Reset timer for the new level
             progress = 0; // Reset progress for the new level
-            selectedGems = []; // Clear selected gems
             updateGameInfo(); // Update display
             progressBar.style.width = '0%'; // Reset progress bar visually
             gameMessage.textContent = ''; // Clear any previous messages
-            generateGems(); // Create a new gem grid
+            initializeGems(); // Initialize the 2D gem array
+            drawGems(); // Draw the gems to the DOM
+            checkInitialMatches(); // Ensure no starting matches
             startTimer(); // Start the level timer
         }
 
@@ -452,7 +463,7 @@
             showScreen(startScreen); // Go to start screen
         }
 
-        // --- Gem Generation and Interaction ---
+        // --- Gem Generation and Interaction (SWIPE MECHANICS) ---
 
         /**
          * Returns a random gem color from the predefined list.
@@ -463,64 +474,288 @@
         }
 
         /**
-         * Generates a new grid of gems.
+         * Initializes the 2D `gems` array with random colors.
          */
-        function generateGems() {
+        function initializeGems() {
+            gems = Array(gridSize).fill(null).map(() => Array(gridSize).fill(null));
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    gems[r][c] = getRandomGemColor();
+                }
+            }
+        }
+
+        /**
+         * Draws the gems from the `gems` array to the DOM.
+         */
+        function drawGems() {
             gameGrid.innerHTML = ''; // Clear existing gems
             gameGrid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
             gameGrid.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
 
-            for (let i = 0; i < gridSize * gridSize; i++) {
-                const gem = document.createElement('div');
-                gem.classList.add('gem', getRandomGemColor()); // Assign 'gem' class and a random color
-                gem.dataset.index = i; // Store its index (useful for more complex logic)
-                gem.addEventListener('click', handleGemClick); // Add click listener
-                gameGrid.appendChild(gem);
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    const gem = document.createElement('div');
+                    gem.classList.add('gem', gems[r][c]);
+                    gem.dataset.row = r; // Store row in data attribute
+                    gem.dataset.col = c; // Store column in data attribute
+                    gem.setAttribute('draggable', true); // Make gems draggable
+
+                    // Add drag event listeners
+                    gem.addEventListener('dragstart', handleDragStart);
+                    gem.addEventListener('dragenter', handleDragEnter);
+                    gem.addEventListener('dragleave', handleDragLeave);
+                    gem.addEventListener('dragover', handleDragOver);
+                    gem.addEventListener('drop', handleDrop);
+                    gem.addEventListener('dragend', handleDragEnd);
+
+                    gameGrid.appendChild(gem);
+                }
             }
         }
 
         /**
-         * Handles a click event on a gem.
-         * @param {Event} event - The click event object.
+         * Finds and removes any initial matches when the board is first created.
+         * Recursively calls itself until no more matches are found.
          */
-        function handleGemClick(event) {
-            const clickedGem = event.target;
-
-            // Prevent selecting the same gem multiple times in one sequence
-            if (selectedGems.includes(clickedGem)) {
-                return;
-            }
-
-            if (selectedGems.length < 3) {
-                selectedGems.push(clickedGem);
-                clickedGem.classList.add('selected'); // Highlight selected gem
-            }
-
-            if (selectedGems.length === 3) {
-                // Delay checking slightly so the user sees the third gem highlighted
-                setTimeout(checkSequence, 300);
-            }
-        }
-
-        /**
-         * Checks if the three selected gems form a valid sequence (same color).
-         */
-        function checkSequence() {
-            const firstColor = selectedGems[0].classList[1]; // Get the color class of the first selected gem
-            const allSameColor = selectedGems.every(gem => gem.classList[1] === firstColor);
-
-            if (allSameColor) {
-                gameMessage.textContent = 'Excellent! Matched a sequence!';
-                increaseProgress(5); // Increase progress by 5% for each successful sequence
-                removeSelectedGems(); // Remove the matched gems
-                fillEmptySpots(); // "Refill" the grid (simplified)
+        function checkInitialMatches() {
+            const matches = findMatches();
+            if (matches.length > 0) {
+                removeMatchedGems(matches);
+                applyGravity();
+                fillNewGems();
+                // Check again after refilling to catch cascades
+                setTimeout(checkInitialMatches, 300); // Small delay for visual effect
             } else {
-                gameMessage.textContent = 'Oops! Colors don\'t match. Try again.';
+                gameMessage.textContent = 'Swipe gems to match 3 or more!';
+            }
+        }
+
+
+        // --- Drag and Drop Handlers ---
+
+        function handleDragStart(e) {
+            activeGem = e.target;
+            e.dataTransfer.setData('text/plain', ''); // Required for Firefox
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault(); // Allow drop
+            targetGem = e.target;
+            // Only highlight if it's a valid swap target
+            if (activeGem && targetGem && allowSwap(activeGem, targetGem)) {
+                targetGem.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            e.target.classList.remove('drag-over');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault(); // Allow drop
+        }
+
+        async function handleDrop(e) {
+            e.preventDefault();
+            targetGem = e.target;
+
+            if (activeGem && targetGem && allowSwap(activeGem, targetGem)) {
+                // Perform the swap in the internal data array
+                const activeRow = parseInt(activeGem.dataset.row);
+                const activeCol = parseInt(activeGem.dataset.col);
+                const targetRow = parseInt(targetGem.dataset.row);
+                const targetCol = parseInt(targetGem.dataset.col);
+
+                // Temporarily swap colors in the data array
+                const tempColor = gems[activeRow][activeCol];
+                gems[activeRow][activeCol] = gems[targetRow][targetCol];
+                gems[targetRow][targetCol] = tempColor;
+
+                // Update the DOM to reflect the swap
+                activeGem.className = 'gem ' + gems[activeRow][activeCol];
+                targetGem.className = 'gem ' + gems[targetRow][targetCol];
+
+                // Check for matches after the swap
+                let matchesFound = await checkMatches();
+
+                if (!matchesFound) {
+                    // If no matches, swap back after a brief visual delay
+                    gameMessage.textContent = 'No match, trying another move!';
+                    setTimeout(() => {
+                        const tempColorBack = gems[activeRow][activeCol];
+                        gems[activeRow][activeCol] = gems[targetRow][targetCol];
+                        gems[targetRow][targetCol] = tempColorBack;
+
+                        activeGem.className = 'gem ' + gems[activeRow][activeCol];
+                        targetGem.className = 'gem ' + gems[targetRow][targetCol];
+                        gameMessage.textContent = 'Swipe gems to match 3 or more!';
+                    }, 500); // Adjust delay as needed
+                }
+            }
+            // Clean up drag-over class
+            if (targetGem) {
+                targetGem.classList.remove('drag-over');
+            }
+        }
+
+        function handleDragEnd(e) {
+            activeGem.classList.remove('dragging');
+            activeGem = null;
+            targetGem = null;
+        }
+
+        /**
+         * Checks if two gems are adjacent (can be swapped).
+         * @param {HTMLElement} gem1 - The first gem element.
+         * @param {HTMLElement} gem2 - The second gem element.
+         * @returns {boolean} - True if they are adjacent, false otherwise.
+         */
+        function allowSwap(gem1, gem2) {
+            const r1 = parseInt(gem1.dataset.row);
+            const c1 = parseInt(gem1.dataset.col);
+            const r2 = parseInt(gem2.dataset.row);
+            const c2 = parseInt(gem2.dataset.col);
+
+            const rowDiff = Math.abs(r1 - r2);
+            const colDiff = Math.abs(c1 - c2);
+
+            // Adjacent horizontally or vertically (not diagonally, not same spot)
+            return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+        }
+
+        /**
+         * Finds all matches of 3 or more gems in the grid.
+         * @returns {Array<Object>} - An array of objects, each representing a matched gem's coordinates.
+         */
+        function findMatches() {
+            const matches = [];
+
+            // Check horizontal matches
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize - 2; c++) {
+                    const color1 = gems[r][c];
+                    const color2 = gems[r][c + 1];
+                    const color3 = gems[r][c + 2];
+
+                    if (color1 && color1 === color2 && color1 === color3) {
+                        matches.push({ row: r, col: c });
+                        matches.push({ row: r, col: c + 1 });
+                        matches.push({ row: r, col: c + 2 });
+                        // Check for more than 3 in a row
+                        let currentC = c + 3;
+                        while (currentC < gridSize && gems[r][currentC] === color1) {
+                            matches.push({ row: r, col: currentC });
+                            currentC++;
+                        }
+                    }
+                }
             }
 
-            // Clear selection highlight and array after checking
-            selectedGems.forEach(gem => gem.classList.remove('selected'));
-            selectedGems = [];
+            // Check vertical matches
+            for (let c = 0; c < gridSize; c++) {
+                for (let r = 0; r < gridSize - 2; r++) {
+                    const color1 = gems[r][c];
+                    const color2 = gems[r + 1][c];
+                    const color3 = gems[r + 2][c];
+
+                    if (color1 && color1 === color2 && color1 === color3) {
+                        matches.push({ row: r, col: c });
+                        matches.push({ row: r + 1, col: c });
+                        matches.push({ row: r + 2, col: c });
+                        // Check for more than 3 in a column
+                        let currentR = r + 3;
+                        while (currentR < gridSize && gems[currentR][c] === color1) {
+                            matches.push({ row: currentR, col: c });
+                            currentR++;
+                        }
+                    }
+                }
+            }
+            return Array.from(new Set(matches.map(m => JSON.stringify(m)))).map(s => JSON.parse(s)); // Remove duplicates
+        }
+
+        /**
+         * Processes matches: removes gems, applies gravity, fills new gems, and checks for cascades.
+         * @returns {Promise<boolean>} - Resolves with true if matches were found and processed, false otherwise.
+         */
+        async function checkMatches() {
+            let foundMatches = findMatches();
+
+            if (foundMatches.length > 0) {
+                gameMessage.textContent = 'Awesome! Match made!';
+                // Increase progress based on number of gems matched
+                increaseProgress(foundMatches.length / 3 * 2); // Roughly 2 progress per 3 gems
+
+                removeMatchedGems(foundMatches);
+                await new Promise(resolve => setTimeout(resolve, 300)); // Visual delay for removal
+
+                applyGravity();
+                await new Promise(resolve => setTimeout(resolve, 300)); // Visual delay for gravity
+
+                fillNewGems();
+                drawGems(); // Redraw grid after new gems
+
+                await new Promise(resolve => setTimeout(resolve, 300)); // Visual delay for new gems
+
+                // Recursively check for new matches (cascades)
+                await checkMatches();
+                return true; // Matches were found and processed
+            }
+            return false; // No matches found
+        }
+
+        /**
+         * Sets matched gems in the `gems` array to null (empty).
+         * @param {Array<Object>} matches - Array of matched gem coordinates.
+         */
+        function removeMatchedGems(matches) {
+            matches.forEach(match => {
+                gems[match.row][match.col] = null; // Set to null for removal
+                // Visually update the gem to be 'empty'
+                const gemElement = gameGrid.querySelector(`[data-row="${match.row}"][data-col="${match.col}"]`);
+                if (gemElement) {
+                    gemElement.classList.add('empty');
+                    gemElement.classList.remove(...gemColors); // Remove color classes
+                    gemElement.removeAttribute('draggable'); // Make it non-draggable
+                }
+            });
+            // Give a moment for the 'empty' class to take effect before drawing
+            setTimeout(drawGems, 200);
+        }
+
+        /**
+         * Applies gravity, moving gems down to fill empty spaces.
+         */
+        function applyGravity() {
+            for (let c = 0; c < gridSize; c++) {
+                let emptySpots = []; // To keep track of null spots in this column
+                for (let r = gridSize - 1; r >= 0; r--) {
+                    if (gems[r][c] === null) {
+                        emptySpots.push(r); // Add empty spot
+                    } else if (emptySpots.length > 0) {
+                        // Move gem down to the lowest empty spot
+                        const targetRow = emptySpots.shift(); // Get the lowest empty row
+                        gems[targetRow][c] = gems[r][c]; // Move the gem
+                        gems[r][c] = null; // Set original spot to null
+                        emptySpots.push(r); // Add the old spot to empty spots
+                    }
+                }
+            }
+        }
+
+        /**
+         * Fills any null spots in the `gems` array with new random gems.
+         */
+        function fillNewGems() {
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    if (gems[r][c] === null) {
+                        gems[r][c] = getRandomGemColor(); // Generate new random gem
+                    }
+                }
+            }
         }
 
         /**
@@ -540,25 +775,6 @@
                     levelComplete();
                 }, 500);
             }
-        }
-
-        /**
-         * Removes the currently selected gems from the DOM.
-         */
-        function removeSelectedGems() {
-            selectedGems.forEach(gem => gem.remove());
-        }
-
-        /**
-         * Fills the empty spots in the grid.
-         * Note: This is a simplified approach for demonstration. In a full Candy Crush-like game,
-         * gems would "fall" from above, and new gems would be generated at the top.
-         * For this basic version, we regenerate the entire grid, which gives a "new board" feel.
-         */
-        function fillEmptySpots() {
-            setTimeout(() => {
-                generateGems(); // Regenerate the entire grid
-            }, 300); // Small delay to show gems disappearing
         }
 
         // --- Starry Background Effect (Initialization) ---
