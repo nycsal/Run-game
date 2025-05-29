@@ -2,1003 +2,310 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Gem Rush Adventure!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Volleyball</title>
     <style>
-        /* General Body Styles */
         body {
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
-            background: linear-gradient(to right, #6a11cb, #2575fc); /* Vibrant background gradient */
-            color: white;
-            overflow: hidden; /* Prevent body scrolling that interferes with touch events */
-            padding: 10px; /* Add some padding around the edges for smaller screens */
-            box-sizing: border-box; /* Include padding in the element's total width and height */
-            -webkit-user-select: none; /* Prevent text selection on iOS */
-            -moz-user-select: none; /* Prevent text selection on Firefox */
-            -ms-user-select: none; /* Prevent text selection on IE/Edge */
-            user-select: none; /* Prevent text selection */
-            -webkit-touch-callout: none; /* Prevent callout menu on iOS */
-            -webkit-tap-highlight-color: rgba(0,0,0,0); /* Remove tap highlight on iOS */
-        }
-
-        /* Game Container */
-        .game-container {
-            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
-            padding: 20px; /* Adjusted padding for smaller screens */
-            border-radius: 15px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); /* Soft shadow for depth */
-            text-align: center;
-            width: 95%; /* Adjust width for better phone screen fit */
-            max-width: 600px; /* Maintain a reasonable max width */
-            box-sizing: border-box;
-            position: relative;
-            /* overflow: hidden; /* This might hide elements, let's try auto or visible for debugging if needed */ */
-            border: 3px solid #ffd700; /* Gold border for a premium feel */
-            touch-action: manipulation; /* Disable default touch actions like double-tap zoom */
-        }
-
-        /* Starry Background Effect */
-        .star-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* Allows clicks to pass through */
             overflow: hidden;
-        }
-
-        .star {
-            position: absolute;
-            background-color: #fff;
-            border-radius: 50%; /* Circular stars */
-            opacity: 0;
-            animation: twinkle 5s infinite ease-in-out; /* Twinkling animation */
-        }
-
-        @keyframes twinkle {
-            0% { opacity: 0; transform: scale(0.5); }
-            50% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(0.5); }
-        }
-
-        /* Game Title */
-        .game-title {
-            font-family: 'Georgia', serif; /* Classic font for title */
-            font-size: 2.5em; /* Slightly smaller title for phones */
-            margin-bottom: 15px; /* Reduced margin */
-            color: #ffd700; /* Gold color */
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7); /* Gold glow effect */
-            animation: pulse 2s infinite alternate; /* Gentle pulsing animation */
-        }
-
-        @keyframes pulse {
-            from { transform: scale(1); }
-            to { transform: scale(1.05); }
-        }
-
-        /* Screen Management */
-        .start-screen, .game-screen, .level-complete-screen, .game-over-screen, .game-won-screen {
-            display: none; /* Hidden by default */
-        }
-
-        .start-screen.active, .game-screen.active, .level-complete-screen.active, .game-over-screen.active, .game-won-screen.active {
-            display: block; /* Shown when active */
-        }
-
-        /* Input Field */
-        input.name-input {
-            padding: 10px;
-            margin-top: 15px; /* Reduced margin */
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            width: 80%;
-            max-width: 250px; /* Adjusted max width */
-            font-size: 1em; /* Slightly smaller font */
-            background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white background */
-            color: #333; /* Dark text */
-            box-sizing: border-box; /* Ensure padding doesn't increase width */
-        }
-
-        /* Buttons */
-        button {
-            background-color: #ffd700; /* Gold background */
-            color: #333; /* Dark text */
-            padding: 10px 20px; /* Adjusted padding */
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em; /* Slightly smaller font */
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
-            margin-top: 15px; /* Reduced margin */
-            font-weight: bold;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow */
-            box-sizing: border-box;
-        }
-
-        button:hover {
-            background-color: #e0b800; /* Darker gold on hover */
-            transform: translateY(-1px); /* Slight lift on hover */
-        }
-
-        /* Game Information (Level, Timer) */
-        .game-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px; /* Reduced margin */
-            font-size: 1em; /* Slightly smaller font */
-        }
-
-        .timer, .level {
-            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
-            padding: 8px 12px; /* Adjusted padding */
-            border-radius: 8px;
-            border: 1px solid #ffd700; /* Gold border */
-        }
-
-        /* Progress Bar */
-        .progress-bar-container {
-            width: 100%;
-            background-color: rgba(255, 255, 255, 0.2); /* Light transparent background */
-            border-radius: 10px;
-            height: 20px; /* Slightly smaller progress bar */
-            margin-top: 15px; /* Reduced margin */
-            overflow: hidden;
-            border: 2px solid #ff69b4; /* Pink border for hearts theme */
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(to right, #ff69b4, #ff1493); /* Pink gradient for hearts */
-            border-radius: 10px;
-            transition: width 0.3s ease-in-out; /* Smooth filling animation */
-            position: relative;
-        }
-
-        .progress-bar::after {
-            content: '❤️'; /* Heart emoji */
-            position: absolute;
-            right: 5px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1em; /* Slightly smaller heart */
-            opacity: 0.8;
-        }
-
-        /* Game Grid */
-        .game-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr); /* 8 columns */
-            grid-template-rows: repeat(8, 1fr); /* 8 rows */
-            gap: 5px; /* Space between gems */
-            width: 90%; /* Make grid responsive within its container */
-            aspect-ratio: 1 / 1; /* Maintain square aspect ratio */
-            background-color: rgba(0, 0, 0, 0.4); /* Dark transparent background */
-            border-radius: 10px;
-            padding: 5px; /* Reduced padding */
-            margin: 15px auto; /* Centered with reduced margin */
-            border: 2px solid #fff; /* White border */
-            box-sizing: border-box; /* Ensure padding and border are inside the width/height */
-        }
-
-        /* Individual Gems */
-        .gem {
-            width: 100%;
-            height: 100%;
-            background-color: #ccc; /* Default background, overridden by color classes */
-            border-radius: 10px; /* Slightly more rounded corners for a polished look */
+            background-color: #f0f0f0;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.5em; /* Adjusted font size for gems */
-            cursor: grab; /* Indicates draggable */
-            transition: transform 0.1s ease, box-shadow 0.1s ease; /* Smooth hover effects */
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 800px; /* Adjust as needed */
+            aspect-ratio: 16 / 9; /* Typical landscape aspect ratio */
+            background-color: #a0d0a0; /* Green court */
             position: relative;
             overflow: hidden;
-            /* Glossy effect */
-            background-image: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 20%, transparent 70%);
-            /* Ensure gems themselves don't trigger browser default touch actions */
-            touch-action: none;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
         }
 
-        .gem:hover {
-            transform: scale(1.03); /* Slight enlargement on hover */
-            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5); /* More pronounced shadow on hover */
+        #net {
+            position: absolute;
+            width: 10px;
+            height: 80%; /* Adjust net height */
+            background-color: #333;
+            left: 50%;
+            top: 10%;
+            transform: translateX(-50%);
+            z-index: 10;
         }
 
-        /* Dragging feedback (for touch and desktop) */
-        .gem.dragging {
-            opacity: 0.5; /* Make dragged gem semi-transparent */
-            transform: scale(1.05);
-            cursor: grabbing;
-        }
-
-        /* Drag over target feedback (for touch and desktop) */
-        .gem.drag-over {
-            border: 2px solid #ffd700; /* Gold border for valid drop target */
-            transform: scale(1.05);
-        }
-
-        /* Gem colors */
-        .gem.red { background-color: #ff4d4d; }
-        .gem.blue { background-color: #4d4dff; }
-        .gem.green { background-color: #4dff4d; }
-        .gem.yellow { background-color: #ffff4d; }
-        .gem.purple { background-color: #8a2be2; }
-        .gem.empty { background-color: transparent; border: none; box-shadow: none; opacity: 0; transition: opacity 0.3s ease-out;} /* For "removed" gems */
-
-        /* Game Messages */
-        .message {
-            font-size: 1.4em; /* Slightly smaller message font */
-            margin-top: 20px; /* Reduced margin */
-            color: #ffd700; /* Gold color */
-            text-shadow: 0 0 8px rgba(255, 215, 0, 0.7); /* Gold glow */
-            animation: pop-in 0.5s ease-out; /* Pop-in animation */
-        }
-
-        @keyframes pop-in {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        /* Final Messages (Game Over, Game Won) */
-        .final-message {
-            font-size: 2em; /* Adjusted final message font */
-            color: #ffd700;
-            text-shadow: 0 0 15px rgba(255, 215, 0, 0.9);
-            animation: pulse 1.5s infinite alternate, glow 2s infinite alternate; /* Combined animations */
-            margin-top: 20px; /* Reduced margin */
-        }
-
-        @keyframes glow {
-            from { box-shadow: 0 0 10px #ffd700; }
-            to { box-shadow: 0 0 30px #ffd700, 0 0 40px #ffd700; }
-        }
-
-        /* Restart/Play Again Button */
-        .restart-button {
-            background-color: #ff69b4; /* Pink background */
+        .player {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #ff6347; /* Team 1 color */
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             color: white;
+            font-weight: bold;
+            user-select: none; /* Prevent text selection on touch */
+            touch-action: none; /* Prevent default touch actions like scrolling */
+            z-index: 5;
+            transition: transform 0.1s ease-out; /* Smooth player movement (basic) */
         }
 
-        .restart-button:hover {
-            background-color: #ff1493; /* Darker pink on hover */
+        .player.team2 {
+            background-color: #4169e1; /* Team 2 color */
+        }
+
+        #ball {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: #fdfd96; /* Yellow ball */
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            z-index: 20;
+            transition: transform 0.05s linear; /* Smooth ball movement (basic) */
+        }
+
+        /* Basic debug info - remove in final game */
+        #debug-info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            padding: 5px;
+            font-size: 12px;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="star-background"></div>
-        <h1 class="game-title">Gem Rush Adventure!</h1>
+    <div id="game-container">
+        <div id="net"></div>
 
-        <div class="start-screen active">
-            <p>Welcome, brave adventurer! What is your name?</p>
-            <input type="text" id="playerNameInput" placeholder="Enter your name" class="name-input">
-            <button id="startButton">Embark on the Adventure!</button>
-        </div>
+        <div class="player" id="player1_1" style="left: 10%; top: 70%;">1</div>
+        <div class="player" id="player1_2" style="left: 25%; top: 70%;">2</div>
+        <div class="player" id="player1_3" style="left: 10%; top: 85%;">3</div>
+        <div class="player" id="player1_4" style="left: 25%; top: 85%;">4</div>
 
-        <div class="game-screen">
-            <div class="game-info">
-                <div class="level">Level: <span id="currentLevel">1</span>/12</div>
-                <div class="timer">Time: <span id="timeLeft">60</span>s</div>
-            </div>
-            <div class="progress-bar-container">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
-            <div class="game-grid" id="gameGrid">
-                </div>
-            <p class="message" id="gameMessage"></p>
-        </div>
+        <div class="player team2" id="player2_1" style="left: 70%; top: 10%;">A</div>
+        <div class="player team2" id="player2_2" style="left: 85%; top: 10%;">B</div>
+        <div class="player team2" id="player2_3" style="left: 70%; top: 25%;">C</div>
+        <div class="player team2" id="player2_4" style="left: 85%; top: 25%;">D</div>
 
-        <div class="level-complete-screen">
-            <h2 class="message">Good job, <span id="playerNameGoodJob"></span>! Level <span id="completedLevel"></span> Completed!</h2>
-            <button id="nextLevelButton">Next Level!</button>
-        </div>
+        <div id="ball"></div>
 
-        <div class="game-over-screen">
-            <h2 class="final-message">Oh no, <span id="playerNameGameOver"></span>! Game Over!</h2>
-            <p>You ran out of time. Better luck next time!</p>
-            <button id="restartGameButton" class="restart-button">Try Again?</button>
-        </div>
-
-        <div class="game-won-screen">
-            <h2 class="final-message">Congratulations, <span id="playerNameGameWon"></span>! You Conquered the Gem Rush!</h2>
-            <p>All 12 levels completed! You are a true Gem Master!</p>
-            <button id="playAgainButton" class="restart-button">Play Again?</button>
-        </div>
+        <div id="debug-info"></div>
     </div>
 
     <script>
-        // Get references to all necessary DOM elements
-        const playerNameInput = document.getElementById('playerNameInput');
-        const startButton = document.getElementById('startButton');
-        const startScreen = document.querySelector('.start-screen');
-        const gameScreen = document.querySelector('.game-screen');
-        const levelCompleteScreen = document.querySelector('.level-complete-screen');
-        const gameOverScreen = document.querySelector('.game-over-screen');
-        const gameWonScreen = document.querySelector('.game-won-screen');
-        const playerNameGoodJob = document.getElementById('playerNameGoodJob');
-        const playerNameGameOver = document.getElementById('playerNameGameOver');
-        const playerNameGameWon = document.getElementById('playerNameGameWon');
-        const completedLevel = document.getElementById('completedLevel');
-        const nextLevelButton = document.getElementById('nextLevelButton');
-        const restartGameButton = document.getElementById('restartGameButton');
-        const playAgainButton = document.getElementById('playAgainButton');
-        const currentLevelSpan = document.getElementById('currentLevel');
-        const timeLeftSpan = document.getElementById('timeLeft');
-        const progressBar = document.getElementById('progressBar');
-        const gameGrid = document.getElementById('gameGrid');
-        const gameMessage = document.getElementById('gameMessage');
+        const gameContainer = document.getElementById('game-container');
+        const ball = document.getElementById('ball');
+        const players = document.querySelectorAll('.player');
+        const debugInfo = document.getElementById('debug-info');
 
-        // Game state variables
-        let playerName = '';
-        let currentLevel = 1;
-        let timeLeft = 60;
-        let progress = 0;
-        const maxProgress = 100; // Represents 100% completion for a level
-        let timerInterval; // To store the timer ID for clearing it
+        let isServing = false;
+        let activePlayer = null; // The player currently "holding" or about to serve the ball
+        let ballInPlay = false;
+        let ballPosition = { x: 0, y: 0 };
+        let ballVelocity = { x: 0, y: 0 };
+        const gravity = 0.5; // Simulate gravity
+        const bounceFactor = 0.7; // How much bounce when hitting ground/net
 
-        const gemColors = ['red', 'blue', 'green', 'yellow', 'purple']; // Available gem colors
-        const gridSize = 8; // The grid will be 8x8
-        let gems = []; // 2D array to represent the game board state (colors)
-        let activeGem = null; // The gem currently being "dragged" (touched)
-        let targetGem = null; // The gem that the activeGem is being "swapped" with
-
-        // Touch swipe related variables
-        let initialTouchX = null;
-        let initialTouchY = null;
-        const swipeThreshold = 30; // Minimum pixels to register as a swipe
-
-        // Flag to prevent multiple concurrent animations/logic
-        let gameLocked = false;
-
-        // --- Game State Functions ---
-
-        /**
-         * Hides all game screens and then shows the specified screen.
-         * @param {HTMLElement} screen - The screen element to display.
-         */
-        function showScreen(screen) {
-            document.querySelectorAll('.game-container > div').forEach(s => {
-                s.classList.remove('active'); // Remove 'active' from all screens
-            });
-            screen.classList.add('active'); // Add 'active' to the target screen
+        // --- Game Setup ---
+        function initializeGame() {
+            // Set initial ball position (e.g., near player 1 for serving)
+            resetBallPosition();
         }
 
-        /**
-         * Initializes and starts a new game.
-         */
-        function startGame() {
-            playerName = playerNameInput.value.trim();
-            if (playerName === '') {
-                alert('Please enter your name to start the adventure!');
-                return;
-            }
-            currentLevel = 1; // Reset to level 1
-            progress = 0; // Reset progress
-            updateGameInfo(); // Update display
-            showScreen(gameScreen); // Show the game screen
-            startLevel(); // Begin the first level
+        function resetBallPosition() {
+            const player1_1 = document.getElementById('player1_1');
+            const player1_1Rect = player1_1.getBoundingClientRect();
+            const containerRect = gameContainer.getBoundingClientRect();
+
+            ballPosition.x = (player1_1Rect.left + player1_1Rect.width / 2) - containerRect.left;
+            ballPosition.y = (player1_1Rect.top - 20) - containerRect.top; // Slightly above player
+            ballVelocity = { x: 0, y: 0 };
+            updateBallPosition();
+            isServing = true; // Player 1 starts with the serve
+            ballInPlay = false;
         }
 
-        /**
-         * Sets up and starts a new level.
-         */
-        function startLevel() {
-            timeLeft = 60; // Reset timer for the new level
-            progress = 0; // Reset progress for the new level
-            gameLocked = false; // Unlock game interactions
-            updateGameInfo(); // Update display
-            progressBar.style.width = '0%'; // Reset progress bar visually
-            gameMessage.textContent = ''; // Clear any previous messages
-            initializeGems(); // Initialize the 2D gem array
-            drawGems(); // Draw the gems to the DOM
-            checkInitialMatches(); // Ensure no starting matches
-            startTimer(); // Start the level timer
+        function updateBallPosition() {
+            ball.style.left = `${ballPosition.x}px`;
+            ball.style.top = `${ballPosition.y}px`;
         }
 
-        /**
-         * Updates the displayed level, time, and progress bar.
-         */
-        function updateGameInfo() {
-            currentLevelSpan.textContent = currentLevel;
-            timeLeftSpan.textContent = timeLeft;
-            progressBar.style.width = progress + '%';
-        }
+        // --- Touch Controls (Conceptual) ---
+        gameContainer.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent default browser touch behavior (e.g., scrolling)
 
-        /**
-         * Starts the countdown timer for the current level.
-         */
-        function startTimer() {
-            clearInterval(timerInterval); // Clear any existing timer
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                timeLeftSpan.textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval); // Stop the timer
-                    if (progress < maxProgress) {
-                        gameOver(); // If progress not met, game over
-                    } else {
-                        levelComplete(); // If progress met, level complete
+            const touch = e.touches[0];
+            const touchX = touch.clientX;
+            const touchY = touch.clientY;
+
+            // Debug info
+            debugInfo.textContent = `Touch: X=${touchX.toFixed(0)}, Y=${touchY.toFixed(0)}`;
+
+            // Check if a player was touched
+            players.forEach(player => {
+                const rect = player.getBoundingClientRect();
+                if (
+                    touchX >= rect.left &&
+                    touchX <= rect.right &&
+                    touchY >= rect.top &&
+                    touchY <= rect.bottom
+                ) {
+                    activePlayer = player;
+                    debugInfo.textContent += ` - Player touched: ${player.id}`;
+
+                    if (isServing && player.id.startsWith('player1')) {
+                        // This player is serving
+                        // Conceptual: A small tap serves the ball up
+                        serveBall(player);
+                        isServing = false;
+                        ballInPlay = true;
+                    } else if (ballInPlay && player.id.startsWith('player1')) {
+                        // This player is trying to hit/pass the ball
+                        // Conceptual: Tap player to hit ball towards net/opponent
+                        hitBall(player);
                     }
-                }
-            }, 1000); // Update every second
-        }
-
-        /**
-         * Handles actions when a level is completed successfully.
-         */
-        function levelComplete() {
-            clearInterval(timerInterval); // Stop the timer
-            gameLocked = true; // Lock game interactions
-            playerNameGoodJob.textContent = playerName;
-            completedLevel.textContent = currentLevel;
-            showScreen(levelCompleteScreen); // Show level complete screen
-        }
-
-        /**
-         * Handles actions when the game is over (time runs out, progress not met).
-         */
-        function gameOver() {
-            clearInterval(timerInterval); // Stop the timer
-            gameLocked = true; // Lock game interactions
-            playerNameGameOver.textContent = playerName;
-            showScreen(gameOverScreen); // Show game over screen
-        }
-
-        /**
-         * Handles actions when all 12 levels are completed.
-         */
-        function gameWon() {
-            clearInterval(timerInterval); // Stop the timer
-            gameLocked = true; // Lock game interactions
-            playerNameGameWon.textContent = playerName;
-            showScreen(gameWonScreen); // Show game won screen
-        }
-
-        /**
-         * Advances to the next level or ends the game if all levels are completed.
-         */
-        function goToNextLevel() {
-            currentLevel++;
-            if (currentLevel > 12) {
-                gameWon(); // All levels done
-            } else {
-                showScreen(gameScreen); // Go back to game screen
-                startLevel(); // Start the next level
-            }
-        }
-
-        /**
-         * Resets the game to the start screen.
-         */
-        function restartGame() {
-            playerNameInput.value = ''; // Clear player name input
-            showScreen(startScreen); // Go to start screen
-        }
-
-        // --- Gem Generation and Interaction (SWIPE MECHANICS) ---
-
-        /**
-         * Returns a random gem color from the predefined list.
-         * @returns {string} - A random gem color class name.
-         */
-        function getRandomGemColor() {
-            return gemColors[Math.floor(Math.random() * gemColors.length)];
-        }
-
-        /**
-         * Initializes the 2D `gems` array with random colors.
-         */
-        function initializeGems() {
-            gems = Array(gridSize).fill(null).map(() => Array(gridSize).fill(null));
-            for (let r = 0; r < gridSize; r++) {
-                for (let c = 0; c < gridSize; c++) {
-                    gems[r][c] = getRandomGemColor();
-                }
-            }
-        }
-
-        /**
-         * Draws the gems from the `gems` array to the DOM.
-         */
-        function drawGems() {
-            gameGrid.innerHTML = ''; // Clear existing gems
-            gameGrid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
-            gameGrid.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
-
-            for (let r = 0; r < gridSize; r++) {
-                for (let c = 0; c < gridSize; c++) {
-                    const gem = document.createElement('div');
-                    gem.classList.add('gem', gems[r][c]);
-                    gem.dataset.row = r; // Store row in data attribute
-                    gem.dataset.col = c; // Store column in data attribute
-
-                    // Add touch event listeners for mobile swipe
-                    gem.addEventListener('touchstart', handleTouchStart);
-                    gem.addEventListener('touchmove', handleTouchMove);
-                    gem.addEventListener('touchend', handleTouchEnd);
-
-                    // Add desktop drag event listeners (for non-touch devices)
-                    gem.setAttribute('draggable', true);
-                    gem.addEventListener('dragstart', handleDragStart);
-                    gem.addEventListener('dragenter', handleDragEnter);
-                    gem.addEventListener('dragleave', handleDragLeave);
-                    gem.addEventListener('dragover', handleDragOver);
-                    gem.addEventListener('drop', handleDrop);
-                    gem.addEventListener('dragend', handleDragEnd);
-
-                    gameGrid.appendChild(gem);
-                }
-            }
-        }
-
-        /**
-         * Finds and removes any initial matches when the board is first created.
-         * Recursively calls itself until no more matches are found.
-         */
-        async function checkInitialMatches() {
-            gameLocked = true; // Temporarily lock interaction during initial match checking
-            const matches = findMatches();
-            if (matches.length > 0) {
-                gameMessage.textContent = 'Clearing initial matches...';
-                removeMatchedGems(matches);
-                await new Promise(resolve => setTimeout(resolve, 500)); // Visual delay
-                applyGravity();
-                await new Promise(resolve => setTimeout(resolve, 500)); // Visual delay
-                fillNewGems();
-                drawGems(); // Redraw grid after new gems
-                await new Promise(resolve => setTimeout(resolve, 500)); // Visual delay
-                await checkInitialMatches(); // Recursively check for cascades
-            } else {
-                gameMessage.textContent = 'Swipe gems to match 3 or more!';
-                gameLocked = false; // Unlock interaction
-            }
-        }
-
-        // --- Touch Event Handlers ---
-
-        function handleTouchStart(e) {
-            if (gameLocked) return;
-            e.preventDefault(); // Prevent scrolling/zooming
-            activeGem = e.target;
-            activeGem.classList.add('dragging');
-            initialTouchX = e.touches[0].clientX;
-            initialTouchY = e.touches[0].clientY;
-            gameMessage.textContent = 'Dragging...';
-        }
-
-        function handleTouchMove(e) {
-            if (!activeGem || gameLocked) return;
-            e.preventDefault(); // Prevent scrolling while moving gem
-
-            const currentTouchX = e.touches[0].clientX;
-            const currentTouchY = e.touches[0].clientY;
-
-            // Determine direction of swipe based on initial vs current touch
-            const dx = currentTouchX - initialTouchX;
-            const dy = currentTouchY - initialTouchY;
-
-            let potentialTarget = null;
-            const gemRect = activeGem.getBoundingClientRect();
-            const gemSize = gemRect.width; // Assuming square gems
-
-            // Calculate center of the active gem
-            const activeGemCenterX = gemRect.left + gemSize / 2;
-            const activeGemCenterY = gemRect.top + gemSize / 2;
-
-            // Determine which adjacent cell the touch is currently over
-            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold) { // Horizontal swipe
-                if (dx > 0) { // Swiping right
-                    potentialTarget = getGemAtCoordinates(activeGemCenterX + gemSize, activeGemCenterY);
-                } else { // Swiping left
-                    potentialTarget = getGemAtCoordinates(activeGemCenterX - gemSize, activeGemCenterY);
-                }
-            } else if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > swipeThreshold) { // Vertical swipe
-                if (dy > 0) { // Swiping down
-                    potentialTarget = getGemAtCoordinates(activeGemCenterX, activeGemCenterY + gemSize);
-                } else { // Swiping up
-                    potentialTarget = getGemAtCoordinates(activeGemCenterX, activeGemCenterY - gemSize);
-                }
-            }
-
-            // Clean up old target highlights
-            if (targetGem && targetGem !== potentialTarget) {
-                targetGem.classList.remove('drag-over');
-            }
-
-            // Set new target and highlight if valid
-            if (potentialTarget && potentialTarget !== activeGem && canSwap(activeGem, potentialTarget)) {
-                targetGem = potentialTarget;
-                targetGem.classList.add('drag-over');
-            } else {
-                targetGem = null;
-            }
-        }
-
-        async function handleTouchEnd(e) {
-            if (gameLocked) return;
-
-            // Clean up active gem highlight immediately
-            activeGem.classList.remove('dragging');
-            if (targetGem) {
-                targetGem.classList.remove('drag-over');
-            }
-
-            if (activeGem && targetGem) {
-                const activeRow = parseInt(activeGem.dataset.row);
-                const activeCol = parseInt(activeGem.dataset.col);
-                const targetRow = parseInt(targetGem.dataset.row);
-                const targetCol = parseInt(targetGem.dataset.col);
-
-                // Perform the swap in the internal data array
-                const tempColor = gems[activeRow][activeCol];
-                gems[activeRow][activeCol] = gems[targetRow][targetCol];
-                gems[targetRow][targetCol] = tempColor;
-
-                // Update the DOM to reflect the swap
-                activeGem.className = `gem ${gems[activeRow][activeCol]}`;
-                targetGem.className = `gem ${gems[targetRow][targetCol]}`;
-
-                gameLocked = true; // Lock game during match check/animation
-                let matchesFound = await checkMatches();
-
-                if (!matchesFound) {
-                    gameMessage.textContent = 'No match, swapping back...';
-                    await new Promise(resolve => setTimeout(resolve, 500)); // Visual delay
-
-                    // Swap back if no match
-                    const tempColorBack = gems[activeRow][activeCol];
-                    gems[activeRow][activeCol] = gems[targetRow][targetCol];
-                    gems[targetRow][targetCol] = tempColorBack;
-
-                    activeGem.className = `gem ${gems[activeRow][activeCol]}`;
-                    targetGem.className = `gem ${gems[targetRow][targetCol]}`;
-                    gameMessage.textContent = 'Swipe gems to match 3 or more!';
-                }
-                gameLocked = false; // Unlock game after process
-            } else {
-                 gameMessage.textContent = 'Swipe gems to match 3 or more!'; // Reset message if no valid swap
-            }
-
-            // Reset touch state
-            activeGem = null;
-            targetGem = null;
-            initialTouchX = null;
-            initialTouchY = null;
-        }
-
-        /**
-         * Helper function to get the gem element at specific screen coordinates.
-         * Useful for touchmove to identify target gem.
-         * @param {number} x - X coordinate on the screen.
-         * @param {number} y - Y coordinate on the screen.
-         * @returns {HTMLElement|null} - The gem element at the coordinates, or null if none.
-         */
-        function getGemAtCoordinates(x, y) {
-            // Get all gem elements
-            const gemElements = gameGrid.querySelectorAll('.gem');
-            for (const gemEl of gemElements) {
-                const rect = gemEl.getBoundingClientRect();
-                if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-                    return gemEl;
-                }
-            }
-            return null;
-        }
-
-        // --- Desktop Drag and Drop Handlers (Keep for desktop support) ---
-
-        function handleDragStart(e) {
-            if (gameLocked) { e.preventDefault(); return; }
-            activeGem = e.target;
-            e.dataTransfer.setData('text/plain', ''); // Required for Firefox
-            e.target.classList.add('dragging');
-            gameMessage.textContent = 'Dragging...';
-        }
-
-        function handleDragEnter(e) {
-            if (gameLocked) return;
-            e.preventDefault(); // Allow drop
-            targetGem = e.target;
-            if (activeGem && targetGem && canSwap(activeGem, targetGem)) {
-                targetGem.classList.add('drag-over');
-            }
-        }
-
-        function handleDragLeave(e) {
-            if (gameLocked) return;
-            e.target.classList.remove('drag-over');
-        }
-
-        function handleDragOver(e) {
-            if (gameLocked) return;
-            e.preventDefault(); // Allow drop
-        }
-
-        async function handleDrop(e) {
-            if (gameLocked) return;
-            e.preventDefault();
-            targetGem = e.target;
-
-            // Cleanup potential target highlighting immediately
-            if (targetGem) {
-                targetGem.classList.remove('drag-over');
-            }
-
-            if (activeGem && targetGem && canSwap(activeGem, targetGem)) {
-                const activeRow = parseInt(activeGem.dataset.row);
-                const activeCol = parseInt(activeGem.dataset.col);
-                const targetRow = parseInt(targetGem.dataset.row);
-                const targetCol = parseInt(targetGem.dataset.col);
-
-                // Perform the swap in the internal data array
-                const tempColor = gems[activeRow][activeCol];
-                gems[activeRow][activeCol] = gems[targetRow][targetCol];
-                gems[targetRow][targetCol] = tempColor;
-
-                // Update the DOM to reflect the swap
-                activeGem.className = `gem ${gems[activeRow][activeCol]}`;
-                targetGem.className = `gem ${gems[targetRow][targetCol]}`;
-
-                gameLocked = true; // Lock game during match check/animation
-                let matchesFound = await checkMatches();
-
-                if (!matchesFound) {
-                    gameMessage.textContent = 'No match, swapping back...';
-                    await new Promise(resolve => setTimeout(resolve, 500)); // Visual delay
-
-                    // Swap back if no match
-                    const tempColorBack = gems[activeRow][activeCol];
-                    gems[activeRow][activeCol] = gems[targetRow][targetCol];
-                    gems[targetRow][targetCol] = tempColorBack;
-
-                    activeGem.className = `gem ${gems[activeRow][activeCol]}`;
-                    targetGem.className = `gem ${gems[targetRow][targetCol]}`;
-                    gameMessage.textContent = 'Swipe gems to match 3 or more!';
-                }
-                gameLocked = false; // Unlock game after process
-            } else {
-                 gameMessage.textContent = 'Swipe gems to match 3 or more!'; // Reset message if no valid swap
-            }
-        }
-
-        function handleDragEnd(e) {
-            if (gameLocked) return;
-            activeGem.classList.remove('dragging');
-            activeGem = null;
-            targetGem = null;
-        }
-
-        /**
-         * Checks if two gems are adjacent (can be swapped).
-         * @param {HTMLElement} gem1 - The first gem element.
-         * @param {HTMLElement} gem2 - The second gem element.
-         * @returns {boolean} - True if they are adjacent, false otherwise.
-         */
-        function canSwap(gem1, gem2) {
-            if (!gem1 || !gem2) return false; // Ensure both gems exist
-
-            const r1 = parseInt(gem1.dataset.row);
-            const c1 = parseInt(gem1.dataset.col);
-            const r2 = parseInt(gem2.dataset.row);
-            const c2 = parseInt(gem2.dataset.col);
-
-            const rowDiff = Math.abs(r1 - r2);
-            const colDiff = Math.abs(c1 - c2);
-
-            // Adjacent horizontally or vertically (not diagonally, not same spot)
-            return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
-        }
-
-        /**
-         * Finds all matches of 3 or more gems in the grid.
-         * @returns {Array<Object>} - An array of objects, each representing a matched gem's coordinates.
-         */
-        function findMatches() {
-            const matches = [];
-            const matchedSet = new Set(); // To prevent duplicate additions
-
-            // Helper to add match if not already added
-            const addMatch = (row, col) => {
-                const key = `${row},${col}`;
-                if (!matchedSet.has(key)) {
-                    matches.push({ row, col });
-                    matchedSet.add(key);
-                }
-            };
-
-            // Check horizontal matches
-            for (let r = 0; r < gridSize; r++) {
-                for (let c = 0; c < gridSize - 2; c++) {
-                    const color1 = gems[r][c];
-                    const color2 = gems[r][c + 1];
-                    const color3 = gems[r][c + 2];
-
-                    if (color1 && color1 === color2 && color1 === color3) {
-                        addMatch(r, c);
-                        addMatch(r, c + 1);
-                        addMatch(r, c + 2);
-                        // Check for more than 3 in a row
-                        let currentC = c + 3;
-                        while (currentC < gridSize && gems[r][currentC] === color1) {
-                            addMatch(r, currentC);
-                            currentC++;
-                        }
-                    }
-                }
-            }
-
-            // Check vertical matches
-            for (let c = 0; c < gridSize; c++) {
-                for (let r = 0; r < gridSize - 2; r++) {
-                    const color1 = gems[r][c];
-                    const color2 = gems[r + 1][c];
-                    const color3 = gems[r + 2][c];
-
-                    if (color1 && color1 === color2 && color1 === color3) {
-                        addMatch(r, c);
-                        addMatch(r + 1, c);
-                        addMatch(r + 2, c);
-                        // Check for more than 3 in a column
-                        let currentR = r + 3;
-                        while (currentR < gridSize && gems[currentR][c] === color1) {
-                            addMatch(currentR, c);
-                            currentR++;
-                        }
-                    }
-                }
-            }
-            return matches;
-        }
-
-        /**
-         * Processes matches: removes gems, applies gravity, fills new gems, and checks for cascades.
-         * This function is asynchronous to allow for visual delays.
-         * @returns {Promise<boolean>} - Resolves with true if matches were found and processed, false otherwise.
-         */
-        async function checkMatches() {
-            let foundMatches = findMatches();
-
-            if (foundMatches.length > 0) {
-                gameMessage.textContent = 'Awesome! Match made!';
-                // Increase progress based on number of gems matched
-                increaseProgress(foundMatches.length * 1.5); // Increase progress more meaningfully
-
-                removeMatchedGems(foundMatches);
-                await new Promise(resolve => setTimeout(resolve, 300)); // Visual delay for removal effect
-
-                applyGravity();
-                drawGems(); // Redraw grid after gravity
-                await new Promise(resolve => setTimeout(resolve, 300)); // Visual delay for gravity effect
-
-                fillNewGems();
-                drawGems(); // Redraw grid after new gems
-                await new Promise(resolve => setTimeout(resolve, 300)); // Visual delay for new gems
-
-                // Recursively check for new matches (cascades)
-                // We await this to ensure the current cascade fully resolves before returning
-                await checkMatches();
-                return true; // Matches were found and processed in this sequence
-            }
-            return false; // No matches found
-        }
-
-        /**
-         * Sets matched gems in the `gems` array to null (empty) and applies 'empty' class to DOM elements.
-         * @param {Array<Object>} matches - Array of matched gem coordinates.
-         */
-        function removeMatchedGems(matches) {
-            matches.forEach(match => {
-                gems[match.row][match.col] = null; // Mark as null in data array
-                const gemElement = gameGrid.querySelector(`[data-row="${match.row}"][data-col="${match.col}"]`);
-                if (gemElement) {
-                    gemElement.classList.add('empty'); // Add empty class for visual fade-out
-                    gemElement.classList.remove(...gemColors); // Remove color classes
-                    gemElement.removeAttribute('draggable'); // Make it non-draggable
-                    // Remove event listeners to prevent interaction with 'empty' gems
-                    gemElement.removeEventListener('touchstart', handleTouchStart);
-                    gemElement.removeEventListener('touchmove', handleTouchMove);
-                    gemElement.removeEventListener('touchend', handleTouchEnd);
-                    gemElement.removeEventListener('dragstart', handleDragStart);
-                    gemElement.removeEventListener('dragenter', handleDragEnter);
-                    gemElement.removeEventListener('dragleave', handleDragLeave);
-                    gemElement.removeEventListener('dragover', handleDragOver);
-                    gemElement.removeEventListener('drop', handleDrop);
-                    gemElement.removeEventListener('dragend', handleDragEnd);
                 }
             });
+        });
+
+        // --- Game Logic (Simplified) ---
+
+        function serveBall(servingPlayer) {
+            // A very simple serve: just gives the ball an upward and forward velocity
+            // This needs significant refinement for actual physics
+            const playerRect = servingPlayer.getBoundingClientRect();
+            const containerRect = gameContainer.getBoundingClientRect();
+
+            ballPosition.x = (playerRect.left + playerRect.width / 2) - containerRect.left;
+            ballPosition.y = (playerRect.top - 50) - containerRect.top; // Start higher
+
+            ballVelocity.x = (Math.random() - 0.5) * 5; // Slight random horizontal
+            ballVelocity.y = -15; // Upward velocity for serve
+
+            updateBallPosition();
         }
 
-        /**
-         * Applies gravity, moving gems down to fill empty spaces.
-         * Updates the internal `gems` array.
-         */
-        function applyGravity() {
-            for (let c = 0; c < gridSize; c++) {
-                let emptyRow = gridSize - 1; // Start from bottom
-                for (let r = gridSize - 1; r >= 0; r--) {
-                    if (gems[r][c] !== null) {
-                        if (gems[emptyRow][c] === null) { // If target empty spot is lower than current gem
-                            gems[emptyRow][c] = gems[r][c]; // Move gem down
-                            gems[r][c] = null; // Clear original spot
-                        }
-                        emptyRow--; // Move up to check next row
+        function hitBall(hittingPlayer) {
+            // A very simple hit: gives the ball a push towards the opponent's side
+            // This also needs complex physics for angle, power based on touch
+            const playerRect = hittingPlayer.getBoundingClientRect();
+            const containerRect = gameContainer.getBoundingClientRect();
+            const netX = gameContainer.offsetWidth / 2;
+
+            // Determine if hitting from left or right side
+            const direction = (playerRect.left + playerRect.width / 2) < netX ? 1 : -1;
+
+            ballVelocity.x = 10 * direction; // Push horizontally
+            ballVelocity.y = -8; // Push slightly upwards
+        }
+
+        function gameLoop() {
+            if (ballInPlay) {
+                // Apply gravity
+                ballVelocity.y += gravity;
+
+                // Update ball position
+                ballPosition.x += ballVelocity.x;
+                ballPosition.y += ballVelocity.y;
+
+                // --- Collision Detection (Very Basic) ---
+
+                // Floor collision
+                const floorY = gameContainer.offsetHeight - ball.offsetHeight;
+                if (ballPosition.y >= floorY) {
+                    ballPosition.y = floorY;
+                    ballVelocity.y *= -bounceFactor; // Bounce
+                    if (Math.abs(ballVelocity.y) < 1) { // Stop if nearly still
+                        ballVelocity.y = 0;
+                        ballInPlay = false; // Ball hit ground, point ends
+                        debugInfo.textContent = "Ball hit ground! Point over.";
+                        setTimeout(resetBallPosition, 2000); // Reset after 2 seconds
                     }
                 }
-            }
-        }
 
-        /**
-         * Fills any null spots in the `gems` array with new random gems.
-         */
-        function fillNewGems() {
-            for (let r = 0; r < gridSize; r++) {
-                for (let c = 0; c < gridSize; c++) {
-                    if (gems[r][c] === null) {
-                        gems[r][c] = getRandomGemColor(); // Generate new random gem
-                    }
+                // Ceiling collision
+                if (ballPosition.y <= 0) {
+                    ballPosition.y = 0;
+                    ballVelocity.y *= -bounceFactor;
                 }
+
+                // Wall collision
+                const rightWallX = gameContainer.offsetWidth - ball.offsetWidth;
+                if (ballPosition.x <= 0 || ballPosition.x >= rightWallX) {
+                    ballPosition.x = Math.max(0, Math.min(ballPosition.x, rightWallX));
+                    ballVelocity.x *= -bounceFactor;
+                }
+
+                // Net collision (simplified)
+                const netElement = document.getElementById('net');
+                const netRect = netElement.getBoundingClientRect();
+                const containerRect = gameContainer.getBoundingClientRect();
+
+                const netLeft = netRect.left - containerRect.left;
+                const netRight = netRect.right - containerRect.left;
+                const netTop = netRect.top - containerRect.top;
+                const netBottom = netRect.bottom - containerRect.top;
+
+
+                // Check if ball is overlapping with net horizontally and vertically
+                if (
+                    ballPosition.x + ball.offsetWidth > netLeft &&
+                    ballPosition.x < netRight &&
+                    ballPosition.y + ball.offsetHeight > netTop &&
+                    ballPosition.y < netBottom
+                ) {
+                    // Ball hit net
+                    ballVelocity.x *= -0.5; // Lose some horizontal speed
+                    ballVelocity.y = Math.abs(ballVelocity.y) * 0.5; // Reduce vertical speed and bounce up
+                    debugInfo.textContent = "Ball hit net!";
+                }
+
+                // Player collision (very simple - needs bounding box/circle logic)
+                players.forEach(player => {
+                    const playerRect = player.getBoundingClientRect();
+                    const playerCenterX = (playerRect.left - containerRect.left) + playerRect.width / 2;
+                    const playerCenterY = (playerRect.top - containerRect.top) + playerRect.height / 2;
+
+                    const ballCenterX = ballPosition.x + ball.offsetWidth / 2;
+                    const ballCenterY = ballPosition.y + ball.offsetHeight / 2;
+
+                    const distance = Math.sqrt(
+                        Math.pow(ballCenterX - playerCenterX, 2) +
+                        Math.pow(ballCenterY - playerCenterY, 2)
+                    );
+
+                    const collisionDistance = (player.offsetWidth / 2) + (ball.offsetWidth / 2);
+
+                    if (distance < collisionDistance && ballInPlay) {
+                        // This is a very rough "hit" - needs proper physics
+                        // For a real game, this would be where you calculate reflection angles
+                        // and potentially apply force based on player movement/tap strength.
+                        // For now, just a slight bounce and change of direction.
+                        ballVelocity.y = -Math.abs(ballVelocity.y) * 0.8; // Bounce up
+                        ballVelocity.x = (ballCenterX - playerCenterX) * 0.1; // Push away from player
+                        debugInfo.textContent = `Ball hit ${player.id}`;
+                    }
+                });
+
+                updateBallPosition();
             }
+
+            requestAnimationFrame(gameLoop);
         }
 
-        /**
-         * Increases the game's progress bar.
-         * @param {number} amount - The amount to increase progress by.
-         */
-        function increaseProgress(amount) {
-            progress += amount;
-            if (progress > maxProgress) {
-                progress = maxProgress; // Cap progress at 100%
-            }
-            progressBar.style.width = progress + '%'; // Update progress bar visually
+        initializeGame();
+        gameLoop();
 
-            if (progress >= maxProgress) {
-                // Give a small delay for the user to see the full progress bar before moving to next level
-                setTimeout(() => {
-                    levelComplete();
-                }, 500);
-            }
-        }
-
-        // --- Starry Background Effect (Initialization) ---
-        /**
-         * Creates and appends star elements to the star background container.
-         */
-        function createStars() {
-            const starBackground = document.querySelector('.star-background');
-            const numStars = 100; // Number of stars to create
-            for (let i = 0; i < numStars; i++) {
-                const star = document.createElement('div');
-                star.classList.add('star');
-                // Random size for stars
-                star.style.width = `${Math.random() * 3 + 1}px`;
-                star.style.height = star.style.width;
-                // Random position for stars
-                star.style.left = `${Math.random() * 100}%`;
-                star.style.top = `${Math.random() * 100}%`;
-                // Random animation delay for varied twinkling
-                star.style.animationDelay = `${Math.random() * 5}s`;
-                starBackground.appendChild(star);
-            }
-        }
-
-        // --- Event Listeners ---
-        startButton.addEventListener('click', startGame);
-        nextLevelButton.addEventListener('click', goToNextLevel);
-        restartGameButton.addEventListener('click', restartGame);
-        playAgainButton.addEventListener('click', restartGame);
-
-        // Initial setup when the page loads
-        createStars();
     </script>
 </body>
 </html>
