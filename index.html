@@ -2,1011 +2,514 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Chrono-Guard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gem Rush Adventure!</title>
     <style>
-        /* --- General Body & Game Container Styling --- */
         body {
-            margin: 0;
-            font-family: 'Orbitron', sans-serif; /* Futuristic font */
+            font-family: 'Arial', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: radial-gradient(circle at center, #0a0a20, #000000); /* Deep space */
-            color: #e0e0f0; /* Light text */
+            margin: 0;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
             overflow: hidden;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            touch-action: none; /* Crucial: Prevents browser scrolling/zooming */
         }
 
-        /* Subtle temporal fabric background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image:
-                linear-gradient(rgba(20, 20, 50, 0.5) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(20, 20, 50, 0.5) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: warpTemporal 120s linear infinite;
-            z-index: -1;
-        }
-
-        @keyframes warpTemporal {
-            from { background-position: 0 0; }
-            to { background-position: 100% 100%; }
-        }
-
-        #game-container {
-            width: 80vw;
-            max-width: 550px; /* Optimized for portrait phone */
-            height: 90vh;
-            max-height: 850px;
-            border: 4px solid #00f0ff; /* Cyan glow border */
-            background-color: rgba(0, 0, 0, 0.6);
+        .game-container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 800px;
+            box-sizing: border-box;
             position: relative;
-            box-shadow: 0 0 40px rgba(0, 240, 255, 0.7); /* Stronger glow */
-            display: flex;
-            flex-direction: column;
-            border-radius: 20px;
             overflow: hidden;
+            border: 3px solid #ffd700; /* Gold border */
         }
 
-        /* --- Game Screens --- */
-        .game-screen {
+        .star-background {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.95);
-            text-align: center;
-            z-index: 100;
-            border-radius: 18px;
-            padding: 20px;
-            box-sizing: border-box;
+            pointer-events: none;
+            overflow: hidden;
         }
 
-        .hidden {
-            display: none !important;
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            opacity: 0;
+            animation: twinkle 5s infinite ease-in-out;
         }
 
-        /* --- Buttons & Input --- */
-        button {
-            padding: 14px 30px;
-            margin: 15px;
-            font-size: 1.4em;
-            cursor: pointer;
-            background-color: #007bff; /* Blue accent */
-            color: white;
-            border: 2px solid #66b2ff;
-            border-radius: 10px;
-            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
-            outline: none;
+        @keyframes twinkle {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.5); }
         }
 
-        button:hover {
-            background-color: #0056b3;
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+        .game-title {
+            font-family: 'Georgia', serif;
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #ffd700; /* Gold */
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+            animation: pulse 2s infinite alternate;
         }
 
-        button:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .start-screen, .game-screen, .level-complete-screen, .game-over-screen, .game-won-screen {
+            display: none;
+        }
+
+        .start-screen.active, .game-screen.active, .level-complete-screen.active, .game-over-screen.active, .game-won-screen.active {
+            display: block;
         }
 
         input[type="text"] {
-            padding: 14px;
-            margin-bottom: 25px;
-            border: 2px solid #66b2ff;
-            border-radius: 10px;
-            font-size: 1.3em;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
             width: 80%;
-            max-width: 320px;
-            background-color: #1a1a33;
-            color: #e0e0f0;
-            text-align: center;
-            box-shadow: inset 0 0 12px rgba(0,0,0,0.6);
-            outline: none;
+            max-width: 300px;
+            font-size: 1.1em;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
         }
 
-        /* --- Game Play Screen Layout --- */
-        #game-play-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: stretch;
-            padding: 15px;
-            box-sizing: border-box;
-            background-color: transparent;
-        }
-
-        #game-info {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            padding: 12px 0;
+        button {
+            background-color: #ffd700; /* Gold */
+            color: #333;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
             font-size: 1.2em;
-            background-color: rgba(0,0,0,0.7);
-            border-radius: 10px;
-            margin-bottom: 15px;
-            z-index: 10;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 20px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        #game-area {
-            flex-grow: 1;
-            position: relative;
+        button:hover {
+            background-color: #e0b800; /* Darker gold */
+            transform: translateY(-2px);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        .timer, .level {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #ffd700;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            height: 25px;
+            margin-top: 20px;
             overflow: hidden;
-            background-color: transparent;
+            border: 2px solid #ff69b4; /* Pink border for hearts */
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #ff69b4, #ff1493); /* Pink gradient for hearts */
             border-radius: 10px;
-            cursor: default; /* Not a shooter, no crosshair */
-            touch-action: none; /* Crucial for mobile */
+            transition: width 0.3s ease-in-out;
+            position: relative;
         }
 
-        /* --- Time Core --- */
-        #time-core {
+        .progress-bar::after {
+            content: '❤️';
             position: absolute;
+            right: 5px;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle, #ff00ff, #800080); /* Magenta/Purple pulse */
-            border-radius: 50%;
-            box-shadow: 0 0 30px #ff00ff, 0 0 60px #800080;
-            animation: pulseCore 2s infinite alternate;
-            z-index: 5; /* Below anomalies, above background */
+            transform: translateY(-50%);
+            font-size: 1.2em;
+            opacity: 0.8;
         }
 
-        @keyframes pulseCore {
-            0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 30px #ff00ff, 0 0 60px #800080; }
-            100% { transform: translate(-50%, -50%) scale(1.05); box-shadow: 0 0 45px #ff00ff, 0 0 80px #800080; }
-        }
-
-        /* --- Temporal Anomalies --- */
-        .anomaly {
-            position: absolute;
-            background-color: rgba(255, 255, 255, 0.7); /* Base color, will be overridden */
-            border-radius: 50%; /* Default to circle */
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            z-index: 20;
-            transition: border-radius 0.1s ease, background-color 0.1s ease, transform 0.05s ease; /* For shape changes */
-            transform-origin: center center;
-            opacity: 0.9;
-        }
-
-        /* Anomaly Colors */
-        .anomaly.red { background-color: rgba(255, 0, 0, 0.7); box-shadow: 0 0 15px #ff0000; }
-        .anomaly.blue { background-color: rgba(0, 0, 255, 0.7); box-shadow: 0 0 15px #0000ff; }
-        .anomaly.green { background-color: rgba(0, 255, 0, 0.7); box-shadow: 0 0 15px #00ff00; }
-        .anomaly.yellow { background-color: rgba(255, 255, 0, 0.7); box-shadow: 0 0 15px #ffff00; }
-        .anomaly.purple { background-color: rgba(128, 0, 128, 0.7); box-shadow: 0 0 15px #800080; }
-
-        /* Anomaly Shapes */
-        .anomaly.square { border-radius: 5px; }
-        .anomaly.triangle {
-            background-color: transparent !important;
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-bottom: 35px solid; /* Base color will be applied here */
-            width: 0; /* Important for triangle shape */
-            height: 0; /* Important for triangle shape */
-            box-shadow: none;
-            opacity: 0.9;
-            transform-origin: 50% 100%; /* For rotation */
-        }
-        /* Color for triangle border-bottom */
-        .anomaly.triangle.red { border-bottom-color: rgba(255, 0, 0, 0.7); }
-        .anomaly.triangle.blue { border-bottom-color: rgba(0, 0, 255, 0.7); }
-        .anomaly.triangle.green { border-bottom-color: rgba(0, 255, 0, 0.7); }
-        .anomaly.triangle.yellow { border-bottom-color: rgba(255, 255, 0, 0.7); }
-        .anomaly.triangle.purple { border-bottom-color: rgba(128, 0, 128, 0.7); }
-
-
-        /* Anomaly States */
-        .anomaly.frozen {
-            animation-play-state: paused;
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.9); /* White glow when frozen */
-            transform: scale(1.05); /* Slightly enlarge when selected */
-        }
-        .anomaly.shunting {
-            box-shadow: 0 0 30px rgba(0, 255, 255, 1), 0 0 15px rgba(0, 255, 255, 1) inset; /* Cyan glow when shunting */
-            z-index: 30; /* Bring to front during shunt */
-        }
-
-        /* --- Time Rifts (Targets) --- */
-        .time-rift {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 3px solid rgba(255, 255, 255, 0.5);
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr); /* Example grid size */
+            grid-template-rows: repeat(8, 1fr);
+            gap: 5px;
+            width: 400px; /* Adjust as needed */
+            height: 400px; /* Adjust as needed */
             background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 20px auto;
+            border: 2px solid #fff;
+        }
+
+        .gem {
+            width: 100%;
+            height: 100%;
+            background-color: #ccc; /* Default */
+            border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 0.9em;
-            color: rgba(255, 255, 255, 0.7);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-            transition: opacity 0.3s ease, border-color 0.3s ease; /* For fading */
-            z-index: 10;
-        }
-        .time-rift.red { border-color: #ff0000; box-shadow: 0 0 20px #ff0000; }
-        .time-rift.blue { border-color: #0000ff; box-shadow: 0 0 20px #0000ff; }
-        .time-rift.green { border-color: #00ff00; box-shadow: 0 0 20px #00ff00; }
-        .time-rift.yellow { border-color: #ffff00; box-shadow: 0 0 20px #ffff00; }
-        .time-rift.purple { border-color: #800080; box-shadow: 0 0 20px #800080; }
-
-        .time-rift.fading {
-            opacity: 0.3;
-            transition: opacity 0.5s ease-out;
+            font-size: 2em;
+            cursor: pointer;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
         }
 
-        /* --- Chronoline (Drag line) --- */
-        #chronoline {
+        .gem:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Gem colors */
+        .gem.red { background-color: #ff4d4d; }
+        .gem.blue { background-color: #4d4dff; }
+        .gem.green { background-color: #4dff4d; }
+        .gem.yellow { background-color: #ffff4d; }
+        .gem.purple { background-color: #8a2be2; }
+
+        .gem::before {
+            content: '';
             position: absolute;
-            height: 3px;
-            background-color: #00ffff; /* Cyan line */
-            box-shadow: 0 0 10px #00ffff;
-            transform-origin: 0 0;
-            display: none;
-            z-index: 40; /* On top of anomalies */
-            pointer-events: none; /* Crucial: Don't block clicks/touches */
-        }
-
-        /* --- Explosion Effect --- */
-        .explosion {
-            position: absolute;
-            width: 80px; /* Size of explosion */
-            height: 80px;
-            background-color: transparent;
-            border-radius: 50%;
-            animation: burstEffect 0.3s forwards;
-            z-index: 50; /* On top of everything temporarily */
-            pointer-events: none;
-        }
-
-        @keyframes burstEffect {
-            0% {
-                transform: scale(0.1);
-                box-shadow: 0 0 0 0 #fff, 0 0 0 0 #ff0;
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1);
-                box-shadow: 0 0 25px 10px #fff, 0 0 50px 15px #ff0, 0 0 75px 20px #f00;
-                opacity: 0.8;
-            }
-            100% {
-                transform: scale(1.5);
-                box-shadow: 0 0 10px 5px #fff, 0 0 20px 10px #ff0, 0 0 30px 15px #f00;
-                opacity: 0;
-            }
-        }
-        /* --- Shunt Effect (Success) --- */
-        .shunt-effect {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background-color: transparent;
-            border-radius: 50%;
-            animation: shuntSparkle 0.4s forwards;
-            z-index: 50;
-            pointer-events: none;
-        }
-
-        @keyframes shuntSparkle {
-            0% {
-                transform: scale(0.1);
-                box-shadow: 0 0 0 0 #00ffff, 0 0 0 0 #66ffff;
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.2);
-                box-shadow: 0 0 20px 5px #00ffff, 0 0 40px 10px #66ffff;
-                opacity: 0.8;
-            }
-            100% {
-                transform: scale(0.5);
-                box-shadow: 0 0 5px 2px #00ffff;
-                opacity: 0;
-            }
-        }
-
-        /* --- Pause Button --- */
-        #controls {
-            display: flex;
-            justify-content: center;
+            top: 0;
+            left: 0;
             width: 100%;
-            padding: 10px 0;
-            margin-top: 15px;
-            background-color: rgba(0,0,0,0.7);
-            border-radius: 10px;
-            z-index: 10;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+            opacity: 0;
+            transition: opacity 0.2s ease;
         }
-        #controls button {
-            padding: 10px 20px;
-            font-size: 1.2em;
-            margin: 0;
+
+        .gem:hover::before {
+            opacity: 1;
+        }
+
+        .message {
+            font-size: 1.8em;
+            margin-top: 30px;
+            color: #ffd700;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+            animation: pop-in 0.5s ease-out;
+        }
+
+        @keyframes pop-in {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .final-message {
+            font-size: 2.5em;
+            color: #ffd700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.9);
+            animation: pulse 1.5s infinite alternate, glow 2s infinite alternate;
+            margin-top: 30px;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px #ffd700; }
+            to { box-shadow: 0 0 30px #ffd700, 0 0 40px #ffd700; }
+        }
+
+        .restart-button {
+            background-color: #ff69b4; /* Pink */
+            color: white;
+        }
+
+        .restart-button:hover {
+            background-color: #ff1493; /* Darker pink */
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <div id="start-screen" class="game-screen">
-            <h1>Chrono-Guard</h1>
-            <p>Enter your Chrono-Guard ID:</p>
-            <input type="text" id="playerNameInput" placeholder="Time Weaver">
-            <button id="startButton">Activate Protocols</button>
+    <div class="game-container">
+        <div class="star-background"></div>
+        <h1 class="game-title">Gem Rush Adventure!</h1>
+
+        <div class="start-screen active">
+            <p>Welcome, brave adventurer! What is your name?</p>
+            <input type="text" id="playerNameInput" placeholder="Enter your name">
+            <button id="startButton">Embark on the Adventure!</button>
         </div>
 
-        <div id="game-play-screen" class="game-screen hidden">
-            <div id="game-info">
-                <p>Guard ID: <span id="playerNameDisplay"></span></p>
-                <p>Integrity: <span id="scoreDisplay">0</span></p>
-                <p>Energy: <span id="livesDisplay">3</span></p>
-                <p>Sector: <span id="levelDisplay">1</span></p>
+        <div class="game-screen">
+            <div class="game-info">
+                <div class="level">Level: <span id="currentLevel">1</span>/12</div>
+                <div class="timer">Time: <span id="timeLeft">60</span>s</div>
             </div>
-            <div id="game-area">
-                <div id="time-core"></div>
-                <div id="chronoline"></div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="game-grid" id="gameGrid">
                 </div>
-            <div id="controls">
-                <button id="pauseButton">Pause</button>
-            </div>
+            <p class="message" id="gameMessage"></p>
         </div>
 
-        <div id="pause-screen" class="game-screen hidden">
-            <h1>Protocols Paused</h1>
-            <button id="continueButton">Resume Operations</button>
-            <button id="restartButtonPause">Reset Time-Stream</button>
+        <div class="level-complete-screen">
+            <h2 class="message">Good job, <span id="playerNameGoodJob"></span>! Level <span id="completedLevel"></span> Completed!</h2>
+            <button id="nextLevelButton">Next Level!</button>
         </div>
 
-        <div id="level-complete-screen" class="game-screen hidden">
-            <h1 id="levelCompleteMessage">Sector 1 Stabilized!</h1>
-            <p>Temporal integrity maintained, <span id="levelCompletePlayerName"></span>!</p>
-            <button id="nextLevelButton">Advance to Next Sector</button>
+        <div class="game-over-screen">
+            <h2 class="final-message">Oh no, <span id="playerNameGameOver"></span>! Game Over!</h2>
+            <p>You ran out of time. Better luck next time!</p>
+            <button id="restartGameButton" class="restart-button">Try Again?</button>
         </div>
 
-        <div id="game-over-screen" class="game-screen hidden">
-            <h1>TEMPORAL COLLAPSE!</h1>
-            <p id="finalScoreMessage">Integrity Score: <span id="finalScoreDisplay">0</span></p>
-            <button id="restartButtonGameOver">Reboot Simulation</button>
+        <div class="game-won-screen">
+            <h2 class="final-message">Congratulations, <span id="playerNameGameWon"></span>! You Conquered the Gem Rush!</h2>
+            <p>All 12 levels completed! You are a true Gem Master!</p>
+            <button id="playAgainButton" class="restart-button">Play Again?</button>
         </div>
     </div>
 
     <script>
-        /* --- Game State Variables --- */
-        let playerName = '';
-        let score = 0;
-        let lives = 3;
-        let level = 1;
-        let gameRunning = false;
-        let gamePaused = false;
-        let gameLoopAnimationFrame;
-        let anomalyGenerationInterval;
-
-        const activeAnomalies = []; // Array to hold active anomaly elements
-        const timeRifts = []; // Array to hold time rift elements
-
-        let selectedAnomaly = null; // The anomaly currently being held/dragged
-        let isHoldingAnomaly = false;
-        let chronolineElement = null;
-
-        // --- DOM Elements ---
-        const gameContainer = document.getElementById('game-container');
-        const startScreen = document.getElementById('start-screen');
-        const gamePlayScreen = document.getElementById('game-play-screen');
-        const pauseScreen = document.getElementById('pause-screen');
-        const levelCompleteScreen = document.getElementById('level-complete-screen');
-        const gameOverScreen = document.getElementById('gameOver-screen');
-
         const playerNameInput = document.getElementById('playerNameInput');
         const startButton = document.getElementById('startButton');
-
-        const playerNameDisplay = document.getElementById('playerNameDisplay');
-        const scoreDisplay = document.getElementById('scoreDisplay');
-        const livesDisplay = document.getElementById('livesDisplay');
-        const levelDisplay = document.getElementById('levelDisplay');
-        const gameArea = document.getElementById('game-area');
-        const timeCore = document.getElementById('time-core');
-        const pauseButton = document.getElementById('pauseButton');
-
-        const continueButton = document.getElementById('continueButton');
-        const restartButtonPause = document.getElementById('restartButtonPause');
-
-        const levelCompleteMessage = document.getElementById('levelCompleteMessage');
-        const levelCompletePlayerName = document.getElementById('levelCompletePlayerName');
+        const startScreen = document.querySelector('.start-screen');
+        const gameScreen = document.querySelector('.game-screen');
+        const levelCompleteScreen = document.querySelector('.level-complete-screen');
+        const gameOverScreen = document.querySelector('.game-over-screen');
+        const gameWonScreen = document.querySelector('.game-won-screen');
+        const playerNameGoodJob = document.getElementById('playerNameGoodJob');
+        const playerNameGameOver = document.getElementById('playerNameGameOver');
+        const playerNameGameWon = document.getElementById('playerNameGameWon');
+        const completedLevel = document.getElementById('completedLevel');
         const nextLevelButton = document.getElementById('nextLevelButton');
+        const restartGameButton = document.getElementById('restartGameButton');
+        const playAgainButton = document.getElementById('playAgainButton');
+        const currentLevelSpan = document.getElementById('currentLevel');
+        const timeLeftSpan = document.getElementById('timeLeft');
+        const progressBar = document.getElementById('progressBar');
+        const gameGrid = document.getElementById('gameGrid');
+        const gameMessage = document.getElementById('gameMessage');
 
-        const finalScoreDisplay = document.getElementById('finalScoreDisplay');
-        const restartButtonGameOver = document.getElementById('restartButtonGameOver');
+        let playerName = '';
+        let currentLevel = 1;
+        let timeLeft = 60;
+        let progress = 0;
+        const maxProgress = 100; // Represents 100%
+        let timerInterval;
+        let selectedGems = [];
+        const gemColors = ['red', 'blue', 'green', 'yellow', 'purple'];
+        const gridSize = 8; // 8x8 grid
 
-        // --- Game Settings (Adjust for difficulty) ---
-        const ANOMALY_COLORS = ['red', 'blue', 'green', 'yellow', 'purple'];
-        const ANOMALY_SHAPES = ['circle', 'square', 'triangle']; // Circle is default (border-radius: 50%)
-        const ANOMALY_BASE_SIZE = 30; // Initial size in px
-        const MAX_ANOMALY_SIZE = 80; // Max size before overload
-        const SHUNT_RANGE = 70; // Max distance from rift to release anomaly
+        // --- Game State Functions ---
 
-        const LEVEL_SETTINGS = {
-            1: {
-                expansionRate: 0.1, // Pixels per frame
-                generationRate: 2000, // ms
-                anomaliesToClear: 10,
-                riftColors: ['blue', 'red'],
-                anomalyTypes: ['circle', 'circle'], // More circles initially
-                fadingRifts: false
-            },
-            2: {
-                expansionRate: 0.15,
-                generationRate: 1700,
-                anomaliesToClear: 15,
-                riftColors: ['blue', 'red', 'green'],
-                anomalyTypes: ['circle', 'square', 'circle'],
-                fadingRifts: false
-            },
-            3: {
-                expansionRate: 0.2,
-                generationRate: 1400,
-                anomaliesToClear: 20,
-                riftColors: ['blue', 'red', 'green', 'yellow'],
-                anomalyTypes: ['circle', 'square', 'triangle'],
-                fadingRifts: false
-            },
-            4: {
-                expansionRate: 0.25,
-                generationRate: 1200,
-                anomaliesToClear: 25,
-                riftColors: ['blue', 'red', 'green', 'yellow', 'purple'],
-                anomalyTypes: ['circle', 'square', 'triangle'],
-                fadingRifts: true, // Rifts will start fading in and out
-                riftFadeDuration: 2000 // How long a rift stays faded
-            },
-            5: { // Temporal Cascade
-                expansionRate: 0.3,
-                generationRate: 900,
-                anomaliesToClear: 30,
-                riftColors: ['blue', 'red', 'green', 'yellow', 'purple'],
-                anomalyTypes: ['circle', 'square', 'triangle'],
-                fadingRifts: true,
-                riftFadeDuration: 1500
-            }
-        };
-
-        const SCORE_PER_SHUNT = 100;
-        const LIFE_LOSS_PER_FAILURE = 1;
-        const MAX_LEVEL = Object.keys(LEVEL_SETTINGS).length;
-
-        let shuntedAnomaliesInLevel = 0;
-
-        // --- Utility Functions ---
-        function showScreen(screenElement) {
-            document.querySelectorAll('.game-screen').forEach(screen => {
-                screen.classList.add('hidden');
+        function showScreen(screen) {
+            document.querySelectorAll('.game-container > div').forEach(s => {
+                s.classList.remove('active');
             });
-            screenElement.classList.remove('hidden');
+            screen.classList.add('active');
         }
-
-        function updateDisplay() {
-            playerNameDisplay.textContent = playerName;
-            scoreDisplay.textContent = score;
-            livesDisplay.textContent = lives;
-            levelDisplay.textContent = level;
-        }
-
-        function createEffect(type, x, y, color = '#fff', size = 80) {
-            const effect = document.createElement('div');
-            effect.style.position = 'absolute';
-            effect.style.left = `${x - size / 2}px`;
-            effect.style.top = `${y - size / 2}px`;
-            effect.style.width = `${size}px`;
-            effect.style.height = `${size}px`;
-            effect.style.borderRadius = '50%';
-            effect.style.pointerEvents = 'none';
-
-            if (type === 'explosion') {
-                effect.className = 'explosion';
-            } else if (type === 'shunt') {
-                effect.className = 'shunt-effect';
-                effect.style.boxShadow = `0 0 20px ${color}, 0 0 40px ${color}`;
-            }
-
-            gameArea.appendChild(effect);
-            setTimeout(() => effect.remove(), 400); // Effects animate for 0.3s-0.4s
-        }
-
-        function getRandomElement(array) {
-            return array[Math.floor(Math.random() * array.length)];
-        }
-
-        // --- Game Logic Functions ---
 
         function startGame() {
             playerName = playerNameInput.value.trim();
             if (playerName === '') {
-                alert('Please enter your Chrono-Guard ID!');
+                alert('Please enter your name to start the adventure!');
                 return;
             }
-            score = 0;
-            lives = 3;
-            level = 1;
-            shuntedAnomaliesInLevel = 0;
-            activeAnomalies.length = 0;
-            timeRifts.length = 0;
-            gameArea.innerHTML = ''; // Clear game area
-            gameArea.appendChild(timeCore); // Re-add Time Core
-            chronolineElement = document.getElementById('chronoline') || document.createElement('div'); // Re-add or create chronoline
-            chronolineElement.id = 'chronoline';
-            gameArea.appendChild(chronolineElement);
-
-            showScreen(gamePlayScreen);
-            gameRunning = true;
-            gamePaused = false;
-            updateDisplay();
+            currentLevel = 1;
+            progress = 0;
+            updateGameInfo();
+            showScreen(gameScreen);
             startLevel();
         }
 
         function startLevel() {
-            shuntedAnomaliesInLevel = 0;
-            activeAnomalies.length = 0;
-            gameArea.querySelectorAll('.anomaly, .time-rift').forEach(el => el.remove());
-            timeRifts.length = 0; // Clear rift array
-
-            const currentSettings = LEVEL_SETTINGS[level];
-            if (!currentSettings) {
-                endGame(true); // Win if no more levels
-                return;
-            }
-
-            spawnTimeRifts(currentSettings.riftColors);
-
-            clearInterval(anomalyGenerationInterval);
-            anomalyGenerationInterval = setInterval(generateAnomaly, currentSettings.generationRate);
-
-            if (gameLoopAnimationFrame) {
-                cancelAnimationFrame(gameLoopAnimationFrame);
-            }
-            gameLoop(); // Start game loop for new level
-            updateDisplay();
+            timeLeft = 60;
+            progress = 0;
+            selectedGems = [];
+            updateGameInfo();
+            progressBar.style.width = '0%';
+            gameMessage.textContent = '';
+            generateGems();
+            startTimer();
         }
 
-        function pauseGame() {
-            if (!gameRunning) return;
-            gamePaused = true;
-            showScreen(pauseScreen);
-            clearInterval(anomalyGenerationInterval);
-            cancelAnimationFrame(gameLoopAnimationFrame);
-            freezeAllAnomalies(true); // Freeze all anomalies visually
+        function updateGameInfo() {
+            currentLevelSpan.textContent = currentLevel;
+            timeLeftSpan.textContent = timeLeft;
+            progressBar.style.width = progress + '%';
         }
 
-        function continueGame() {
-            gamePaused = false;
-            showScreen(gamePlayScreen);
-            const currentSettings = LEVEL_SETTINGS[level];
-            anomalyGenerationInterval = setInterval(generateAnomaly, currentSettings.generationRate);
-            gameLoop(); // Resume animation frame loop
-            freezeAllAnomalies(false); // Unfreeze
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timeLeftSpan.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (progress < maxProgress) {
+                        gameOver();
+                    } else {
+                        levelComplete();
+                    }
+                }
+            }, 1000);
+        }
+
+        function levelComplete() {
+            clearInterval(timerInterval);
+            playerNameGoodJob.textContent = playerName;
+            completedLevel.textContent = currentLevel;
+            showScreen(levelCompleteScreen);
+        }
+
+        function gameOver() {
+            clearInterval(timerInterval);
+            playerNameGameOver.textContent = playerName;
+            showScreen(gameOverScreen);
+        }
+
+        function gameWon() {
+            clearInterval(timerInterval);
+            playerNameGameWon.textContent = playerName;
+            showScreen(gameWonScreen);
+        }
+
+        function goToNextLevel() {
+            currentLevel++;
+            if (currentLevel > 12) {
+                gameWon();
+            } else {
+                showScreen(gameScreen);
+                startLevel();
+            }
         }
 
         function restartGame() {
-            clearInterval(anomalyGenerationInterval);
-            cancelAnimationFrame(gameLoopAnimationFrame);
-            startGame();
+            playerNameInput.value = ''; // Clear name for new game
+            showScreen(startScreen);
         }
 
-        function endGame(win = false) {
-            gameRunning = false;
-            gamePaused = false;
-            clearInterval(anomalyGenerationInterval);
-            cancelAnimationFrame(gameLoopAnimationFrame);
+        // --- Gem Generation and Interaction ---
 
-            // Clean up all remaining game objects
-            gameArea.querySelectorAll('.anomaly, .time-rift, .explosion, .shunt-effect').forEach(el => el.remove());
-            activeAnomalies.length = 0;
-            timeRifts.length = 0;
-            chronolineElement.style.display = 'none';
+        function getRandomGemColor() {
+            return gemColors[Math.floor(Math.random() * gemColors.length)];
+        }
 
-            if (win) {
-                if (level > MAX_LEVEL) {
-                    levelCompleteMessage.textContent = "All Sectors Stabilized! Chrono-Commander!";
-                    levelCompletePlayerName.textContent = playerName;
-                    nextLevelButton.textContent = "Begin New Cycle?";
-                    nextLevelButton.onclick = restartGame;
-                } else {
-                    levelCompleteMessage.textContent = `Sector ${level} Stabilized!`;
-                    levelCompletePlayerName.textContent = playerName;
-                    nextLevelButton.textContent = "Advance to Next Sector";
-                    nextLevelButton.onclick = nextLevel;
-                }
-                showScreen(levelCompleteScreen);
+        function generateGems() {
+            gameGrid.innerHTML = ''; // Clear existing gems
+            gameGrid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            gameGrid.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
 
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const gem = document.createElement('div');
+                gem.classList.add('gem', getRandomGemColor());
+                gem.dataset.index = i;
+                gem.addEventListener('click', handleGemClick);
+                gameGrid.appendChild(gem);
+            }
+        }
+
+        function handleGemClick(event) {
+            const clickedGem = event.target;
+
+            if (selectedGems.length < 3) {
+                selectedGems.push(clickedGem);
+                clickedGem.style.border = '2px solid white'; // Highlight selected
+            }
+
+            if (selectedGems.length === 3) {
+                checkSequence();
+            }
+        }
+
+        function checkSequence() {
+            const firstColor = selectedGems[0].classList[1]; // Get the color class
+            const allSameColor = selectedGems.every(gem => gem.classList[1] === firstColor);
+
+            if (allSameColor) {
+                gameMessage.textContent = 'Excellent! Matched a sequence!';
+                increaseProgress(5); // Increase progress by a small amount for each sequence
+                removeSelectedGems();
+                fillEmptySpots();
             } else {
-                finalScoreDisplay.textContent = score;
-                showScreen(gameOverScreen);
+                gameMessage.textContent = 'Oops! Colors don\'t match. Try again.';
+            }
+
+            // Clear selection after checking
+            selectedGems.forEach(gem => gem.style.border = 'none');
+            selectedGems = [];
+        }
+
+        function increaseProgress(amount) {
+            progress += amount;
+            if (progress > maxProgress) {
+                progress = maxProgress;
+            }
+            progressBar.style.width = progress + '%';
+
+            if (progress >= maxProgress) {
+                setTimeout(() => { // Give a small delay to see full progress
+                    levelComplete();
+                }, 500);
             }
         }
 
-        function generateAnomaly() {
-            if (!gameRunning || gamePaused || isHoldingAnomaly) return; // Don't generate if player is holding one
-
-            const currentSettings = LEVEL_SETTINGS[level];
-            const anomalyColor = getRandomElement(ANOMALY_COLORS);
-            const anomalyShape = getRandomElement(currentSettings.anomalyTypes);
-
-            const anomaly = document.createElement('div');
-            anomaly.className = `anomaly ${anomalyColor} ${anomalyShape}`;
-            anomaly.dataset.color = anomalyColor;
-            anomaly.dataset.shape = anomalyShape;
-            anomaly.dataset.size = ANOMALY_BASE_SIZE; // Current size
-            anomaly.style.width = `${ANOMALY_BASE_SIZE}px`;
-            anomaly.style.height = `${ANOMALY_BASE_SIZE}px`;
-
-            // Adjust initial position for triangle shape
-            let initialTop = -50;
-            let initialLeft = Math.random() * (gameArea.offsetWidth - ANOMALY_BASE_SIZE);
-
-            if (anomalyShape === 'triangle') {
-                 // Triangle is defined by borders, actual width/height are 0
-                 // Position it so its base is at the calculated (left, top)
-                anomaly.style.left = `${initialLeft}px`;
-                anomaly.style.top = `${initialTop + ANOMALY_BASE_SIZE}px`; // Adjust top to compensate for triangle's structure
-            } else {
-                anomaly.style.left = `${initialLeft}px`;
-                anomaly.style.top = `${initialTop}px`;
-            }
-
-
-            gameArea.appendChild(anomaly);
-            activeAnomalies.push(anomaly);
+        function removeSelectedGems() {
+            selectedGems.forEach(gem => gem.remove());
         }
 
-        function updateAnomalies() {
-            const currentSettings = LEVEL_SETTINGS[level];
-            const coreCenterX = timeCore.offsetLeft + timeCore.offsetWidth / 2;
-            const coreCenterY = timeCore.offsetTop + timeCore.offsetHeight / 2;
-            const coreRadius = timeCore.offsetWidth / 2;
-
-            for (let i = activeAnomalies.length - 1; i >= 0; i--) {
-                const anomaly = activeAnomalies[i];
-
-                if (!gameArea.contains(anomaly) || anomaly === selectedAnomaly) continue; // Skip removed or selected anomaly
-
-                let currentSize = parseFloat(anomaly.dataset.size);
-
-                // Expand anomaly
-                currentSize += currentSettings.expansionRate;
-                if (currentSize > MAX_ANOMALY_SIZE) {
-                    // Anomaly overloaded!
-                    loseLife(anomaly, "overload");
-                    continue; // Skip further processing for this anomaly
-                }
-
-                anomaly.dataset.size = currentSize;
-                if (anomaly.dataset.shape === 'triangle') {
-                    // For triangle, adjust border sizes proportionally
-                    const newBorderBottom = currentSize;
-                    const newBorderLeftRight = currentSize / 2;
-                    anomaly.style.borderBottomWidth = `${newBorderBottom}px`;
-                    anomaly.style.borderLeftWidth = `${newBorderLeftRight}px`;
-                    anomaly.style.borderRightWidth = `${newBorderLeftRight}px`;
-                    // Triangles need to re-center based on their unique sizing
-                    anomaly.style.left = `${parseFloat(anomaly.style.left) - (currentSettings.expansionRate / 2)}px`;
-                    anomaly.style.top = `${parseFloat(anomaly.style.top) - (currentSettings.expansionRate / 2)}px`;
-                } else {
-                    anomaly.style.width = `${currentSize}px`;
-                    anomaly.style.height = `${currentSize}px`;
-                    anomaly.style.left = `${parseFloat(anomaly.style.left) - (currentSettings.expansionRate / 2)}px`;
-                    anomaly.style.top = `${parseFloat(anomaly.style.top) - (currentSettings.expansionRate / 2)}px`;
-                }
-            }
+        function fillEmptySpots() {
+            // This is a very simplified fill logic. In a real game, gems would fall down.
+            // For this basic version, we'll just regenerate the grid for simplicity.
+            // This will look less like a falling gem game and more like a fresh board.
+            setTimeout(() => {
+                generateGems();
+            }, 300); // Small delay to show gems disappearing
         }
 
-        function loseLife(anomaly, reason) {
-            lives -= LIFE_LOSS_PER_FAILURE;
-            updateDisplay();
-            createEffect('explosion', anomaly.offsetLeft + anomaly.offsetWidth / 2, anomaly.offsetTop + anomaly.offsetHeight / 2, '#f00', 100);
-            anomaly.remove();
-            activeAnomalies.splice(activeAnomalies.indexOf(anomaly), 1);
-            if (lives <= 0) {
-                endGame();
+        // --- Starry Background Effect ---
+        function createStars() {
+            const starBackground = document.querySelector('.star-background');
+            const numStars = 100;
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                starBackground.appendChild(star);
             }
-        }
-
-        function spawnTimeRifts(colors) {
-            const gameAreaWidth = gameArea.offsetWidth;
-            const gameAreaHeight = gameArea.offsetHeight;
-            const riftSize = 60;
-            const padding = 20;
-
-            const riftPositions = [
-                { x: padding, y: padding }, // Top-left
-                { x: gameAreaWidth - riftSize - padding, y: padding }, // Top-right
-                { x: padding, y: gameAreaHeight - riftSize - padding }, // Bottom-left
-                { x: gameAreaWidth - riftSize - padding, y: gameAreaHeight - riftSize - padding }, // Bottom-right
-                // Add more positions if more than 4 rifts are needed, perhaps centered top/bottom
-            ];
-
-            // Shuffle positions to randomize where colors appear
-            for (let i = riftPositions.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [riftPositions[i], riftPositions[j]] = [riftPositions[j], riftPositions[i]];
-            }
-
-            colors.forEach((color, index) => {
-                const rift = document.createElement('div');
-                rift.className = `time-rift ${color}`;
-                rift.dataset.color = color;
-                rift.style.left = `${riftPositions[index].x}px`;
-                rift.style.top = `${riftPositions[index].y}px`;
-                gameArea.appendChild(rift);
-                timeRifts.push(rift);
-
-                // Start fading logic for certain levels
-                if (LEVEL_SETTINGS[level].fadingRifts) {
-                    startRiftFading(rift, LEVEL_SETTINGS[level].riftFadeDuration);
-                }
-            });
-        }
-
-        function startRiftFading(rift, duration) {
-            setInterval(() => {
-                rift.classList.add('fading');
-                setTimeout(() => {
-                    rift.classList.remove('fading');
-                }, duration / 2); // Visible for half the duration, faded for other half
-            }, duration);
-        }
-
-
-        function checkLevelCompletion() {
-            const currentSettings = LEVEL_SETTINGS[level];
-            if (shuntedAnomaliesInLevel >= currentSettings.anomaliesToClear) {
-                advanceLevelOrWin();
-            }
-        }
-
-        function advanceLevelOrWin() {
-            gameRunning = false;
-            clearInterval(anomalyGenerationInterval);
-            cancelAnimationFrame(gameLoopAnimationFrame);
-
-            if (level < MAX_LEVEL) {
-                showScreen(levelCompleteScreen);
-            } else {
-                endGame(true); // All levels completed, you win!
-            }
-        }
-
-        function nextLevel() {
-            level++;
-            if (level > MAX_LEVEL) {
-                endGame(true);
-                return;
-            }
-            showScreen(gamePlayScreen);
-            gameRunning = true;
-            gamePaused = false;
-            updateDisplay();
-            startLevel();
-        }
-
-        // --- Game Loop (requestAnimationFrame for smooth animations) ---
-        function gameLoop() {
-            if (!gameRunning || gamePaused) return;
-
-            if (!isHoldingAnomaly) {
-                updateAnomalies(); // Anomalies only expand when not holding one
-            }
-
-            gameLoopAnimationFrame = requestAnimationFrame(gameLoop);
-        }
-
-        // --- Interaction Logic (Tap & Drag) ---
-        let touchStartPoint = null;
-        let lastAnomalyX, lastAnomalyY; // To store anomaly position when dragging starts
-
-        gameArea.addEventListener('mousedown', (e) => {
-            if (!gameRunning || gamePaused || isHoldingAnomaly) return;
-
-            const targetAnomaly = e.target.closest('.anomaly');
-            if (targetAnomaly) {
-                initiateAnomalyHold(targetAnomaly, e.clientX, e.clientY);
-            }
-        });
-
-        gameArea.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (!gameRunning || gamePaused || isHoldingAnomaly || e.touches.length === 0) return;
-
-            const touch = e.touches[0];
-            const targetAnomaly = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.anomaly');
-
-            if (targetAnomaly) {
-                initiateAnomalyHold(targetAnomaly, touch.clientX, touch.clientY);
-            }
-        }, { passive: false });
-
-        function initiateAnomalyHold(anomaly, clientX, clientY) {
-            selectedAnomaly = anomaly;
-            isHoldingAnomaly = true;
-            selectedAnomaly.classList.add('frozen'); // Visually freeze
-            freezeAllAnomalies(true); // Pause other anomalies' expansion
-
-            // Store anomaly's initial position relative to gameArea
-            const gameAreaRect = gameArea.getBoundingClientRect();
-            lastAnomalyX = selectedAnomaly.offsetLeft;
-            lastAnomalyY = selectedAnomaly.offsetTop;
-
-            // Show chronoline
-            chronolineElement.style.display = 'block';
-            updateChronoline(clientX, clientY);
-        }
-
-        gameArea.addEventListener('mousemove', (e) => {
-            if (isHoldingAnomaly && selectedAnomaly && gameRunning && !gamePaused) {
-                updateChronoline(e.clientX, e.clientY);
-            }
-        });
-
-        gameArea.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (isHoldingAnomaly && selectedAnomaly && gameRunning && !gamePaused && e.touches.length > 0) {
-                const touch = e.touches[0];
-                updateChronoline(touch.clientX, touch.clientY);
-            }
-        }, { passive: false });
-
-
-        function updateChronoline(clientX, clientY) {
-            if (!selectedAnomaly) return;
-
-            const gameAreaRect = gameArea.getBoundingClientRect();
-            const anomalyCenterX = selectedAnomaly.offsetLeft + selectedAnomaly.offsetWidth / 2;
-            const anomalyCenterY = selectedAnomaly.offsetTop + selectedAnomaly.offsetHeight / 2;
-
-            const pointerX = clientX - gameAreaRect.left;
-            const pointerY = clientY - gameAreaRect.top;
-
-            const dx = pointerX - anomalyCenterX;
-            const dy = pointerY - anomalyCenterY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const angle = Math.atan2(dy, dx);
-
-            chronolineElement.style.left = `${anomalyCenterX}px`;
-            chronolineElement.style.top = `${anomalyCenterY}px`;
-            chronolineElement.style.width = `${distance}px`;
-            chronolineElement.style.transform = `rotate(${angle}rad)`;
-        }
-
-        document.addEventListener('mouseup', (e) => {
-            if (isHoldingAnomaly && selectedAnomaly && gameRunning && !gamePaused) {
-                releaseAnomaly(e.clientX, e.clientY);
-            }
-        });
-
-        document.addEventListener('touchend', (e) => {
-            if (isHoldingAnomaly && selectedAnomaly && gameRunning && !gamePaused) {
-                // Touchend event might not have clientX/Y directly on the touch object
-                // If it's a multi-touch scenario, touches[0] might not be the one that ended
-                // For simplicity, we'll use the last known position or center of gameArea if no touch is left
-                const lastX = e.changedTouches[0]?.clientX || gameArea.getBoundingClientRect().left + gameArea.offsetWidth / 2;
-                const lastY = e.changedTouches[0]?.clientY || gameArea.getBoundingClientRect().top + gameArea.offsetHeight / 2;
-                releaseAnomaly(lastX, lastY);
-            }
-        });
-
-        function releaseAnomaly(clientX, clientY) {
-            if (!selectedAnomaly) return;
-
-            const gameAreaRect = gameArea.getBoundingClientRect();
-            const releaseX = clientX - gameAreaRect.left;
-            const releaseY = clientY - gameAreaRect.top;
-
-            let shunted = false;
-            let targetRift = null;
-
-            // Check if released over a Time Rift
-            for (const rift of timeRifts) {
-                const riftRect = rift.getBoundingClientRect();
-                const riftRelRect = {
-                    left: riftRect.left - gameAreaRect.left,
-                    right: riftRect.right - gameAreaRect.left,
-                    top: riftRect.top - gameAreaRect.top,
-                    bottom: riftRect.bottom - gameAreaRect.top
-                };
-
-                // Check if release point is within rift boundaries + shunt range
-                if (
-                    releaseX >= riftRelRect.left - SHUNT_RANGE &&
-                    releaseX <= riftRelRect.right + SHUNT_RANGE &&
-                    releaseY >= riftRelRect.top - SHUNT_RANGE &&
-                    releaseY <= riftRelRect.bottom + SHUNT_RANGE
-                ) {
-                    targetRift = rift;
-                    break;
-                }
-            }
-
-            if (targetRift) {
-                if (selectedAnomaly.dataset.color === targetRift.dataset.color && !targetRift.classList.contains('fading')) {
-                    // Correct shunt!
-                    score += SCORE_PER_SHUNT;
-                    shuntedAnomaliesInLevel++;
-                    createEffect('shunt', targetRift.offsetLeft + targetRift.offsetWidth / 2, targetRift.offsetTop + targetRift.offsetHeight / 2, selectedAnomaly.dataset.color, 70);
-                    selectedAnomaly.remove();
-                    activeAnomalies.splice(activeAnomalies.indexOf(selectedAnomaly), 1);
-                    shunted = true;
-                } else {
-                    // Incorrect shunt!
-                    loseLife(selectedAnomaly, "incorrect_shunt");
-                }
-            } else {
-                // Released outside of any valid rift, or no rift was close enough
-                // Anomaly just reverts to its position and resumes expanding
-                selectedAnomaly.classList.remove('frozen');
-                selectedAnomaly.classList.remove('shunting');
-                selectedAnomaly.style.left = `${lastAnomalyX}px`; // Revert to start drag position
-                selectedAnomaly.style.top = `${lastAnomalyY}px`; // Revert to start drag position
-            }
-
-            isHoldingAnomaly = false;
-            selectedAnomaly = null;
-            chronolineElement.style.display = 'none'; // Hide chronoline
-            freezeAllAnomalies(false); // Unfreeze all anomalies
-
-            updateDisplay();
-            if (shunted) {
-                checkLevelCompletion();
-            }
-        }
-
-        // Helper to freeze/unfreeze all non-selected anomalies
-        function freezeAllAnomalies(freeze) {
-            activeAnomalies.forEach(anomaly => {
-                if (anomaly !== selectedAnomaly) {
-                    if (freeze) {
-                        anomaly.classList.add('frozen');
-                    } else {
-                        anomaly.classList.remove('frozen');
-                    }
-                }
-            });
         }
 
         // --- Event Listeners ---
         startButton.addEventListener('click', startGame);
-
-        // --- Pause Button
-        pauseButton.addEventListener('click', pauseGame);
-
-        // --- Pause Screen
-        continueButton.addEventListener('click', continueGame);
-        restartButtonPause.addEventListener('click', restartGame);
-
-        // --- Level Complete Screen
-        nextLevelButton.addEventListener('click', nextLevel);
-
-        // --- Game Over Screen
-        restartButtonGameOver.addEventListener('click', restartGame);
+        nextLevelButton.addEventListener('click', goToNextLevel);
+        restartGameButton.addEventListener('click', restartGame);
+        playAgainButton.addEventListener('click', restartGame);
 
         // Initial setup
-        showScreen(startScreen);
-        updateDisplay();
+        createStars();
     </script>
 </body>
 </html>
