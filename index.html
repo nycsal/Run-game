@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Gem Rush Adventure!</title>
     <style>
         /* General Body Styles */
@@ -15,9 +15,15 @@
             margin: 0;
             background: linear-gradient(to right, #6a11cb, #2575fc); /* Vibrant background gradient */
             color: white;
-            overflow: auto; /* Allow scrolling if content overflows on small screens */
+            overflow: hidden; /* Prevent body scrolling that interferes with touch events */
             padding: 10px; /* Add some padding around the edges for smaller screens */
             box-sizing: border-box; /* Include padding in the element's total width and height */
+            -webkit-user-select: none; /* Prevent text selection on iOS */
+            -moz-user-select: none; /* Prevent text selection on Firefox */
+            -ms-user-select: none; /* Prevent text selection on IE/Edge */
+            user-select: none; /* Prevent text selection */
+            -webkit-touch-callout: none; /* Prevent callout menu on iOS */
+            -webkit-tap-highlight-color: rgba(0,0,0,0); /* Remove tap highlight on iOS */
         }
 
         /* Game Container */
@@ -31,8 +37,9 @@
             max-width: 600px; /* Maintain a reasonable max width */
             box-sizing: border-box;
             position: relative;
-            overflow: hidden; /* Hide overflowing elements */
+            /* overflow: hidden; /* This might hide elements, let's try auto or visible for debugging if needed */ */
             border: 3px solid #ffd700; /* Gold border for a premium feel */
+            touch-action: manipulation; /* Disable default touch actions like double-tap zoom */
         }
 
         /* Starry Background Effect */
@@ -198,6 +205,8 @@
             overflow: hidden;
             /* Glossy effect */
             background-image: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 20%, transparent 70%);
+            /* Ensure gems themselves don't trigger browser default touch actions */
+            touch-action: none;
         }
 
         .gem:hover {
@@ -205,13 +214,14 @@
             box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5); /* More pronounced shadow on hover */
         }
 
-        /* Dragging feedback */
+        /* Dragging feedback (for touch and desktop) */
         .gem.dragging {
             opacity: 0.5; /* Make dragged gem semi-transparent */
+            transform: scale(1.05);
             cursor: grabbing;
         }
 
-        /* Drag over target feedback */
+        /* Drag over target feedback (for touch and desktop) */
         .gem.drag-over {
             border: 2px solid #ffd700; /* Gold border for valid drop target */
             transform: scale(1.05);
@@ -223,7 +233,7 @@
         .gem.green { background-color: #4dff4d; }
         .gem.yellow { background-color: #ffff4d; }
         .gem.purple { background-color: #8a2be2; }
-        .gem.empty { background-color: transparent; border: none; box-shadow: none;} /* For "removed" gems */
+        .gem.empty { background-color: transparent; border: none; box-shadow: none; opacity: 0; transition: opacity 0.3s ease-out;} /* For "removed" gems */
 
         /* Game Messages */
         .message {
@@ -339,8 +349,16 @@
         const gemColors = ['red', 'blue', 'green', 'yellow', 'purple']; // Available gem colors
         const gridSize = 8; // The grid will be 8x8
         let gems = []; // 2D array to represent the game board state (colors)
-        let activeGem = null; // The gem being dragged
-        let targetGem = null; // The gem being dragged over
+        let activeGem = null; // The gem currently being "dragged" (touched)
+        let targetGem = null; // The gem that the activeGem is being "swapped" with
+
+        // Touch swipe related variables
+        let initialTouchX = null;
+        let initialTouchY = null;
+        const swipeThreshold = 30; // Minimum pixels to register as a swipe
+
+        // Flag to prevent multiple concurrent animations/logic
+        let gameLocked = false;
 
         // --- Game State Functions ---
 
@@ -377,6 +395,7 @@
         function startLevel() {
             timeLeft = 60; // Reset timer for the new level
             progress = 0; // Reset progress for the new level
+            gameLocked = false; // Unlock game interactions
             updateGameInfo(); // Update display
             progressBar.style.width = '0%'; // Reset progress bar visually
             gameMessage.textContent = ''; // Clear any previous messages
@@ -419,6 +438,7 @@
          */
         function levelComplete() {
             clearInterval(timerInterval); // Stop the timer
+            gameLocked = true; // Lock game interactions
             playerNameGoodJob.textContent = playerName;
             completedLevel.textContent = currentLevel;
             showScreen(levelCompleteScreen); // Show level complete screen
@@ -429,6 +449,7 @@
          */
         function gameOver() {
             clearInterval(timerInterval); // Stop the timer
+            gameLocked = true; // Lock game interactions
             playerNameGameOver.textContent = playerName;
             showScreen(gameOverScreen); // Show game over screen
         }
@@ -438,6 +459,7 @@
          */
         function gameWon() {
             clearInterval(timerInterval); // Stop the timer
+            gameLocked = true; // Lock game interactions
             playerNameGameWon.textContent = playerName;
             showScreen(gameWonScreen); // Show game won screen
         }
@@ -499,9 +521,14 @@
                     gem.classList.add('gem', gems[r][c]);
                     gem.dataset.row = r; // Store row in data attribute
                     gem.dataset.col = c; // Store column in data attribute
-                    gem.setAttribute('draggable', true); // Make gems draggable
 
-                    // Add drag event listeners
+                    // Add touch event listeners for mobile swipe
+                    gem.addEventListener('touchstart', handleTouchStart);
+                    gem.addEventListener('touchmove', handleTouchMove);
+                    gem.addEventListener('touchend', handleTouchEnd);
+
+                    // Add desktop drag event listeners (for non-touch devices)
+                    gem.setAttribute('draggable', true);
                     gem.addEventListener('dragstart', handleDragStart);
                     gem.addEventListener('dragenter', handleDragEnter);
                     gem.addEventListener('dragleave', handleDragLeave);
@@ -518,89 +545,234 @@
          * Finds and removes any initial matches when the board is first created.
          * Recursively calls itself until no more matches are found.
          */
-        function checkInitialMatches() {
+        async function checkInitialMatches() {
+            gameLocked = true; // Temporarily lock interaction during initial match checking
             const matches = findMatches();
             if (matches.length > 0) {
+                gameMessage.textContent = 'Clearing initial matches...';
                 removeMatchedGems(matches);
+                await new Promise(resolve => setTimeout(resolve, 500)); // Visual delay
                 applyGravity();
+                await new Promise(resolve => setTimeout(resolve, 500)); // Visual delay
                 fillNewGems();
-                // Check again after refilling to catch cascades
-                setTimeout(checkInitialMatches, 300); // Small delay for visual effect
+                drawGems(); // Redraw grid after new gems
+                await new Promise(resolve => setTimeout(resolve, 500)); // Visual delay
+                await checkInitialMatches(); // Recursively check for cascades
             } else {
                 gameMessage.textContent = 'Swipe gems to match 3 or more!';
+                gameLocked = false; // Unlock interaction
             }
         }
 
+        // --- Touch Event Handlers ---
 
-        // --- Drag and Drop Handlers ---
-
-        function handleDragStart(e) {
+        function handleTouchStart(e) {
+            if (gameLocked) return;
+            e.preventDefault(); // Prevent scrolling/zooming
             activeGem = e.target;
-            e.dataTransfer.setData('text/plain', ''); // Required for Firefox
-            e.target.classList.add('dragging');
+            activeGem.classList.add('dragging');
+            initialTouchX = e.touches[0].clientX;
+            initialTouchY = e.touches[0].clientY;
+            gameMessage.textContent = 'Dragging...';
         }
 
-        function handleDragEnter(e) {
-            e.preventDefault(); // Allow drop
-            targetGem = e.target;
-            // Only highlight if it's a valid swap target
-            if (activeGem && targetGem && allowSwap(activeGem, targetGem)) {
+        function handleTouchMove(e) {
+            if (!activeGem || gameLocked) return;
+            e.preventDefault(); // Prevent scrolling while moving gem
+
+            const currentTouchX = e.touches[0].clientX;
+            const currentTouchY = e.touches[0].clientY;
+
+            // Determine direction of swipe based on initial vs current touch
+            const dx = currentTouchX - initialTouchX;
+            const dy = currentTouchY - initialTouchY;
+
+            let potentialTarget = null;
+            const gemRect = activeGem.getBoundingClientRect();
+            const gemSize = gemRect.width; // Assuming square gems
+
+            // Calculate center of the active gem
+            const activeGemCenterX = gemRect.left + gemSize / 2;
+            const activeGemCenterY = gemRect.top + gemSize / 2;
+
+            // Determine which adjacent cell the touch is currently over
+            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold) { // Horizontal swipe
+                if (dx > 0) { // Swiping right
+                    potentialTarget = getGemAtCoordinates(activeGemCenterX + gemSize, activeGemCenterY);
+                } else { // Swiping left
+                    potentialTarget = getGemAtCoordinates(activeGemCenterX - gemSize, activeGemCenterY);
+                }
+            } else if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > swipeThreshold) { // Vertical swipe
+                if (dy > 0) { // Swiping down
+                    potentialTarget = getGemAtCoordinates(activeGemCenterX, activeGemCenterY + gemSize);
+                } else { // Swiping up
+                    potentialTarget = getGemAtCoordinates(activeGemCenterX, activeGemCenterY - gemSize);
+                }
+            }
+
+            // Clean up old target highlights
+            if (targetGem && targetGem !== potentialTarget) {
+                targetGem.classList.remove('drag-over');
+            }
+
+            // Set new target and highlight if valid
+            if (potentialTarget && potentialTarget !== activeGem && canSwap(activeGem, potentialTarget)) {
+                targetGem = potentialTarget;
                 targetGem.classList.add('drag-over');
+            } else {
+                targetGem = null;
             }
         }
 
-        function handleDragLeave(e) {
-            e.target.classList.remove('drag-over');
-        }
+        async function handleTouchEnd(e) {
+            if (gameLocked) return;
 
-        function handleDragOver(e) {
-            e.preventDefault(); // Allow drop
-        }
+            // Clean up active gem highlight immediately
+            activeGem.classList.remove('dragging');
+            if (targetGem) {
+                targetGem.classList.remove('drag-over');
+            }
 
-        async function handleDrop(e) {
-            e.preventDefault();
-            targetGem = e.target;
-
-            if (activeGem && targetGem && allowSwap(activeGem, targetGem)) {
-                // Perform the swap in the internal data array
+            if (activeGem && targetGem) {
                 const activeRow = parseInt(activeGem.dataset.row);
                 const activeCol = parseInt(activeGem.dataset.col);
                 const targetRow = parseInt(targetGem.dataset.row);
                 const targetCol = parseInt(targetGem.dataset.col);
 
-                // Temporarily swap colors in the data array
+                // Perform the swap in the internal data array
                 const tempColor = gems[activeRow][activeCol];
                 gems[activeRow][activeCol] = gems[targetRow][targetCol];
                 gems[targetRow][targetCol] = tempColor;
 
                 // Update the DOM to reflect the swap
-                activeGem.className = 'gem ' + gems[activeRow][activeCol];
-                targetGem.className = 'gem ' + gems[targetRow][targetCol];
+                activeGem.className = `gem ${gems[activeRow][activeCol]}`;
+                targetGem.className = `gem ${gems[targetRow][targetCol]}`;
 
-                // Check for matches after the swap
+                gameLocked = true; // Lock game during match check/animation
                 let matchesFound = await checkMatches();
 
                 if (!matchesFound) {
-                    // If no matches, swap back after a brief visual delay
-                    gameMessage.textContent = 'No match, trying another move!';
-                    setTimeout(() => {
-                        const tempColorBack = gems[activeRow][activeCol];
-                        gems[activeRow][activeCol] = gems[targetRow][targetCol];
-                        gems[targetRow][targetCol] = tempColorBack;
+                    gameMessage.textContent = 'No match, swapping back...';
+                    await new Promise(resolve => setTimeout(resolve, 500)); // Visual delay
 
-                        activeGem.className = 'gem ' + gems[activeRow][activeCol];
-                        targetGem.className = 'gem ' + gems[targetRow][targetCol];
-                        gameMessage.textContent = 'Swipe gems to match 3 or more!';
-                    }, 500); // Adjust delay as needed
+                    // Swap back if no match
+                    const tempColorBack = gems[activeRow][activeCol];
+                    gems[activeRow][activeCol] = gems[targetRow][targetCol];
+                    gems[targetRow][targetCol] = tempColorBack;
+
+                    activeGem.className = `gem ${gems[activeRow][activeCol]}`;
+                    targetGem.className = `gem ${gems[targetRow][targetCol]}`;
+                    gameMessage.textContent = 'Swipe gems to match 3 or more!';
+                }
+                gameLocked = false; // Unlock game after process
+            } else {
+                 gameMessage.textContent = 'Swipe gems to match 3 or more!'; // Reset message if no valid swap
+            }
+
+            // Reset touch state
+            activeGem = null;
+            targetGem = null;
+            initialTouchX = null;
+            initialTouchY = null;
+        }
+
+        /**
+         * Helper function to get the gem element at specific screen coordinates.
+         * Useful for touchmove to identify target gem.
+         * @param {number} x - X coordinate on the screen.
+         * @param {number} y - Y coordinate on the screen.
+         * @returns {HTMLElement|null} - The gem element at the coordinates, or null if none.
+         */
+        function getGemAtCoordinates(x, y) {
+            // Get all gem elements
+            const gemElements = gameGrid.querySelectorAll('.gem');
+            for (const gemEl of gemElements) {
+                const rect = gemEl.getBoundingClientRect();
+                if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                    return gemEl;
                 }
             }
-            // Clean up drag-over class
+            return null;
+        }
+
+        // --- Desktop Drag and Drop Handlers (Keep for desktop support) ---
+
+        function handleDragStart(e) {
+            if (gameLocked) { e.preventDefault(); return; }
+            activeGem = e.target;
+            e.dataTransfer.setData('text/plain', ''); // Required for Firefox
+            e.target.classList.add('dragging');
+            gameMessage.textContent = 'Dragging...';
+        }
+
+        function handleDragEnter(e) {
+            if (gameLocked) return;
+            e.preventDefault(); // Allow drop
+            targetGem = e.target;
+            if (activeGem && targetGem && canSwap(activeGem, targetGem)) {
+                targetGem.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            if (gameLocked) return;
+            e.target.classList.remove('drag-over');
+        }
+
+        function handleDragOver(e) {
+            if (gameLocked) return;
+            e.preventDefault(); // Allow drop
+        }
+
+        async function handleDrop(e) {
+            if (gameLocked) return;
+            e.preventDefault();
+            targetGem = e.target;
+
+            // Cleanup potential target highlighting immediately
             if (targetGem) {
                 targetGem.classList.remove('drag-over');
+            }
+
+            if (activeGem && targetGem && canSwap(activeGem, targetGem)) {
+                const activeRow = parseInt(activeGem.dataset.row);
+                const activeCol = parseInt(activeGem.dataset.col);
+                const targetRow = parseInt(targetGem.dataset.row);
+                const targetCol = parseInt(targetGem.dataset.col);
+
+                // Perform the swap in the internal data array
+                const tempColor = gems[activeRow][activeCol];
+                gems[activeRow][activeCol] = gems[targetRow][targetCol];
+                gems[targetRow][targetCol] = tempColor;
+
+                // Update the DOM to reflect the swap
+                activeGem.className = `gem ${gems[activeRow][activeCol]}`;
+                targetGem.className = `gem ${gems[targetRow][targetCol]}`;
+
+                gameLocked = true; // Lock game during match check/animation
+                let matchesFound = await checkMatches();
+
+                if (!matchesFound) {
+                    gameMessage.textContent = 'No match, swapping back...';
+                    await new Promise(resolve => setTimeout(resolve, 500)); // Visual delay
+
+                    // Swap back if no match
+                    const tempColorBack = gems[activeRow][activeCol];
+                    gems[activeRow][activeCol] = gems[targetRow][targetCol];
+                    gems[targetRow][targetCol] = tempColorBack;
+
+                    activeGem.className = `gem ${gems[activeRow][activeCol]}`;
+                    targetGem.className = `gem ${gems[targetRow][targetCol]}`;
+                    gameMessage.textContent = 'Swipe gems to match 3 or more!';
+                }
+                gameLocked = false; // Unlock game after process
+            } else {
+                 gameMessage.textContent = 'Swipe gems to match 3 or more!'; // Reset message if no valid swap
             }
         }
 
         function handleDragEnd(e) {
+            if (gameLocked) return;
             activeGem.classList.remove('dragging');
             activeGem = null;
             targetGem = null;
@@ -612,7 +784,9 @@
          * @param {HTMLElement} gem2 - The second gem element.
          * @returns {boolean} - True if they are adjacent, false otherwise.
          */
-        function allowSwap(gem1, gem2) {
+        function canSwap(gem1, gem2) {
+            if (!gem1 || !gem2) return false; // Ensure both gems exist
+
             const r1 = parseInt(gem1.dataset.row);
             const c1 = parseInt(gem1.dataset.col);
             const r2 = parseInt(gem2.dataset.row);
@@ -631,6 +805,16 @@
          */
         function findMatches() {
             const matches = [];
+            const matchedSet = new Set(); // To prevent duplicate additions
+
+            // Helper to add match if not already added
+            const addMatch = (row, col) => {
+                const key = `${row},${col}`;
+                if (!matchedSet.has(key)) {
+                    matches.push({ row, col });
+                    matchedSet.add(key);
+                }
+            };
 
             // Check horizontal matches
             for (let r = 0; r < gridSize; r++) {
@@ -640,13 +824,13 @@
                     const color3 = gems[r][c + 2];
 
                     if (color1 && color1 === color2 && color1 === color3) {
-                        matches.push({ row: r, col: c });
-                        matches.push({ row: r, col: c + 1 });
-                        matches.push({ row: r, col: c + 2 });
+                        addMatch(r, c);
+                        addMatch(r, c + 1);
+                        addMatch(r, c + 2);
                         // Check for more than 3 in a row
                         let currentC = c + 3;
                         while (currentC < gridSize && gems[r][currentC] === color1) {
-                            matches.push({ row: r, col: currentC });
+                            addMatch(r, currentC);
                             currentC++;
                         }
                     }
@@ -661,23 +845,24 @@
                     const color3 = gems[r + 2][c];
 
                     if (color1 && color1 === color2 && color1 === color3) {
-                        matches.push({ row: r, col: c });
-                        matches.push({ row: r + 1, col: c });
-                        matches.push({ row: r + 2, col: c });
+                        addMatch(r, c);
+                        addMatch(r + 1, c);
+                        addMatch(r + 2, c);
                         // Check for more than 3 in a column
                         let currentR = r + 3;
                         while (currentR < gridSize && gems[currentR][c] === color1) {
-                            matches.push({ row: currentR, col: c });
+                            addMatch(currentR, c);
                             currentR++;
                         }
                     }
                 }
             }
-            return Array.from(new Set(matches.map(m => JSON.stringify(m)))).map(s => JSON.parse(s)); // Remove duplicates
+            return matches;
         }
 
         /**
          * Processes matches: removes gems, applies gravity, fills new gems, and checks for cascades.
+         * This function is asynchronous to allow for visual delays.
          * @returns {Promise<boolean>} - Resolves with true if matches were found and processed, false otherwise.
          */
         async function checkMatches() {
@@ -686,60 +871,67 @@
             if (foundMatches.length > 0) {
                 gameMessage.textContent = 'Awesome! Match made!';
                 // Increase progress based on number of gems matched
-                increaseProgress(foundMatches.length / 3 * 2); // Roughly 2 progress per 3 gems
+                increaseProgress(foundMatches.length * 1.5); // Increase progress more meaningfully
 
                 removeMatchedGems(foundMatches);
-                await new Promise(resolve => setTimeout(resolve, 300)); // Visual delay for removal
+                await new Promise(resolve => setTimeout(resolve, 300)); // Visual delay for removal effect
 
                 applyGravity();
-                await new Promise(resolve => setTimeout(resolve, 300)); // Visual delay for gravity
+                drawGems(); // Redraw grid after gravity
+                await new Promise(resolve => setTimeout(resolve, 300)); // Visual delay for gravity effect
 
                 fillNewGems();
                 drawGems(); // Redraw grid after new gems
-
                 await new Promise(resolve => setTimeout(resolve, 300)); // Visual delay for new gems
 
                 // Recursively check for new matches (cascades)
+                // We await this to ensure the current cascade fully resolves before returning
                 await checkMatches();
-                return true; // Matches were found and processed
+                return true; // Matches were found and processed in this sequence
             }
             return false; // No matches found
         }
 
         /**
-         * Sets matched gems in the `gems` array to null (empty).
+         * Sets matched gems in the `gems` array to null (empty) and applies 'empty' class to DOM elements.
          * @param {Array<Object>} matches - Array of matched gem coordinates.
          */
         function removeMatchedGems(matches) {
             matches.forEach(match => {
-                gems[match.row][match.col] = null; // Set to null for removal
-                // Visually update the gem to be 'empty'
+                gems[match.row][match.col] = null; // Mark as null in data array
                 const gemElement = gameGrid.querySelector(`[data-row="${match.row}"][data-col="${match.col}"]`);
                 if (gemElement) {
-                    gemElement.classList.add('empty');
+                    gemElement.classList.add('empty'); // Add empty class for visual fade-out
                     gemElement.classList.remove(...gemColors); // Remove color classes
                     gemElement.removeAttribute('draggable'); // Make it non-draggable
+                    // Remove event listeners to prevent interaction with 'empty' gems
+                    gemElement.removeEventListener('touchstart', handleTouchStart);
+                    gemElement.removeEventListener('touchmove', handleTouchMove);
+                    gemElement.removeEventListener('touchend', handleTouchEnd);
+                    gemElement.removeEventListener('dragstart', handleDragStart);
+                    gemElement.removeEventListener('dragenter', handleDragEnter);
+                    gemElement.removeEventListener('dragleave', handleDragLeave);
+                    gemElement.removeEventListener('dragover', handleDragOver);
+                    gemElement.removeEventListener('drop', handleDrop);
+                    gemElement.removeEventListener('dragend', handleDragEnd);
                 }
             });
-            // Give a moment for the 'empty' class to take effect before drawing
-            setTimeout(drawGems, 200);
         }
 
         /**
          * Applies gravity, moving gems down to fill empty spaces.
+         * Updates the internal `gems` array.
          */
         function applyGravity() {
             for (let c = 0; c < gridSize; c++) {
-                let emptySpots = []; // To keep track of null spots in this column
+                let emptyRow = gridSize - 1; // Start from bottom
                 for (let r = gridSize - 1; r >= 0; r--) {
-                    if (gems[r][c] === null) {
-                        emptySpots.push(r); // Add empty spot
-                    } else if (emptySpots.length > 0) {
-                        // Move gem down to the lowest empty spot
-                        const targetRow = emptySpots.shift(); // Get the lowest empty row
-                        gems[targetRow][c] = gems[r][c]; // Move the gem
-                        gems[r][c] = null; // Set original spot to null
-                        emptySpots.push(r); // Add the old spot to empty spots
+                    if (gems[r][c] !== null) {
+                        if (gems[emptyRow][c] === null) { // If target empty spot is lower than current gem
+                            gems[emptyRow][c] = gems[r][c]; // Move gem down
+                            gems[r][c] = null; // Clear original spot
+                        }
+                        emptyRow--; // Move up to check next row
                     }
                 }
             }
