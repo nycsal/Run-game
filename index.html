@@ -40,4 +40,227 @@
             display: none;
         }
         #gameOverScreen button, #startScreen button, #levelUpScreen button {
-            padding
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background: #ffd700;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="startScreen">
+        <div>
+            <h1>Temple Runner</h1>
+            <p>Swipe Left/Right: Move lanes<br>Swipe Up: Jump<br>Swipe Down: Slide</p>
+            <button onclick="startGame()">Start Game</button>
+        </div>
+    </div>
+    <div id="gameOverScreen">
+        <div>
+            <h1>Game Over</h1>
+            <p>Score: <span id="finalScore"></span></p>
+            <button onclick="restartGame()">Restart</button>
+        </div>
+    </div>
+    <div id="levelUpScreen">
+        <div>
+            <h1>Level <span id="nextLevel"></span></h1>
+            <p>Score: <span id="currentScore"></span></p>
+            <button onclick="continueGame()">Continue</button>
+        </div>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            width = canvas.width;
+            height = canvas.height;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let gameState = 'start';
+        let player = { lane: 1, y: 0, state: 'run', jumpTime: 0, slideTime: 0 };
+        let obstacles = [];
+        let coins = [];
+        let score = 0;
+        let level = 1;
+        let speed = 5;
+        let distance = 0;
+        let gameLoop;
+
+        const lanes = [width * 0.3, width * 0.5, width * 0.7];
+        const playerWidth = width * 0.1;
+        const playerHeight = height * 0.2;
+        const obstacleSize = width * 0.1;
+        const coinSize = width * 0.05;
+
+        // Touch controls
+        let touchStartX = 0, touchStartY = 0;
+        canvas.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        });
+        canvas.addEventListener('touchend', (e) => {
+            let touchEndX = e.changedTouches[0].clientX;
+            let touchEndY = e.changedTouches[0].clientY;
+            let dx = touchEndX - touchStartX;
+            let dy = touchEndY - touchStartY;
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 50 && player.lane < 2) player.lane++;
+                if (dx < -50 && player.lane > 0) player.lane--;
+            } else {
+                if (dy < -50 && player.state === 'run') {
+                    player.state = 'jump';
+                    player.jumpTime = 30;
+                }
+                if (dy > 50 && player.state === 'run') {
+                    player.state = 'slide';
+                    player.slideTime = 30;
+                }
+            }
+        });
+
+        function spawnObstacle() {
+            let lane = Math.floor(Math.random() * 3);
+            let type = Math.random() > 0.5 ? 'rock' : 'barrier';
+            obstacles.push({ lane, y: -obstacleSize, type });
+        }
+
+        function spawnCoin() {
+            let lane = Math.floor(Math.random() * 3);
+            coins.push({ lane, y: -coinSize });
+        }
+
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            gameState = 'playing';
+            score = 0;
+            level = 1;
+            speed = 5;
+            distance = 0;
+            player = { lane: 1, y: 0, state: 'run', jumpTime: 0, slideTime: 0 };
+            obstacles = [];
+            coins = [];
+            gameLoop = setInterval(update, 1000 / 60);
+        }
+
+        function restartGame() {
+            document.getElementById('gameOverScreen').style.display = 'none';
+            startGame();
+        }
+
+        function continueGame() {
+            document.getElementById('levelUpScreen').style.display = 'none';
+            gameState = 'playing';
+            gameLoop = setInterval(update, 1000 / 60);
+        }
+
+        function update() {
+            if (gameState !== 'playing') return;
+
+            // Update player
+            if (player.state === 'jump') {
+                player.jumpTime--;
+                player.y = -height * 0.2 * (1 - Math.abs(player.jumpTime / 15 - 1));
+                if (player.jumpTime <= 0) player.state = 'run';
+            } else if (player.state === 'slide') {
+                player.slideTime--;
+                if (player.slideTime <= 0) player.state = 'run';
+            } else {
+                player.y = 0;
+            }
+
+            // Spawn obstacles and coins
+            if (Math.random() < 0.02 * level) spawnObstacle();
+            if (Math.random() < 0.03) spawnCoin();
+
+            // Update obstacles
+            obstacles.forEach(o => o.y += speed);
+            obstacles = obstacles.filter(o => o.y < height);
+
+            // Update coins
+            coins.forEach(c => c.y += speed);
+            coins = coins.filter(c => c.y < height);
+
+            // Collision detection
+            obstacles.forEach(o => {
+                if (o.lane === player.lane && Math.abs(o.y - (height * 0.8 + player.y)) < obstacleSize) {
+                    if ((o.type === 'rock' && player.state !== 'jump') || (o.type === 'barrier' && player.state !== 'slide')) {
+                        gameState = 'gameover';
+                        document.getElementById('finalScore').textContent = score;
+                        document.getElementById('gameOverScreen').style.display = 'flex';
+                        clearInterval(gameLoop);
+                    }
+                }
+            });
+
+            // Coin collection
+            coins.forEach((c, i) => {
+                if (c.lane === player.lane && Math.abs(c.y - (height * 0.8 + player.y)) < coinSize) {
+                    score += 10;
+                    coins.splice(i, 1);
+                }
+            });
+
+            // Level progression
+            distance += speed;
+            if (distance > 2000 * level) {
+                level++;
+                speed += 1;
+                if (level > 5) {
+                    gameState = 'gameover';
+                    document.getElementById('finalScore').textContent = score;
+                    document.getElementById('gameOverScreen').style.display = 'flex';
+                    clearInterval(gameLoop);
+                } else {
+                    gameState = 'levelup';
+                    document.getElementById('nextLevel').textContent = level;
+                    document.getElementById('currentScore').textContent = score;
+                    document.getElementById('levelUpScreen').style.display = 'flex';
+                    clearInterval(gameLoop);
+                }
+            }
+
+            // Render
+            ctx.fillStyle = '#444';
+            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = '#888';
+            ctx.fillRect(0, height * 0.7, width, height * 0.3);
+            lanes.forEach(laneX => {
+                ctx.fillStyle = '#666';
+                ctx.fillRect(laneX - playerWidth / 2, height * 0.7, playerWidth, height * 0.3);
+            });
+            ctx.fillStyle = '#ffd700';
+            coins.forEach(c => {
+                ctx.beginPath();
+                ctx.arc(lanes[c.lane], c.y, coinSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            obstacles.forEach(o => {
+                ctx.fillStyle = o.type === 'rock' ? '#8b4513' : '#ff4500';
+                ctx.fillRect(lanes[o.lane] - obstacleSize / 2, o.y, obstacleSize, obstacleSize);
+            });
+            ctx.fillStyle = '#00f';
+            let playerY = height * 0.8 + player.y;
+            let playerH = player.state === 'slide' ? playerHeight / 2 : playerHeight;
+            ctx.fillRect(lanes[player.lane] - playerWidth / 2, playerY - playerH, playerWidth, playerH);
+            ctx.fillStyle = '#fff';
+            ctx.font = '20px Arial';
+            ctx.fillText(`Score: ${score}  Level: ${level}`, 10, 30);
+        }
+
+        window.onload = () => {
+            document.getElementById('startScreen').style.display = 'flex';
+        };
+    </script>
+</body>
+</html>
