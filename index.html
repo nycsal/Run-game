@@ -254,8 +254,12 @@
 
             // Adjust grid columns based on number of cards
             let numCols = 4;
-            if (cards.length > 20) numCols = 5;
-            if (cards.length > 30) numCols = 6;
+            // You can refine this logic to better suit various card counts
+            if (cards.length === 12) numCols = 3; // For 6 pairs
+            else if (cards.length === 16) numCols = 4; // For 8 pairs
+            else if (cards.length >= 20) numCols = 4; // Default for 10 or more pairs
+            else if (cards.length >= 24) numCols = 5; // For 12 pairs (24 cards)
+            else if (cards.length >= 30) numCols = 5; // For 15 pairs (30 cards)
             gameBoard.style.gridTemplateColumns = `repeat(${numCols}, 1fr)`;
 
 
@@ -280,20 +284,19 @@
                 gameBoard.querySelectorAll('.card').forEach(card => {
                     card.classList.add('flipped');
                 });
-                // *** MODIFIED THIS LINE ***
                 setTimeout(() => {
                     gameBoard.querySelectorAll('.card').forEach(card => {
                         card.classList.remove('flipped');
                     });
                     startGame(); // Start timer after cards are hidden
-                }, 3000); // Show for 3 seconds
-            }, 500);
+                }, **3000**); // Show for 3 seconds
+            }, 500); // Small initial delay before showing cards
         }
 
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = array[j], array[i]];
+                [array[i], array[j]] = [array[j], array[i]];
             }
             return array;
         }
@@ -317,7 +320,7 @@
                 flippedCards.push(clickedCard);
 
                 if (flippedCards.length === 2) {
-                    setTimeout(checkForMatch, 700); // Allow time for second card to flip
+                    setTimeout(checkForMatch, 700); // Allow time for second card to flip and then check
                 }
             }
         }
@@ -333,7 +336,7 @@
 
                 card1.classList.add('matched');
                 card2.classList.add('matched');
-                // Optional: Remove event listeners for matched cards if needed
+                // It's good practice to remove event listeners for matched cards
                 card1.removeEventListener('click', flipCard);
                 card2.removeEventListener('click', flipCard);
 
@@ -347,7 +350,7 @@
                 setTimeout(() => {
                     card1.classList.remove('flipped');
                     card2.classList.remove('flipped');
-                }, 500);
+                }, 500); // Short delay before flipping back
             }
             flippedCards = []; // Reset flipped cards
         }
@@ -358,9 +361,8 @@
             powerBallFill.style.width = `${fillPercentage}%`;
         }
 
-
         function startTimer() {
-            clearInterval(timer); // Clear any existing timer
+            clearInterval(timer); // Clear any existing timer to prevent multiple timers
             timer = setInterval(() => {
                 timeLeft--;
                 timerDisplay.textContent = timeLeft;
@@ -369,12 +371,12 @@
                     clearInterval(timer);
                     endLevel(false); // Time's up
                 }
-            }, 1000);
+            }, 1000); // Decrement every second
         }
 
         function endLevel(levelComplete) {
             gameActive = false;
-            clearInterval(timer);
+            clearInterval(timer); // Stop the timer
 
             if (levelComplete) {
                 overlayMessage.innerHTML = `Level ${level} Complete! You found all pairs! <br>Score: ${score}`;
@@ -384,25 +386,25 @@
                 } else {
                     overlayMessage.innerHTML = `Congratulations! You beat all 7 levels! <br>Final Score: ${score}`;
                     restartButton.textContent = `Play Again from Level 1`;
-                    level = 1; // Reset for next game
+                    level = 1; // Reset for next game if all levels completed
                 }
-
             } else {
                 overlayMessage.innerHTML = `Time's Up! Game Over! <br>Score: ${score} <br>Try Level ${level} again?`;
                 restartButton.textContent = `Try Again (Level ${level})`;
             }
-            overlay.style.display = 'flex';
+            overlay.style.display = 'flex'; // Show the overlay
         }
 
         restartButton.addEventListener('click', () => {
+            // If the message indicates all levels are completed, reset level to 1
             if (overlayMessage.textContent.includes("Congratulations")) {
-                level = 1; // Start from level 1 if all levels were completed
+                level = 1;
             }
-            initializeGame();
+            initializeGame(); // Restart the game (or next level)
         });
 
 
-        // Initial game setup
+        // Initial game setup when the page loads
         initializeGame();
 
     </script>
