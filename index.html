@@ -239,7 +239,7 @@
 
         .hud {
             position: absolute;
-            bottom: 20px;
+            bottom: 60px;
             left: 20px;
             right: 20px;
             display: flex;
@@ -607,15 +607,15 @@
                     goalkeeper.classList.add('diving-right');
                 }
                 
-                // Calculate ball destination
+                // Calculate ball destination with much more power
                 const goalArea = document.querySelector('.goal-area');
                 const goalRect = goalArea.getBoundingClientRect();
                 const ballRect = ball.getBoundingClientRect();
                 
-                // Add some randomness based on power and aim
+                // Increase power multiplier significantly
                 const accuracy = 0.7 + (normalizedPower * 0.3);
-                const targetX = (deltaX * 2 * accuracy) + (Math.random() - 0.5) * 50;
-                const targetY = (deltaY * 2 * accuracy) - 400 + (Math.random() - 0.5) * 30;
+                const targetX = (deltaX * 4 * accuracy) + (Math.random() - 0.5) * 50;
+                const targetY = (deltaY * 4 * accuracy) - 600 + (Math.random() - 0.5) * 30;
                 
                 // Animate ball
                 ball.style.transform = `translate(calc(-50% + ${targetX}px), ${targetY}px) scale(0.8)`;
