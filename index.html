@@ -35,9 +35,9 @@
 
         .field {
             position: absolute;
-            bottom: 0;
+            top: 0;
             width: 100%;
-            height: 70%;
+            height: 100%;
             background: linear-gradient(to bottom, #4CAF50, #2E7D32);
             overflow: hidden;
         }
@@ -55,86 +55,127 @@
 
         .goal-area {
             position: absolute;
-            bottom: 0;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: 280px;
-            height: 160px;
-            border: 4px solid white;
-            border-bottom: none;
-            background: rgba(0,0,0,0.1);
+            width: 300px;
+            height: 180px;
+            border: 6px solid white;
+            border-top: none;
+            background: rgba(0,0,0,0.2);
+            border-radius: 0 0 10px 10px;
         }
 
         .goalpost {
             position: absolute;
             background: white;
+            border-radius: 2px;
         }
 
         .goalpost.left {
-            left: -4px;
-            top: -4px;
-            width: 8px;
-            height: 164px;
+            left: -6px;
+            top: 0;
+            width: 12px;
+            height: 186px;
         }
 
         .goalpost.right {
-            right: -4px;
-            top: -4px;
-            width: 8px;
-            height: 164px;
+            right: -6px;
+            top: 0;
+            width: 12px;
+            height: 186px;
         }
 
-        .goalpost.top {
-            top: -4px;
+        .goalpost.bottom {
+            bottom: -6px;
             left: 0;
             width: 100%;
-            height: 8px;
+            height: 12px;
+        }
+
+        .goal-net {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(255,255,255,0.3) 20px, rgba(255,255,255,0.3) 21px),
+                repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.3) 20px, rgba(255,255,255,0.3) 21px);
         }
 
         .goalkeeper {
             position: absolute;
-            bottom: 20px;
+            top: 120px;
             left: 50%;
             transform: translateX(-50%);
-            width: 40px;
-            height: 60px;
-            background: #FF6B35;
-            border-radius: 20px 20px 10px 10px;
-            transition: all 0.3s ease;
+            width: 45px;
+            height: 70px;
+            background: linear-gradient(to bottom, #FFE4B5, #DEB887);
+            border-radius: 22px 22px 15px 15px;
+            transition: all 0.4s ease;
             z-index: 10;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         .goalkeeper::before {
             content: '';
             position: absolute;
-            top: 5px;
+            top: 8px;
             left: 50%;
             transform: translateX(-50%);
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             background: #FFE4B5;
             border-radius: 50%;
+            border: 2px solid #DEB887;
+        }
+
+        .goalkeeper::after {
+            content: '';
+            position: absolute;
+            top: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 35px;
+            height: 25px;
+            background: #FF6B35;
+            border-radius: 8px;
         }
 
         .goalkeeper.diving-left {
-            transform: translateX(-150%) rotate(-15deg);
+            transform: translateX(-200%) rotate(-25deg) scale(1.1);
+            animation: dive 0.4s ease-out;
         }
 
         .goalkeeper.diving-right {
-            transform: translateX(50%) rotate(15deg);
+            transform: translateX(100%) rotate(25deg) scale(1.1);
+            animation: dive 0.4s ease-out;
+        }
+
+        @keyframes dive {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1.1); }
         }
 
         .ball {
             position: absolute;
-            bottom: 200px;
+            bottom: 150px;
             left: 50%;
             transform: translateX(-50%);
-            width: 25px;
-            height: 25px;
-            background: radial-gradient(circle at 30% 30%, white, #333);
+            width: 35px;
+            height: 35px;
+            background: radial-gradient(circle at 35% 35%, #ffffff, #000000);
             border-radius: 50%;
-            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            z-index: 5;
+            transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 15;
+            cursor: grab;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .ball:active {
+            cursor: grabbing;
         }
 
         .ball::before {
@@ -143,45 +184,62 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 15px;
-            height: 15px;
-            border: 2px solid #333;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #333;
             border-radius: 50%;
         }
 
-        .target-zones {
+        .ball::after {
+            content: '';
             position: absolute;
-            bottom: 0;
+            top: 8px;
+            left: 8px;
+            width: 8px;
+            height: 8px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+        }
+
+        .aim-line {
+            position: absolute;
+            bottom: 167px;
             left: 50%;
-            transform: translateX(-50%);
-            width: 280px;
-            height: 160px;
+            transform-origin: bottom center;
+            width: 4px;
+            background: linear-gradient(to top, #FFD700, transparent);
+            border-radius: 2px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 5;
             pointer-events: none;
         }
 
-        .zone {
+        .power-meter {
             position: absolute;
-            border: 2px dashed rgba(255,255,255,0.3);
-            cursor: pointer;
-            pointer-events: all;
-            transition: all 0.2s ease;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            border: 2px solid white;
+            opacity: 0;
+            transition: opacity 0.2s ease;
         }
 
-        .zone:active {
-            background: rgba(255,255,255,0.2);
-            transform: scale(0.95);
+        .power-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4CAF50, #FFD700, #FF5722);
+            border-radius: 8px;
+            width: 0%;
+            transition: width 0.1s ease;
         }
-
-        .zone.top-left { top: 0; left: 0; width: 33.33%; height: 50%; }
-        .zone.top-center { top: 0; left: 33.33%; width: 33.33%; height: 50%; }
-        .zone.top-right { top: 0; right: 0; width: 33.33%; height: 50%; }
-        .zone.bottom-left { bottom: 0; left: 0; width: 33.33%; height: 50%; }
-        .zone.bottom-center { bottom: 0; left: 33.33%; width: 33.33%; height: 50%; }
-        .zone.bottom-right { bottom: 0; right: 0; width: 33.33%; height: 50%; }
 
         .hud {
             position: absolute;
-            top: 20px;
+            bottom: 20px;
             left: 20px;
             right: 20px;
             display: flex;
@@ -196,6 +254,7 @@
             border-radius: 15px;
             text-align: center;
             min-width: 120px;
+            border: 2px solid #FFD700;
         }
 
         .score {
@@ -216,6 +275,14 @@
             margin-top: 5px;
         }
 
+        .instructions-panel {
+            background: rgba(0,0,0,0.8);
+            padding: 10px 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #4CAF50;
+        }
+
         .start-screen {
             position: absolute;
             top: 0;
@@ -231,11 +298,12 @@
         }
 
         .game-title {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
             color: #FFD700;
             margin-bottom: 20px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-align: center;
         }
 
         .start-btn {
@@ -260,7 +328,8 @@
             margin-top: 30px;
             text-align: center;
             color: #87CEEB;
-            line-height: 1.6;
+            line-height: 1.8;
+            max-width: 350px;
         }
 
         .game-over {
@@ -303,15 +372,16 @@
 
         .feedback {
             position: absolute;
-            top: 50%;
+            top: 40%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             opacity: 0;
             transition: all 0.5s ease;
             z-index: 50;
             pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
 
         .feedback.goal {
@@ -324,48 +394,49 @@
 
         .feedback.show {
             opacity: 1;
-            transform: translate(-50%, -50%) scale(1.2);
+            transform: translate(-50%, -50%) scale(1.3);
         }
 
         @media (max-width: 480px) {
-            .game-title { font-size: 24px; }
+            .game-title { font-size: 22px; }
             .start-btn { padding: 15px 30px; font-size: 20px; }
-            .goal-area { width: 240px; height: 140px; }
+            .goal-area { width: 280px; height: 160px; }
             .score { font-size: 20px; }
+            .goalkeeper { width: 40px; height: 60px; }
+            .ball { width: 30px; height: 30px; }
+            .power-meter { width: 160px; }
         }
     </style>
 </head>
 <body>
     <div class="game-container">
+        <div class="field">
+            <div class="goal-area">
+                <div class="goalpost left"></div>
+                <div class="goalpost right"></div>
+                <div class="goalpost bottom"></div>
+                <div class="goal-net"></div>
+            </div>
+            
+            <div class="goalkeeper" id="goalkeeper"></div>
+            <div class="ball" id="ball"></div>
+            <div class="aim-line" id="aimLine"></div>
+            
+            <div class="power-meter" id="powerMeter">
+                <div class="power-fill" id="powerFill"></div>
+            </div>
+        </div>
+
         <div class="hud">
             <div class="score-panel">
                 <div class="score" id="score">0</div>
                 <div class="level">Level <span id="level">1</span></div>
                 <div class="progress"><span id="goals">0</span>/5 Goals</div>
             </div>
-            <div class="score-panel">
-                <div style="font-size: 14px; color: #87CEEB;">Tap goal zones to shoot!</div>
+            <div class="instructions-panel">
+                <div style="font-size: 12px; color: #87CEEB;">Hold & drag ball to aim</div>
+                <div style="font-size: 12px; color: #FFD700;">Release to shoot!</div>
             </div>
-        </div>
-
-        <div class="field">
-            <div class="goal-area">
-                <div class="goalpost left"></div>
-                <div class="goalpost right"></div>
-                <div class="goalpost top"></div>
-                
-                <div class="target-zones">
-                    <div class="zone top-left" data-zone="top-left"></div>
-                    <div class="zone top-center" data-zone="top-center"></div>
-                    <div class="zone top-right" data-zone="top-right"></div>
-                    <div class="zone bottom-left" data-zone="bottom-left"></div>
-                    <div class="zone bottom-center" data-zone="bottom-center"></div>
-                    <div class="zone bottom-right" data-zone="bottom-right"></div>
-                </div>
-            </div>
-            
-            <div class="goalkeeper" id="goalkeeper"></div>
-            <div class="ball" id="ball"></div>
         </div>
 
         <div class="feedback" id="feedback"></div>
@@ -374,7 +445,8 @@
             <div class="game-title">⚽ PENALTY SHOOTOUT ⚽</div>
             <button class="start-btn" id="startBtn">START GAME</button>
             <div class="instructions">
-                <p>🎯 Tap the goal zones to shoot the ball</p>
+                <p>🎯 <strong>Hold and drag</strong> the ball to aim</p>
+                <p>⚡ <strong>Release</strong> to shoot with power</p>
                 <p>🥅 Beat the goalkeeper and score goals</p>
                 <p>⭐ Complete 5 goals per level to advance</p>
                 <p>🏆 How far can you go?</p>
@@ -397,6 +469,9 @@
                 this.goalsPerLevel = 5;
                 this.gameActive = false;
                 this.shooting = false;
+                this.aiming = false;
+                this.startPos = { x: 0, y: 0 };
+                this.currentPos = { x: 0, y: 0 };
                 
                 this.elements = {
                     startScreen: document.getElementById('startScreen'),
@@ -410,7 +485,10 @@
                     goals: document.getElementById('goals'),
                     feedback: document.getElementById('feedback'),
                     finalScore: document.getElementById('finalScore'),
-                    gameOverMessage: document.getElementById('gameOverMessage')
+                    gameOverMessage: document.getElementById('gameOverMessage'),
+                    aimLine: document.getElementById('aimLine'),
+                    powerMeter: document.getElementById('powerMeter'),
+                    powerFill: document.getElementById('powerFill')
                 };
                 
                 this.initializeGame();
@@ -420,13 +498,15 @@
                 this.elements.startBtn.addEventListener('click', () => this.startGame());
                 this.elements.restartBtn.addEventListener('click', () => this.restartGame());
                 
-                document.querySelectorAll('.zone').forEach(zone => {
-                    zone.addEventListener('click', (e) => this.shoot(e.target.dataset.zone));
-                    zone.addEventListener('touchstart', (e) => {
-                        e.preventDefault();
-                        this.shoot(e.target.dataset.zone);
-                    });
-                });
+                // Touch events for ball
+                this.elements.ball.addEventListener('touchstart', (e) => this.startAiming(e), { passive: false });
+                this.elements.ball.addEventListener('touchmove', (e) => this.updateAim(e), { passive: false });
+                this.elements.ball.addEventListener('touchend', (e) => this.shoot(e), { passive: false });
+                
+                // Mouse events for desktop testing
+                this.elements.ball.addEventListener('mousedown', (e) => this.startAiming(e));
+                document.addEventListener('mousemove', (e) => this.updateAim(e));
+                document.addEventListener('mouseup', (e) => this.shoot(e));
             }
             
             startGame() {
@@ -449,40 +529,77 @@
                 this.gameActive = true;
             }
             
-            shoot(zone) {
+            startAiming(e) {
                 if (!this.gameActive || this.shooting) return;
                 
-                this.shooting = true;
-                const isGoal = this.calculateGoal(zone);
-                const goalkeepMove = this.getGoalkeeperMove();
+                e.preventDefault();
+                this.aiming = true;
                 
-                this.animateShot(zone, isGoal, goalkeepMove);
+                const touch = e.touches ? e.touches[0] : e;
+                this.startPos = { x: touch.clientX, y: touch.clientY };
+                this.currentPos = { x: touch.clientX, y: touch.clientY };
+                
+                this.elements.aimLine.style.opacity = '1';
+                this.elements.powerMeter.style.opacity = '1';
             }
             
-            calculateGoal(zone) {
-                const difficulty = Math.min(this.level * 0.1, 0.7);
-                let baseChance = 0.7;
+            updateAim(e) {
+                if (!this.aiming) return;
                 
-                // Adjust chances based on zone
-                if (zone === 'top-center' || zone === 'bottom-center') {
-                    baseChance = 0.4; // Harder to score in center
-                } else if (zone.includes('top')) {
-                    baseChance = 0.8; // Easier to score high
+                e.preventDefault();
+                const touch = e.touches ? e.touches[0] : e;
+                this.currentPos = { x: touch.clientX, y: touch.clientY };
+                
+                const deltaX = this.currentPos.x - this.startPos.x;
+                const deltaY = this.currentPos.y - this.startPos.y;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                const angle = Math.atan2(-deltaY, deltaX) * 180 / Math.PI + 90;
+                
+                // Update aim line
+                const maxDistance = 150;
+                const lineHeight = Math.min(distance, maxDistance);
+                this.elements.aimLine.style.height = lineHeight + 'px';
+                this.elements.aimLine.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+                
+                // Update power meter
+                const power = Math.min(distance / maxDistance * 100, 100);
+                this.elements.powerFill.style.width = power + '%';
+            }
+            
+            shoot(e) {
+                if (!this.aiming) return;
+                
+                e.preventDefault();
+                this.aiming = false;
+                this.shooting = true;
+                
+                // Hide aim helpers
+                this.elements.aimLine.style.opacity = '0';
+                this.elements.powerMeter.style.opacity = '0';
+                
+                const deltaX = this.currentPos.x - this.startPos.x;
+                const deltaY = this.currentPos.y - this.startPos.y;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                
+                if (distance < 20) {
+                    this.shooting = false;
+                    return; // Too small movement, cancel shot
                 }
                 
-                return Math.random() > (difficulty + (1 - baseChance));
+                this.animateShot(deltaX, deltaY, distance);
             }
             
-            getGoalkeeperMove() {
-                const moves = ['left', 'right', 'stay'];
-                return moves[Math.floor(Math.random() * moves.length)];
-            }
-            
-            animateShot(zone, isGoal, goalkeepMove) {
+            animateShot(deltaX, deltaY, power) {
                 const ball = this.elements.ball;
                 const goalkeeper = this.elements.goalkeeper;
                 
+                // Calculate shot properties
+                const maxPower = 150;
+                const normalizedPower = Math.min(power / maxPower, 1);
+                const shotAccuracy = this.calculateAccuracy(deltaX, deltaY, normalizedPower);
+                
                 // Animate goalkeeper
+                const goalkeepMove = this.getGoalkeeperMove();
                 goalkeeper.className = 'goalkeeper';
                 if (goalkeepMove === 'left') {
                     goalkeeper.classList.add('diving-left');
@@ -492,37 +609,82 @@
                 
                 // Calculate ball destination
                 const goalArea = document.querySelector('.goal-area');
-                const zoneElement = document.querySelector(`[data-zone="${zone}"]`);
-                const rect = zoneElement.getBoundingClientRect();
                 const goalRect = goalArea.getBoundingClientRect();
+                const ballRect = ball.getBoundingClientRect();
                 
-                const targetX = rect.left + rect.width/2 - goalRect.left - goalRect.width/2;
-                const targetY = -(rect.top + rect.height/2 - goalRect.bottom);
+                // Add some randomness based on power and aim
+                const accuracy = 0.7 + (normalizedPower * 0.3);
+                const targetX = (deltaX * 2 * accuracy) + (Math.random() - 0.5) * 50;
+                const targetY = (deltaY * 2 * accuracy) - 400 + (Math.random() - 0.5) * 30;
                 
                 // Animate ball
-                ball.style.transform = `translate(${targetX}px, ${targetY}px) scale(0.7)`;
+                ball.style.transform = `translate(calc(-50% + ${targetX}px), ${targetY}px) scale(0.8)`;
+                ball.style.transition = 'all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                 
+                // Check if goal after animation
                 setTimeout(() => {
+                    const isGoal = this.checkGoal(targetX, targetY, goalkeepMove);
                     this.resolveShot(isGoal);
+                    
                     setTimeout(() => {
                         this.resetBall();
                         goalkeeper.className = 'goalkeeper';
                         this.shooting = false;
-                    }, 1500);
-                }, 800);
+                    }, 2000);
+                }, 1000);
+            }
+            
+            calculateAccuracy(deltaX, deltaY, power) {
+                // Better accuracy with moderate power
+                const powerPenalty = Math.abs(power - 0.7) * 0.3;
+                return Math.max(0.3, 0.8 - powerPenalty);
+            }
+            
+            checkGoal(targetX, targetY, goalkeepMove) {
+                // Check if ball is within goal bounds
+                const goalWidth = 150; // Half width from center
+                const goalHeight = -350; // Approximate goal top
+                
+                if (Math.abs(targetX) > goalWidth || targetY > -200) {
+                    return false; // Missed goal completely
+                }
+                
+                // Check if goalkeeper saves it
+                let saveChance = 0.3 + (this.level * 0.05); // Increases with level
+                
+                // Goalkeeper positioning affects save chance
+                if (goalkeepMove === 'left' && targetX < -50) {
+                    saveChance += 0.3;
+                } else if (goalkeepMove === 'right' && targetX > 50) {
+                    saveChance += 0.3;
+                } else if (goalkeepMove === 'stay' && Math.abs(targetX) < 50) {
+                    saveChance += 0.2;
+                }
+                
+                return Math.random() > Math.min(saveChance, 0.8);
+            }
+            
+            getGoalkeeperMove() {
+                const moves = ['left', 'right', 'stay'];
+                const weights = [0.35, 0.35, 0.3]; // Slightly favor diving
+                const random = Math.random();
+                
+                if (random < weights[0]) return 'left';
+                if (random < weights[0] + weights[1]) return 'right';
+                return 'stay';
             }
             
             resolveShot(isGoal) {
                 if (isGoal) {
                     this.score += 10;
                     this.goalsInLevel++;
-                    this.showFeedback('GOAL!', 'goal');
+                    this.showFeedback('GOAL! ⚽', 'goal');
                     
                     if (this.goalsInLevel >= this.goalsPerLevel) {
-                        this.levelUp();
+                        setTimeout(() => this.levelUp(), 1000);
                     }
                 } else {
-                    this.showFeedback('SAVED!', 'miss');
+                    this.showFeedback('SAVED! 🥅', 'miss');
                 }
                 
                 this.updateUI();
@@ -532,10 +694,10 @@
                 this.level++;
                 this.goalsInLevel = 0;
                 this.score += this.level * 20; // Bonus points
-                this.showFeedback(`LEVEL ${this.level}!`, 'goal');
+                this.showFeedback(`LEVEL ${this.level}! 🌟`, 'goal');
                 
                 if (this.level > 10) {
-                    this.endGame(true);
+                    setTimeout(() => this.endGame(true), 2000);
                 }
             }
             
@@ -546,11 +708,13 @@
                 
                 setTimeout(() => {
                     feedback.classList.remove('show');
-                }, 2000);
+                }, 2500);
             }
             
             resetBall() {
-                this.elements.ball.style.transform = 'translateX(-50%) scale(1)';
+                const ball = this.elements.ball;
+                ball.style.transform = 'translateX(-50%) scale(1)';
+                ball.style.transition = 'all 0.3s ease';
             }
             
             updateUI() {
