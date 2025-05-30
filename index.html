@@ -3,309 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile Volleyball</title>
+    <title>Temple Runner</title>
     <style>
-        body {
+        body, html {
             margin: 0;
+            padding: 0;
             overflow: hidden;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-        }
-
-        #game-container {
+            height: 100%;
             width: 100%;
-            max-width: 800px; /* Adjust as needed */
-            aspect-ratio: 16 / 9; /* Typical landscape aspect ratio */
-            background-color: #a0d0a0; /* Green court */
-            position: relative;
-            overflow: hidden;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
-        }
-
-        #net {
-            position: absolute;
-            width: 10px;
-            height: 80%; /* Adjust net height */
-            background-color: #333;
-            left: 50%;
-            top: 10%;
-            transform: translateX(-50%);
-            z-index: 10;
-        }
-
-        .player {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background-color: #ff6347; /* Team 1 color */
-            border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
-            font-weight: bold;
-            user-select: none; /* Prevent text selection on touch */
-            touch-action: none; /* Prevent default touch actions like scrolling */
-            z-index: 5;
-            transition: transform 0.1s ease-out; /* Smooth player movement (basic) */
+            background: #222;
         }
-
-        .player.team2 {
-            background-color: #4169e1; /* Team 2 color */
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            touch-action: none;
         }
-
-        #ball {
+        #gameOverScreen, #startScreen, #levelUpScreen {
             position: absolute;
-            width: 30px;
-            height: 30px;
-            background-color: #fdfd96; /* Yellow ball */
-            border-radius: 50%;
-            box-shadow: 0 0 5px rgba(0,0,0,0.3);
-            z-index: 20;
-            transition: transform 0.05s linear; /* Smooth ball movement (basic) */
-        }
-
-        /* Basic debug info - remove in final game */
-        #debug-info {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: rgba(0,0,0,0.5);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
             color: white;
-            padding: 5px;
-            font-size: 12px;
-            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+            text-align: center;
+            display: none;
         }
-    </style>
-</head>
-<body>
-    <div id="game-container">
-        <div id="net"></div>
-
-        <div class="player" id="player1_1" style="left: 10%; top: 70%;">1</div>
-        <div class="player" id="player1_2" style="left: 25%; top: 70%;">2</div>
-        <div class="player" id="player1_3" style="left: 10%; top: 85%;">3</div>
-        <div class="player" id="player1_4" style="left: 25%; top: 85%;">4</div>
-
-        <div class="player team2" id="player2_1" style="left: 70%; top: 10%;">A</div>
-        <div class="player team2" id="player2_2" style="left: 85%; top: 10%;">B</div>
-        <div class="player team2" id="player2_3" style="left: 70%; top: 25%;">C</div>
-        <div class="player team2" id="player2_4" style="left: 85%; top: 25%;">D</div>
-
-        <div id="ball"></div>
-
-        <div id="debug-info"></div>
-    </div>
-
-    <script>
-        const gameContainer = document.getElementById('game-container');
-        const ball = document.getElementById('ball');
-        const players = document.querySelectorAll('.player');
-        const debugInfo = document.getElementById('debug-info');
-
-        let isServing = false;
-        let activePlayer = null; // The player currently "holding" or about to serve the ball
-        let ballInPlay = false;
-        let ballPosition = { x: 0, y: 0 };
-        let ballVelocity = { x: 0, y: 0 };
-        const gravity = 0.5; // Simulate gravity
-        const bounceFactor = 0.7; // How much bounce when hitting ground/net
-
-        // --- Game Setup ---
-        function initializeGame() {
-            // Set initial ball position (e.g., near player 1 for serving)
-            resetBallPosition();
-        }
-
-        function resetBallPosition() {
-            const player1_1 = document.getElementById('player1_1');
-            const player1_1Rect = player1_1.getBoundingClientRect();
-            const containerRect = gameContainer.getBoundingClientRect();
-
-            ballPosition.x = (player1_1Rect.left + player1_1Rect.width / 2) - containerRect.left;
-            ballPosition.y = (player1_1Rect.top - 20) - containerRect.top; // Slightly above player
-            ballVelocity = { x: 0, y: 0 };
-            updateBallPosition();
-            isServing = true; // Player 1 starts with the serve
-            ballInPlay = false;
-        }
-
-        function updateBallPosition() {
-            ball.style.left = `${ballPosition.x}px`;
-            ball.style.top = `${ballPosition.y}px`;
-        }
-
-        // --- Touch Controls (Conceptual) ---
-        gameContainer.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevent default browser touch behavior (e.g., scrolling)
-
-            const touch = e.touches[0];
-            const touchX = touch.clientX;
-            const touchY = touch.clientY;
-
-            // Debug info
-            debugInfo.textContent = `Touch: X=${touchX.toFixed(0)}, Y=${touchY.toFixed(0)}`;
-
-            // Check if a player was touched
-            players.forEach(player => {
-                const rect = player.getBoundingClientRect();
-                if (
-                    touchX >= rect.left &&
-                    touchX <= rect.right &&
-                    touchY >= rect.top &&
-                    touchY <= rect.bottom
-                ) {
-                    activePlayer = player;
-                    debugInfo.textContent += ` - Player touched: ${player.id}`;
-
-                    if (isServing && player.id.startsWith('player1')) {
-                        // This player is serving
-                        // Conceptual: A small tap serves the ball up
-                        serveBall(player);
-                        isServing = false;
-                        ballInPlay = true;
-                    } else if (ballInPlay && player.id.startsWith('player1')) {
-                        // This player is trying to hit/pass the ball
-                        // Conceptual: Tap player to hit ball towards net/opponent
-                        hitBall(player);
-                    }
-                }
-            });
-        });
-
-        // --- Game Logic (Simplified) ---
-
-        function serveBall(servingPlayer) {
-            // A very simple serve: just gives the ball an upward and forward velocity
-            // This needs significant refinement for actual physics
-            const playerRect = servingPlayer.getBoundingClientRect();
-            const containerRect = gameContainer.getBoundingClientRect();
-
-            ballPosition.x = (playerRect.left + playerRect.width / 2) - containerRect.left;
-            ballPosition.y = (playerRect.top - 50) - containerRect.top; // Start higher
-
-            ballVelocity.x = (Math.random() - 0.5) * 5; // Slight random horizontal
-            ballVelocity.y = -15; // Upward velocity for serve
-
-            updateBallPosition();
-        }
-
-        function hitBall(hittingPlayer) {
-            // A very simple hit: gives the ball a push towards the opponent's side
-            // This also needs complex physics for angle, power based on touch
-            const playerRect = hittingPlayer.getBoundingClientRect();
-            const containerRect = gameContainer.getBoundingClientRect();
-            const netX = gameContainer.offsetWidth / 2;
-
-            // Determine if hitting from left or right side
-            const direction = (playerRect.left + playerRect.width / 2) < netX ? 1 : -1;
-
-            ballVelocity.x = 10 * direction; // Push horizontally
-            ballVelocity.y = -8; // Push slightly upwards
-        }
-
-        function gameLoop() {
-            if (ballInPlay) {
-                // Apply gravity
-                ballVelocity.y += gravity;
-
-                // Update ball position
-                ballPosition.x += ballVelocity.x;
-                ballPosition.y += ballVelocity.y;
-
-                // --- Collision Detection (Very Basic) ---
-
-                // Floor collision
-                const floorY = gameContainer.offsetHeight - ball.offsetHeight;
-                if (ballPosition.y >= floorY) {
-                    ballPosition.y = floorY;
-                    ballVelocity.y *= -bounceFactor; // Bounce
-                    if (Math.abs(ballVelocity.y) < 1) { // Stop if nearly still
-                        ballVelocity.y = 0;
-                        ballInPlay = false; // Ball hit ground, point ends
-                        debugInfo.textContent = "Ball hit ground! Point over.";
-                        setTimeout(resetBallPosition, 2000); // Reset after 2 seconds
-                    }
-                }
-
-                // Ceiling collision
-                if (ballPosition.y <= 0) {
-                    ballPosition.y = 0;
-                    ballVelocity.y *= -bounceFactor;
-                }
-
-                // Wall collision
-                const rightWallX = gameContainer.offsetWidth - ball.offsetWidth;
-                if (ballPosition.x <= 0 || ballPosition.x >= rightWallX) {
-                    ballPosition.x = Math.max(0, Math.min(ballPosition.x, rightWallX));
-                    ballVelocity.x *= -bounceFactor;
-                }
-
-                // Net collision (simplified)
-                const netElement = document.getElementById('net');
-                const netRect = netElement.getBoundingClientRect();
-                const containerRect = gameContainer.getBoundingClientRect();
-
-                const netLeft = netRect.left - containerRect.left;
-                const netRight = netRect.right - containerRect.left;
-                const netTop = netRect.top - containerRect.top;
-                const netBottom = netRect.bottom - containerRect.top;
-
-
-                // Check if ball is overlapping with net horizontally and vertically
-                if (
-                    ballPosition.x + ball.offsetWidth > netLeft &&
-                    ballPosition.x < netRight &&
-                    ballPosition.y + ball.offsetHeight > netTop &&
-                    ballPosition.y < netBottom
-                ) {
-                    // Ball hit net
-                    ballVelocity.x *= -0.5; // Lose some horizontal speed
-                    ballVelocity.y = Math.abs(ballVelocity.y) * 0.5; // Reduce vertical speed and bounce up
-                    debugInfo.textContent = "Ball hit net!";
-                }
-
-                // Player collision (very simple - needs bounding box/circle logic)
-                players.forEach(player => {
-                    const playerRect = player.getBoundingClientRect();
-                    const playerCenterX = (playerRect.left - containerRect.left) + playerRect.width / 2;
-                    const playerCenterY = (playerRect.top - containerRect.top) + playerRect.height / 2;
-
-                    const ballCenterX = ballPosition.x + ball.offsetWidth / 2;
-                    const ballCenterY = ballPosition.y + ball.offsetHeight / 2;
-
-                    const distance = Math.sqrt(
-                        Math.pow(ballCenterX - playerCenterX, 2) +
-                        Math.pow(ballCenterY - playerCenterY, 2)
-                    );
-
-                    const collisionDistance = (player.offsetWidth / 2) + (ball.offsetWidth / 2);
-
-                    if (distance < collisionDistance && ballInPlay) {
-                        // This is a very rough "hit" - needs proper physics
-                        // For a real game, this would be where you calculate reflection angles
-                        // and potentially apply force based on player movement/tap strength.
-                        // For now, just a slight bounce and change of direction.
-                        ballVelocity.y = -Math.abs(ballVelocity.y) * 0.8; // Bounce up
-                        ballVelocity.x = (ballCenterX - playerCenterX) * 0.1; // Push away from player
-                        debugInfo.textContent = `Ball hit ${player.id}`;
-                    }
-                });
-
-                updateBallPosition();
-            }
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        initializeGame();
-        gameLoop();
-
-    </script>
-</body>
-</html>
+        #gameOverScreen button, #startScreen button, #levelUpScreen button {
+            padding
