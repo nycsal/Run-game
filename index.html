@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Basketball Shooter</title>
+    <title>Soccer Shooter</title>
     <style>
         body, html {
             margin: 0;
@@ -34,7 +34,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial Black', Arial, sans-serif;
             font-size: 24px;
             text-align: center;
             display: none;
@@ -45,16 +45,21 @@
             margin: 10px;
             border-radius: 5px;
             border: none;
+            background: #fff;
         }
         #startScreen button, #gameOverScreen button, #levelUpScreen button {
-            padding: 10px 20px;
-            font-size: 18px;
+            padding: 12px 24px;
+            font-size: 20px;
             cursor: pointer;
-            background: #ff4500;
+            background: linear-gradient(#ff4500, #d83b01);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        #startScreen button:hover, #gameOverScreen button:hover, #levelUpScreen button:hover {
+            background: linear-gradient(#ff6500, #e84c01);
         }
     </style>
 </head>
@@ -62,23 +67,23 @@
     <canvas id="gameCanvas"></canvas>
     <div id="startScreen">
         <div>
-            <h1>Basketball Shooter</h1>
+            <h1 style="font-size: 36px; color: #ffd700;">Soccer Shooter</h1>
             <p>Enter Your Name:</p>
             <input type="text" id="playerName" placeholder="Your Name" maxlength="20">
-            <p>Swipe to aim and shoot. Score 12 points in 30 seconds!</p>
+            <p>Swipe to aim and shoot. Score 3 out of 5 goals to advance!</p>
             <button onclick="startGame()">Start Game</button>
         </div>
     </div>
     <div id="gameOverScreen">
         <div>
-            <h1>Game Over</h1>
+            <h1 style="font-size: 36px; color: #ffd700;">Game Over</h1>
             <p><span id="playerNameDisplay"></span>'s Score: <span id="finalScore"></span></p>
             <button onclick="restartGame()">Restart</button>
         </div>
     </div>
     <div id="levelUpScreen">
         <div>
-            <h1>Level <span id="nextLevel"></span></h1>
+            <h1 style="font-size: 36px; color: #ffd700;">Level <span id="nextLevel"></span></h1>
             <p><span id="playerNameLevel"></span>'s Score: <span id="currentScore"></span></p>
             <button onclick="continueGame()">Continue</button>
         </div>
@@ -101,27 +106,29 @@
         let playerName = '';
         let score = 0;
         let level = 1;
-        let timeLeft = 30;
+        let shotsTaken = 0;
+        let goalsScored = 0;
         let ball = { x: width * 0.5, y: height * 0.9, vx: 0, vy: 0, state: 'ready' };
-        let hoop = { x: width * 0.5, y: height * 0.2, vx: 0 };
+        let goalkeeper = { x: width * 0.5, y: height * 0.2, vx: 0 };
         let lastShotTime = 0;
         let gameLoop;
 
-        const hoopWidth = width * 0.15;
-        const hoopHeight = height * 0.05;
+        const goalWidth = width * 0.3;
+        const goalHeight = height * 0.15;
         const ballSize = width * 0.03;
-        const halfCourtY = height * 0.5;
+        const goalkeeperWidth = width * 0.1;
+        const goalkeeperHeight = height * 0.15;
 
         // Touch controls
         let touchStartX = 0, touchStartY = 0;
         canvas.addEventListener('touchstart', (e) => {
-            if (ball.state === 'ready') {
+            if (ball.state === 'ready' && shotsTaken < 5) {
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
             }
         });
         canvas.addEventListener('touchend', (e) => {
-            if (ball.state === 'ready') {
+            if (ball.state === 'ready' && shotsTaken < 5) {
                 let touchEndX = e.changedTouches[0].clientX;
                 let touchEndY = e.changedTouches[0].clientY;
                 let dx = touchEndX - touchStartX;
@@ -130,6 +137,7 @@
                 ball.vx = dx * 0.05;
                 ball.vy = dy * 0.05 * power;
                 ball.state = 'shot';
+                shotsTaken++;
                 lastShotTime = Date.now();
             }
         });
@@ -140,34 +148,59 @@
             gameState = 'playing';
             score = 0;
             level = 1;
-            timeLeft = 30;
+            shotsTaken = 0;
+            goalsScored = 0;
             ball = { x: width * 0.5, y: height * 0.9, vx: 0, vy: 0, state: 'ready' };
-            hoop.vx = width * 0.005 * level;
+            goalkeeper.vx = width * 0.005 * level;
             gameLoop = setInterval(update, 1000 / 60);
         }
 
         function restartGame() {
-            document.getElementById('将gameOverScreen').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'none';
             document.getElementById('startScreen').style.display = 'flex';
             gameState = 'start';
         }
 
         function continueGame() {
             document.getElementById('levelUpScreen').style.display = 'none';
-            gameState = 'playing';
-            timeLeft = 30;
+            gameStateociosState = 'playing';
+            shotsTaken = 0;
+            goalsScored = 0;
             ball = { x: width * 0.5, y: height * 0.9, vx: 0, vy: 0, state: 'ready' };
-            hoop.vx = width * 0.005 * level;
+            goalkeeper.vx = width * 0.005 * level;
             gameLoop = setInterval(update, 1000 / 60);
         }
 
         function update() {
             if (gameState !== 'playing') return;
 
-            // Update time
-            timeLeft -= 1 / 60;
-            if (timeLeft <= 0) {
-                if (score >= 12 * level) {
+            // Update goalkeeper
+            goalkeeper.x += goalkeeper.vx;
+            if (goalkeeper.x < width * 0.35 || goalkeeper.x > width * 0.65) {
+                goalkeeper.vx = -goalkeeper.vx * (1 + level * 0.2);
+            }
+
+            // Update ball
+            if (ball.state === 'shot') {
+                ball.x += ball.vx;
+                ball.vy += 0.3; // Gravity
+                ball.y += ball.vy;
+                if (ball.y > height * 0.9 && Date.now() - lastShotTime > 500) {
+                    // Check for goal
+                    if (ball.y < height * 0.2 + goalHeight && 
+                        ball.x > width * 0.5 - goalWidth / 2 && 
+                        ball.x < width * 0.5 + goalWidth / 2 &&
+                        Math.abs(ball.x - goalkeeper.x) > goalkeeperWidth / 2) {
+                        score++;
+                        goalsScored++;
+                    }
+                    ball = { x: width * 0.5, y: height * 0.9, vx: 0, vy: 0, state: 'ready' };
+                }
+            }
+
+            // Check level completion
+            if (shotsTaken >= 5) {
+                if (goalsScored >= 3) {
                     level++;
                     if (level > 5) {
                         gameState = 'gameover';
@@ -192,58 +225,63 @@
                 }
             }
 
-            // Update hoop
-            hoop.x += hoop.vx;
-            if (hoop.x < hoopWidth / 2 || hoop.x > width - hoopWidth / 2) {
-                hoop.vx = -hoop.vx * (1 + level * 0.2);
+            // Render
+            // Field
+            const grassGradient = ctx.createLinearGradient(0, 0, 0, height);
+            grassGradient.addColorStop(0, '#228B22');
+            grassGradient.addColorStop(1, '#1B6B1B');
+            ctx.fillStyle = grassGradient;
+            ctx.fillRect(0, 0, width, height);
+            // Penalty area
+            ctx.fillStyle = '#1A5A1A';
+            ctx.fillRect(width * 0.3, height * 0.1, width * 0.4, height * 0.3);
+            // Goal
+            ctx.fillStyle = '#FFF';
+            ctx.fillRect(width * 0.5 - goalWidth / 2, height * 0.1, goalWidth, goalHeight);
+            // Net
+            ctx.strokeStyle = '#CCC';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < goalWidth; i += 10) {
+                ctx.beginPath();
+                ctx.moveTo(width * 0.5 - goalWidth / 2 + i, height * 0.1);
+                ctx.lineTo(width * 0.5 - goalWidth / 2 + i, height * 0.2);
+                ctx.stroke();
             }
-
-            // Update ball
-            if (ball.state === 'shot') {
-                ball.x += ball.vx;
-                ball.vy += 0.5; // Gravity
-                ball.y += ball.vy;
-                if (ball.y > height * 0.9 && Date.now() - lastShotTime > 500) {
-                    // Check for score
-                    if (Math.abs(ball.x - hoop.x) < hoopWidth / 2 && Math.abs(ball.y - hoop.y) < hoopHeight) {
-                        score += ball.y > halfCourtY ? 3 : 2;
-                    }
-                    ball = { x: width * 0.5, y: height * 0.9, vx: 0, vy: 0, state: 'ready' };
+            for (let i = 0; i < goalHeight; i += 10) {
+                ctx.beginPath();
+                ctx.moveTo(width * 0.5 - goalWidth / 2, height * 0.1 + i);
+                ctx.lineTo(width * 0.5 + goalWidth / 2, height * 0.1 + i);
+                ctx.stroke();
+            }
+            // Goalkeeper
+            const keeperGradient = ctx.createLinearGradient(goalkeeper.x - goalkeeperWidth / 2, 0, goalkeeper.x + goalkeeperWidth / 2, 0);
+            keeperGradient.addColorStop(0, '#FF0000');
+            keeperGradient.addColorStop(1, '#CC0000');
+            ctx.fillStyle = keeperGradient;
+            ctx.fillRect(goalkeeper.x - goalkeeperWidth / 2, goalkeeper.y - goalkeeperHeight, goalkeeperWidth, goalkeeperHeight);
+            // Ball
+            if (ball.state === 'ready' || ball.state === 'shot') {
+                const ballGradient = ctx.createRadialGradient(ball.x, ball.y, ballSize * 0.3, ball.x, ball.y, ballSize);
+                ballGradient.addColorStop(0, '#FFF');
+                ballGradient.addColorStop(1, '#AAA');
+                ctx.fillStyle = ballGradient;
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ballSize, 0, Math.PI * 2);
+                ctx.fill();
+                // Ball pattern
+                ctx.fillStyle = '#000';
+                for (let i = 0; i < 6; i++) {
+                    ctx.beginPath();
+                    ctx.arc(ball.x + ballSize * 0.5 * Math.cos(i * Math.PI / 3), 
+                            ball.y + ballSize * 0.5 * Math.sin(i * Math.PI / 3), 
+                            ballSize * 0.2, 0, Math.PI * 2);
+                    ctx.fill();
                 }
             }
-
-            // Render
-            ctx.fillStyle = '#228B22';
-            ctx.fillRect(0, 0, width, height);
-            ctx.fillStyle = '#8B4513';
-            ctx.fillRect(0, height * 0.7, width, height * 0.3);
-            ctx.strokeStyle = '#FFF';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(width * 0.5, height * 0.5, width * 0.2, 0, Math.PI, true);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(width * 0.5, height * 0.5);
-            ctx.lineTo(width * 0.5, height * 0.9);
-            ctx.stroke();
-            ctx.fillStyle = '#FF4500';
-            ctx.fillRect(hoop.x - hoopWidth / 2, hoop.y, hoopWidth, hoopHeight);
+            // HUD
             ctx.fillStyle = '#FFF';
-            ctx.fillRect(hoop.x - hoopWidth / 4, hoop.y - height * 0.05, hoopWidth / 2, height * 0.05);
-            if (ball.state === 'ready') {
-                ctx.fillStyle = '#FFA500';
-                ctx.beginPath();
-                ctx.arc(ball.x, ball.y, ballSize, 0, Math.PI * 2);
-                ctx.fill();
-            } else {
-                ctx.fillStyle = '#FFA500';
-                ctx.beginPath();
-                ctx.arc(ball.x, ball.y, ballSize, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            ctx.fillStyle = '#FFF';
-            ctx.font = '20px Arial';
-            ctx.fillText(`${playerName}'s Score: ${score}  Level: ${level}  Time: ${Math.ceil(timeLeft)}`, 10, 30);
+            ctx.font = '20px Arial Black';
+            ctx.fillText(`${playerName}'s Score: ${score}  Level: ${level}  Shots: ${shotsTaken}/5  Goals: ${goalsScored}/3`, 10, 30);
         }
 
         window.onload = () => {
