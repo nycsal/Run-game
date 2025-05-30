@@ -280,19 +280,20 @@
                 gameBoard.querySelectorAll('.card').forEach(card => {
                     card.classList.add('flipped');
                 });
+                // *** MODIFIED THIS LINE ***
                 setTimeout(() => {
                     gameBoard.querySelectorAll('.card').forEach(card => {
                         card.classList.remove('flipped');
                     });
                     startGame(); // Start timer after cards are hidden
-                }, 2000); // Show for 2 seconds
+                }, 3000); // Show for 3 seconds
             }, 500);
         }
 
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+                [array[i], array[j]] = array[j], array[i]];
             }
             return array;
         }
