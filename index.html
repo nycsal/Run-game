@@ -2,291 +2,579 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Soccer Shooter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soccer Penalty Shootout</title>
     <style>
-        body, html {
+        * {
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            height: 100%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #222;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
-        canvas {
-            display: block;
+
+        body {
+            font-family: 'Arial Black', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow: hidden;
+        }
+
+        .game-container {
             width: 100vw;
             height: 100vh;
-            touch-action: none;
+            position: relative;
+            background: linear-gradient(to bottom, #87CEEB 0%, #4CAF50 60%);
         }
-        #startScreen, #gameOverScreen, #levelUpScreen {
+
+        .field {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 70%;
+            background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+            overflow: hidden;
+        }
+
+        .field::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(90deg, transparent, transparent 48px, rgba(255,255,255,0.1) 48px, rgba(255,255,255,0.1) 50px);
+            top: 0;
+            left: 0;
+        }
+
+        .goal-area {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            height: 160px;
+            border: 4px solid white;
+            border-bottom: none;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .goalpost {
+            position: absolute;
+            background: white;
+        }
+
+        .goalpost.left {
+            left: -4px;
+            top: -4px;
+            width: 8px;
+            height: 164px;
+        }
+
+        .goalpost.right {
+            right: -4px;
+            top: -4px;
+            width: 8px;
+            height: 164px;
+        }
+
+        .goalpost.top {
+            top: -4px;
+            left: 0;
+            width: 100%;
+            height: 8px;
+        }
+
+        .goalkeeper {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 60px;
+            background: #FF6B35;
+            border-radius: 20px 20px 10px 10px;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .goalkeeper::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #FFE4B5;
+            border-radius: 50%;
+        }
+
+        .goalkeeper.diving-left {
+            transform: translateX(-150%) rotate(-15deg);
+        }
+
+        .goalkeeper.diving-right {
+            transform: translateX(50%) rotate(15deg);
+        }
+
+        .ball {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle at 30% 30%, white, #333);
+            border-radius: 50%;
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 5;
+        }
+
+        .ball::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 15px;
+            height: 15px;
+            border: 2px solid #333;
+            border-radius: 50%;
+        }
+
+        .target-zones {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            height: 160px;
+            pointer-events: none;
+        }
+
+        .zone {
+            position: absolute;
+            border: 2px dashed rgba(255,255,255,0.3);
+            cursor: pointer;
+            pointer-events: all;
+            transition: all 0.2s ease;
+        }
+
+        .zone:active {
+            background: rgba(255,255,255,0.2);
+            transform: scale(0.95);
+        }
+
+        .zone.top-left { top: 0; left: 0; width: 33.33%; height: 50%; }
+        .zone.top-center { top: 0; left: 33.33%; width: 33.33%; height: 50%; }
+        .zone.top-right { top: 0; right: 0; width: 33.33%; height: 50%; }
+        .zone.bottom-left { bottom: 0; left: 0; width: 33.33%; height: 50%; }
+        .zone.bottom-center { bottom: 0; left: 33.33%; width: 33.33%; height: 50%; }
+        .zone.bottom-right { bottom: 0; right: 0; width: 33.33%; height: 50%; }
+
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .score-panel {
+            background: rgba(0,0,0,0.8);
+            padding: 15px 20px;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .level {
+            font-size: 16px;
+            margin-top: 5px;
+            color: #87CEEB;
+        }
+
+        .progress {
+            font-size: 14px;
+            color: #FFF;
+            margin-top: 5px;
+        }
+
+        .start-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
+            background: rgba(0,0,0,0.9);
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            font-family: 'Arial Black', Arial, sans-serif;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .game-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .start-btn {
+            padding: 20px 40px;
             font-size: 24px;
-            text-align: center;
-            display: none;
-        }
-        #startScreen input {
-            padding: 10px;
-            font-size: 18px;
-            margin: 10px;
-            border-radius: 5px;
-            border: none;
-            background: #fff;
-        }
-        #startScreen button, #gameOverScreen button, #levelUpScreen button {
-            padding: 12px 24px;
-            font-size: 20px;
-            cursor: pointer;
-            background: linear-gradient(#ff4500, #d83b01);
+            font-weight: bold;
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
             color: white;
             border: none;
-            border-radius: 8px;
-            margin-top: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
         }
-        #startScreen button:hover, #gameOverScreen button:hover, #levelUpScreen button:hover {
-            background: linear-gradient(#ff6500, #e84c01);
+
+        .start-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .instructions {
+            margin-top: 30px;
+            text-align: center;
+            color: #87CEEB;
+            line-height: 1.6;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .final-score {
+            font-size: 36px;
+            color: #FFD700;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            font-size: 20px;
+            color: white;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .restart-btn {
+            padding: 15px 30px;
+            font-size: 20px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .feedback.goal {
+            color: #4CAF50;
+        }
+
+        .feedback.miss {
+            color: #FF5722;
+        }
+
+        .feedback.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        @media (max-width: 480px) {
+            .game-title { font-size: 24px; }
+            .start-btn { padding: 15px 30px; font-size: 20px; }
+            .goal-area { width: 240px; height: 140px; }
+            .score { font-size: 20px; }
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <div id="startScreen">
-        <div>
-            <h1 style="font-size: 36px; color: #ffd700;">Soccer Shooter</h1>
-            <p>Enter Your Name:</p>
-            <input type="text" id="playerName" placeholder="Your Name" maxlength="20">
-            <p>Swipe to aim and shoot. Score 3 out of 5 goals to advance!</p>
-            <button onclick="startGame()">Start Game</button>
+    <div class="game-container">
+        <div class="hud">
+            <div class="score-panel">
+                <div class="score" id="score">0</div>
+                <div class="level">Level <span id="level">1</span></div>
+                <div class="progress"><span id="goals">0</span>/5 Goals</div>
+            </div>
+            <div class="score-panel">
+                <div style="font-size: 14px; color: #87CEEB;">Tap goal zones to shoot!</div>
+            </div>
+        </div>
+
+        <div class="field">
+            <div class="goal-area">
+                <div class="goalpost left"></div>
+                <div class="goalpost right"></div>
+                <div class="goalpost top"></div>
+                
+                <div class="target-zones">
+                    <div class="zone top-left" data-zone="top-left"></div>
+                    <div class="zone top-center" data-zone="top-center"></div>
+                    <div class="zone top-right" data-zone="top-right"></div>
+                    <div class="zone bottom-left" data-zone="bottom-left"></div>
+                    <div class="zone bottom-center" data-zone="bottom-center"></div>
+                    <div class="zone bottom-right" data-zone="bottom-right"></div>
+                </div>
+            </div>
+            
+            <div class="goalkeeper" id="goalkeeper"></div>
+            <div class="ball" id="ball"></div>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="start-screen" id="startScreen">
+            <div class="game-title">⚽ PENALTY SHOOTOUT ⚽</div>
+            <button class="start-btn" id="startBtn">START GAME</button>
+            <div class="instructions">
+                <p>🎯 Tap the goal zones to shoot the ball</p>
+                <p>🥅 Beat the goalkeeper and score goals</p>
+                <p>⭐ Complete 5 goals per level to advance</p>
+                <p>🏆 How far can you go?</p>
+            </div>
+        </div>
+
+        <div class="game-over" id="gameOver">
+            <div class="final-score" id="finalScore">Game Over!</div>
+            <div class="message" id="gameOverMessage">Great effort!</div>
+            <button class="restart-btn" id="restartBtn">PLAY AGAIN</button>
         </div>
     </div>
-    <div id="gameOverScreen">
-        <div>
-            <h1 style="font-size: 36px; color: #ffd700;">Game Over</h1>
-            <p><span id="playerNameDisplay"></span>'s Score: <span id="finalScore"></span></p>
-            <button onclick="restartGame()">Restart</button>
-        </div>
-    </div>
-    <div id="levelUpScreen">
-        <div>
-            <h1 style="font-size: 36px; color: #ffd700;">Level <span id="nextLevel"></span></h1>
-            <p><span id="playerNameLevel"></span>'s Score: <span id="currentScore"></span></p>
-            <button onclick="continueGame()">Continue</button>
-        </div>
-    </div>
+
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            width = canvas.width;
-            height = canvas.height;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        let gameState = 'start';
-        let playerName = '';
-        let score = 0;
-        let level = 1;
-        let shotsTaken = 0;
-        let goalsScored = 0;
-        let ball = { x: width * 0.5, y: height * 0.9, vx: 0, vy: 0, state: 'ready' };
-        let goalkeeper = { x: width * 0.5, y: height * 0.2, vx: 0 };
-        let lastShotTime = 0;
-        let gameLoop;
-
-        const goalWidth = width * 0.3;
-        const goalHeight = height * 0.15;
-        const ballSize = width * 0.03;
-        const goalkeeperWidth = width * 0.1;
-        const goalkeeperHeight = height * 0.15;
-
-        // Touch controls
-        let touchStartX = 0, touchStartY = 0;
-        canvas.addEventListener('touchstart', (e) => {
-            if (ball.state === 'ready' && shotsTaken < 5) {
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
+        class SoccerGame {
+            constructor() {
+                this.score = 0;
+                this.level = 1;
+                this.goalsInLevel = 0;
+                this.goalsPerLevel = 5;
+                this.gameActive = false;
+                this.shooting = false;
+                
+                this.elements = {
+                    startScreen: document.getElementById('startScreen'),
+                    gameOver: document.getElementById('gameOver'),
+                    startBtn: document.getElementById('startBtn'),
+                    restartBtn: document.getElementById('restartBtn'),
+                    ball: document.getElementById('ball'),
+                    goalkeeper: document.getElementById('goalkeeper'),
+                    score: document.getElementById('score'),
+                    level: document.getElementById('level'),
+                    goals: document.getElementById('goals'),
+                    feedback: document.getElementById('feedback'),
+                    finalScore: document.getElementById('finalScore'),
+                    gameOverMessage: document.getElementById('gameOverMessage')
+                };
+                
+                this.initializeGame();
             }
-        });
-        canvas.addEventListener('touchend', (e) => {
-            if (ball.state === 'ready' && shotsTaken < 5) {
-                let touchEndX = e.changedTouches[0].clientX;
-                let touchEndY = e.changedTouches[0].clientY;
-                let dx = touchEndX - touchStartX;
-                let dy = touchEndY - touchStartY;
-                let power = Math.sqrt(dx * dx + dy * dy) / 100;
-                ball.vx = dx * 0.05;
-                ball.vy = dy * 0.05 * power;
-                ball.state = 'shot';
-                shotsTaken++;
-                lastShotTime = Date.now();
+            
+            initializeGame() {
+                this.elements.startBtn.addEventListener('click', () => this.startGame());
+                this.elements.restartBtn.addEventListener('click', () => this.restartGame());
+                
+                document.querySelectorAll('.zone').forEach(zone => {
+                    zone.addEventListener('click', (e) => this.shoot(e.target.dataset.zone));
+                    zone.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        this.shoot(e.target.dataset.zone);
+                    });
+                });
             }
-        });
-
-        function startGame() {
-            playerName = document.getElementById('playerName').value.trim() || 'Player';
-            document.getElementById('startScreen').style.display = 'none';
-            gameState = 'playing';
-            score = 0;
-            level = 1;
-            shotsTaken = 0;
-            goalsScored = 0;
-            ball = { x: width * 0.5, y: height * 0.9, vx: 0, vy: 0, state: 'ready' };
-            goalkeeper.vx = width * 0.005 * level;
-            gameLoop = setInterval(update, 1000 / 60);
-        }
-
-        function restartGame() {
-            document.getElementById('gameOverScreen').style.display = 'none';
-            document.getElementById('startScreen').style.display = 'flex';
-            gameState = 'start';
-        }
-
-        function continueGame() {
-            document.getElementById('levelUpScreen').style.display = 'none';
-            gameStateociosState = 'playing';
-            shotsTaken = 0;
-            goalsScored = 0;
-            ball = { x: width * 0.5, y: height * 0.9, vx: 0, vy: 0, state: 'ready' };
-            goalkeeper.vx = width * 0.005 * level;
-            gameLoop = setInterval(update, 1000 / 60);
-        }
-
-        function update() {
-            if (gameState !== 'playing') return;
-
-            // Update goalkeeper
-            goalkeeper.x += goalkeeper.vx;
-            if (goalkeeper.x < width * 0.35 || goalkeeper.x > width * 0.65) {
-                goalkeeper.vx = -goalkeeper.vx * (1 + level * 0.2);
+            
+            startGame() {
+                this.elements.startScreen.style.display = 'none';
+                this.gameActive = true;
+                this.resetGame();
             }
-
-            // Update ball
-            if (ball.state === 'shot') {
-                ball.x += ball.vx;
-                ball.vy += 0.3; // Gravity
-                ball.y += ball.vy;
-                if (ball.y > height * 0.9 && Date.now() - lastShotTime > 500) {
-                    // Check for goal
-                    if (ball.y < height * 0.2 + goalHeight && 
-                        ball.x > width * 0.5 - goalWidth / 2 && 
-                        ball.x < width * 0.5 + goalWidth / 2 &&
-                        Math.abs(ball.x - goalkeeper.x) > goalkeeperWidth / 2) {
-                        score++;
-                        goalsScored++;
-                    }
-                    ball = { x: width * 0.5, y: height * 0.9, vx: 0, vy: 0, state: 'ready' };
+            
+            resetGame() {
+                this.score = 0;
+                this.level = 1;
+                this.goalsInLevel = 0;
+                this.updateUI();
+                this.resetBall();
+            }
+            
+            restartGame() {
+                this.elements.gameOver.style.display = 'none';
+                this.resetGame();
+                this.gameActive = true;
+            }
+            
+            shoot(zone) {
+                if (!this.gameActive || this.shooting) return;
+                
+                this.shooting = true;
+                const isGoal = this.calculateGoal(zone);
+                const goalkeepMove = this.getGoalkeeperMove();
+                
+                this.animateShot(zone, isGoal, goalkeepMove);
+            }
+            
+            calculateGoal(zone) {
+                const difficulty = Math.min(this.level * 0.1, 0.7);
+                let baseChance = 0.7;
+                
+                // Adjust chances based on zone
+                if (zone === 'top-center' || zone === 'bottom-center') {
+                    baseChance = 0.4; // Harder to score in center
+                } else if (zone.includes('top')) {
+                    baseChance = 0.8; // Easier to score high
                 }
+                
+                return Math.random() > (difficulty + (1 - baseChance));
             }
-
-            // Check level completion
-            if (shotsTaken >= 5) {
-                if (goalsScored >= 3) {
-                    level++;
-                    if (level > 5) {
-                        gameState = 'gameover';
-                        document.getElementById('playerNameDisplay').textContent = playerName;
-                        document.getElementById('finalScore').textContent = score;
-                        document.getElementById('gameOverScreen').style.display = 'flex';
-                        clearInterval(gameLoop);
-                    } else {
-                        gameState = 'levelup';
-                        document.getElementById('nextLevel').textContent = level;
-                        document.getElementById('playerNameLevel').textContent = playerName;
-                        document.getElementById('currentScore').textContent = score;
-                        document.getElementById('levelUpScreen').style.display = 'flex';
-                        clearInterval(gameLoop);
+            
+            getGoalkeeperMove() {
+                const moves = ['left', 'right', 'stay'];
+                return moves[Math.floor(Math.random() * moves.length)];
+            }
+            
+            animateShot(zone, isGoal, goalkeepMove) {
+                const ball = this.elements.ball;
+                const goalkeeper = this.elements.goalkeeper;
+                
+                // Animate goalkeeper
+                goalkeeper.className = 'goalkeeper';
+                if (goalkeepMove === 'left') {
+                    goalkeeper.classList.add('diving-left');
+                } else if (goalkeepMove === 'right') {
+                    goalkeeper.classList.add('diving-right');
+                }
+                
+                // Calculate ball destination
+                const goalArea = document.querySelector('.goal-area');
+                const zoneElement = document.querySelector(`[data-zone="${zone}"]`);
+                const rect = zoneElement.getBoundingClientRect();
+                const goalRect = goalArea.getBoundingClientRect();
+                
+                const targetX = rect.left + rect.width/2 - goalRect.left - goalRect.width/2;
+                const targetY = -(rect.top + rect.height/2 - goalRect.bottom);
+                
+                // Animate ball
+                ball.style.transform = `translate(${targetX}px, ${targetY}px) scale(0.7)`;
+                
+                setTimeout(() => {
+                    this.resolveShot(isGoal);
+                    setTimeout(() => {
+                        this.resetBall();
+                        goalkeeper.className = 'goalkeeper';
+                        this.shooting = false;
+                    }, 1500);
+                }, 800);
+            }
+            
+            resolveShot(isGoal) {
+                if (isGoal) {
+                    this.score += 10;
+                    this.goalsInLevel++;
+                    this.showFeedback('GOAL!', 'goal');
+                    
+                    if (this.goalsInLevel >= this.goalsPerLevel) {
+                        this.levelUp();
                     }
                 } else {
-                    gameState = 'gameover';
-                    document.getElementById('playerNameDisplay').textContent = playerName;
-                    document.getElementById('finalScore').textContent = score;
-                    document.getElementById('gameOverScreen').style.display = 'flex';
-                    clearInterval(gameLoop);
+                    this.showFeedback('SAVED!', 'miss');
+                }
+                
+                this.updateUI();
+            }
+            
+            levelUp() {
+                this.level++;
+                this.goalsInLevel = 0;
+                this.score += this.level * 20; // Bonus points
+                this.showFeedback(`LEVEL ${this.level}!`, 'goal');
+                
+                if (this.level > 10) {
+                    this.endGame(true);
                 }
             }
-
-            // Render
-            // Field
-            const grassGradient = ctx.createLinearGradient(0, 0, 0, height);
-            grassGradient.addColorStop(0, '#228B22');
-            grassGradient.addColorStop(1, '#1B6B1B');
-            ctx.fillStyle = grassGradient;
-            ctx.fillRect(0, 0, width, height);
-            // Penalty area
-            ctx.fillStyle = '#1A5A1A';
-            ctx.fillRect(width * 0.3, height * 0.1, width * 0.4, height * 0.3);
-            // Goal
-            ctx.fillStyle = '#FFF';
-            ctx.fillRect(width * 0.5 - goalWidth / 2, height * 0.1, goalWidth, goalHeight);
-            // Net
-            ctx.strokeStyle = '#CCC';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < goalWidth; i += 10) {
-                ctx.beginPath();
-                ctx.moveTo(width * 0.5 - goalWidth / 2 + i, height * 0.1);
-                ctx.lineTo(width * 0.5 - goalWidth / 2 + i, height * 0.2);
-                ctx.stroke();
+            
+            showFeedback(text, type) {
+                const feedback = this.elements.feedback;
+                feedback.textContent = text;
+                feedback.className = `feedback ${type} show`;
+                
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 2000);
             }
-            for (let i = 0; i < goalHeight; i += 10) {
-                ctx.beginPath();
-                ctx.moveTo(width * 0.5 - goalWidth / 2, height * 0.1 + i);
-                ctx.lineTo(width * 0.5 + goalWidth / 2, height * 0.1 + i);
-                ctx.stroke();
+            
+            resetBall() {
+                this.elements.ball.style.transform = 'translateX(-50%) scale(1)';
             }
-            // Goalkeeper
-            const keeperGradient = ctx.createLinearGradient(goalkeeper.x - goalkeeperWidth / 2, 0, goalkeeper.x + goalkeeperWidth / 2, 0);
-            keeperGradient.addColorStop(0, '#FF0000');
-            keeperGradient.addColorStop(1, '#CC0000');
-            ctx.fillStyle = keeperGradient;
-            ctx.fillRect(goalkeeper.x - goalkeeperWidth / 2, goalkeeper.y - goalkeeperHeight, goalkeeperWidth, goalkeeperHeight);
-            // Ball
-            if (ball.state === 'ready' || ball.state === 'shot') {
-                const ballGradient = ctx.createRadialGradient(ball.x, ball.y, ballSize * 0.3, ball.x, ball.y, ballSize);
-                ballGradient.addColorStop(0, '#FFF');
-                ballGradient.addColorStop(1, '#AAA');
-                ctx.fillStyle = ballGradient;
-                ctx.beginPath();
-                ctx.arc(ball.x, ball.y, ballSize, 0, Math.PI * 2);
-                ctx.fill();
-                // Ball pattern
-                ctx.fillStyle = '#000';
-                for (let i = 0; i < 6; i++) {
-                    ctx.beginPath();
-                    ctx.arc(ball.x + ballSize * 0.5 * Math.cos(i * Math.PI / 3), 
-                            ball.y + ballSize * 0.5 * Math.sin(i * Math.PI / 3), 
-                            ballSize * 0.2, 0, Math.PI * 2);
-                    ctx.fill();
+            
+            updateUI() {
+                this.elements.score.textContent = this.score;
+                this.elements.level.textContent = this.level;
+                this.elements.goals.textContent = this.goalsInLevel;
+            }
+            
+            endGame(won = false) {
+                this.gameActive = false;
+                this.elements.finalScore.textContent = `Final Score: ${this.score}`;
+                
+                if (won) {
+                    this.elements.gameOverMessage.textContent = '🏆 CHAMPION! You completed all levels!';
+                } else {
+                    this.elements.gameOverMessage.textContent = `🌟 Great job! You reached level ${this.level}!`;
                 }
+                
+                this.elements.gameOver.style.display = 'flex';
             }
-            // HUD
-            ctx.fillStyle = '#FFF';
-            ctx.font = '20px Arial Black';
-            ctx.fillText(`${playerName}'s Score: ${score}  Level: ${level}  Shots: ${shotsTaken}/5  Goals: ${goalsScored}/3`, 10, 30);
         }
-
-        window.onload = () => {
-            document.getElementById('startScreen').style.display = 'flex';
-        };
+        
+        // Start the game
+        new SoccerGame();
     </script>
 </body>
 </html>
