@@ -40,6 +40,7 @@
             overflow: hidden;
             touch-action: none;
             padding: 15px;
+            box-sizing: border-box;
         }
         .object {
             position: absolute;
@@ -60,7 +61,7 @@
             animation: match 0.5s forwards;
         }
         .pair-animation {
-            animation: pair 0.5s forwards;
+            animation: pair 0.3s forwards;
         }
         .power-bar-container {
             width: 100%;
@@ -215,10 +216,10 @@
         }
 
         function positionObject(obj, size) {
-            const areaWidth = playArea.clientWidth - size - 20; // Extra padding
-            const areaHeight = playArea.clientHeight - size - 20;
-            const x = 10 + Math.random() * areaWidth;
-            const y = 10 + Math.random() * areaHeight;
+            const areaWidth = playArea.clientWidth - size - 30; // Increased padding to ensure visibility
+            const areaHeight = playArea.clientHeight - size - 30;
+            const x = 15 + Math.random() * areaWidth;
+            const y = 15 + Math.random() * areaHeight;
             obj.style.left = `${x}px`;
             obj.style.top = `${y}px`;
         }
@@ -229,7 +230,7 @@
                 selected.push(obj);
                 obj.classList.add('pair-animation');
                 if (selected.length === 2) {
-                    checkMatch();
+                    setTimeout(checkMatch, 300); // Delay to show animation
                 }
             }
         }
@@ -240,7 +241,7 @@
                 obj1.classList.add('matched');
                 obj2.classList.add('matched');
                 score += 10;
-                power = Math.min(power + 20, 100); // Cap power at 100
+                power = Math.min(power + 20, 100);
                 pairsFound++;
                 scoreDisplay.textContent = `Score: ${score}`;
                 powerBar.style.width = `${power}%`;
@@ -253,8 +254,10 @@
                     }
                 }
             } else {
-                obj1.classList.remove('pair-animation');
-                obj2.classList.remove('pair-animation');
+                setTimeout(() => {
+                    obj1.classList.remove('pair-animation');
+                    obj2.classList.remove('pair-animation');
+                }, 300);
             }
             selected = [];
         }
