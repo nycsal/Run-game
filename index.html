@@ -39,7 +39,7 @@
             position: relative;
             overflow: hidden;
             touch-action: none;
-            padding: 10px;
+            padding: 15px;
         }
         .object {
             position: absolute;
@@ -74,7 +74,7 @@
             width: 0;
             transition: width 0.5s;
         }
-        #game-over, #level-up {
+        #game-over, #level-up, #start-screen {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -84,9 +84,11 @@
             padding: 20px;
             text-align: center;
             display: none;
-            font-size: 1.5em;
+            font-size: 1.2em;
             border-radius: 10px;
+            max-width: 80%;
         }
+        #start-screen { display: block; }
         button {
             padding: 10px 20px;
             font-size: 1em;
@@ -120,6 +122,10 @@
             <div class="power-bar" id="power-bar"></div>
         </div>
         <div id="play-area"></div>
+        <div id="start-screen">
+            <p>Tap matching gems to pair them. Complete all pairs to level up. 45 seconds per level. Difficulty increases each level!</p>
+            <button onclick="startGame()">Start</button>
+        </div>
         <div id="game-over">
             Game Over! Score: <span id="final-score"></span><br>
             <button onclick="restartGame()">Restart</button>
@@ -139,6 +145,7 @@
         const finalScoreDisplay = document.getElementById('final-score');
         const levelUpScreen = document.getElementById('level-up');
         const nextLevelDisplay = document.getElementById('next-level');
+        const startScreen = document.getElementById('start-screen');
 
         let level = 1;
         let score = 0;
@@ -152,6 +159,7 @@
         const colors = ['#ff4500', '#00ff7f', '#1e90ff', '#ffd700', '#ff69b4', '#00ffff'];
 
         function startGame() {
+            startScreen.style.display = 'none';
             objects = [];
             selected = [];
             pairsFound = 0;
@@ -207,17 +215,17 @@
         }
 
         function positionObject(obj, size) {
-            const areaWidth = playArea.clientWidth - size;
-            const areaHeight = playArea.clientHeight - size;
-            const x = Math.random() * areaWidth;
-            const y = Math.random() * areaHeight;
+            const areaWidth = playArea.clientWidth - size - 20; // Extra padding
+            const areaHeight = playArea.clientHeight - size - 20;
+            const x = 10 + Math.random() * areaWidth;
+            const y = 10 + Math.random() * areaHeight;
             obj.style.left = `${x}px`;
             obj.style.top = `${y}px`;
         }
 
         function handleTap(e, obj) {
             e.preventDefault();
-            if (selected.length < 2 && !selected.includes(obj)) {
+            if (selected.length < 2 && !selected.includes(obj) && !obj.classList.contains('matched')) {
                 selected.push(obj);
                 obj.classList.add('pair-animation');
                 if (selected.length === 2) {
@@ -232,10 +240,10 @@
                 obj1.classList.add('matched');
                 obj2.classList.add('matched');
                 score += 10;
-                power += 20;
+                power = Math.min(power + 20, 100); // Cap power at 100
                 pairsFound++;
                 scoreDisplay.textContent = `Score: ${score}`;
-                powerBar.style.width = `${Math.min(power, 100)}%`;
+                powerBar.style.width = `${power}%`;
                 if (pairsFound === objects.length / 2) {
                     if (level < 7) {
                         clearInterval(timer);
@@ -283,10 +291,8 @@
             level = 1;
             score = 0;
             gameOverScreen.style.display = 'none';
-            startGame();
+            startScreen.style.display = 'block';
         }
-
-        startGame();
     </script>
 </body>
 </html>
