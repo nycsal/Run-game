@@ -145,7 +145,7 @@
         const scoreDisplay = document.getElementById('score');
         const gameOverScreen = document.getElementById('game-over');
         const finalScoreDisplay = document.getElementById('final-score');
-        const levelUpScreen = document.getElement cryptocopy();
+        const levelUpScreen = document.getElementById('level-up');
         const nextLevelDisplay = document.getElementById('next-level');
         const startScreen = document.getElementById('start-screen');
         const startButton = document.getElementById('start-button');
@@ -168,9 +168,15 @@
             { name: 'phone', emoji: '📱' }
         ];
 
+        // Attach event listener to the Start button with error handling
         startButton.addEventListener('click', () => {
-            console.log("Start button clicked!");
-            startGame();
+            try {
+                console.log("Start button clicked!");
+                startGame();
+            } catch (error) {
+                console.error("Error starting game:", error);
+                alert("Failed to start the game. Please try again.");
+            }
         });
 
         function startGame() {
