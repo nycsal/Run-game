@@ -46,14 +46,17 @@
             position: absolute;
             width: 50px;
             height: 50px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
             border: 2px solid #ffd700;
             box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
             transition: transform 0.3s, opacity 0.3s;
             user-select: none;
             touch-action: none;
+            background: #fff;
+            border-radius: 5px;
         }
         .matched {
             animation: match 0.5s forwards;
@@ -142,7 +145,7 @@
         const scoreDisplay = document.getElementById('score');
         const gameOverScreen = document.getElementById('game-over');
         const finalScoreDisplay = document.getElementById('final-score');
-        const levelUpScreen = document.getElementById('level-up');
+        const levelUpScreen = document.getElement cryptocopy();
         const nextLevelDisplay = document.getElementById('next-level');
         const startScreen = document.getElementById('start-screen');
         const startButton = document.getElementById('start-button');
@@ -156,16 +159,15 @@
         let pairsFound = 0;
         let timer;
         const objectsList = [
-            { name: 'pencil', image: 'url(https://via.placeholder.com/50/0000FF/FFFFFF?text=P)' },
-            { name: 'eraser', image: 'url(https://via.placeholder.com/50/FF0000/FFFFFF?text=E)' },
-            { name: 'cup', image: 'url(https://via.placeholder.com/50/00FF00/FFFFFF?text=C)' },
-            { name: 'laptop', image: 'url(https://via.placeholder.com/50/FFA500/FFFFFF?text=L)' },
-            { name: 'banana', image: 'url(https://via.placeholder.com/50/FFFF00/FFFFFF?text=B)' },
-            { name: 'book', image: 'url(https://via.placeholder.com/50/800080/FFFFFF?text=Bo)' },
-            { name: 'phone', image: 'url(https://via.placeholder.com/50/00FFFF/FFFFFF?text=Ph)' }
+            { name: 'pencil', emoji: '✏️' },
+            { name: 'eraser', emoji: '🧹' },
+            { name: 'cup', emoji: '☕' },
+            { name: 'laptop', emoji: '💻' },
+            { name: 'banana', emoji: '🍌' },
+            { name: 'book', emoji: '📖' },
+            { name: 'phone', emoji: '📱' }
         ];
 
-        // Attach event listener to the Start button
         startButton.addEventListener('click', () => {
             console.log("Start button clicked!");
             startGame();
@@ -198,8 +200,8 @@
             const pairs = [];
             for (let i = 0; i < objectCount / 2; i++) {
                 const obj = availableObjects[Math.floor(Math.random() * availableObjects.length)];
-                pairs.push({ name: obj.name, image: obj.image, pairId: i });
-                pairs.push({ name: obj.name, image: obj.image, pairId: i });
+                pairs.push({ name: obj.name, emoji: obj.emoji, pairId: i });
+                pairs.push({ name: obj.name, emoji: obj.emoji, pairId: i });
             }
             pairs.sort(() => Math.random() - 0.5);
 
@@ -208,7 +210,7 @@
                 obj.classList.add('object');
                 obj.style.width = `${size}px`;
                 obj.style.height = `${size}px`;
-                obj.style.backgroundImage = pair.image;
+                obj.innerHTML = pair.emoji;
                 obj.dataset.name = pair.name;
                 obj.dataset.pairId = pair.pairId;
                 obj.dataset.id = index;
