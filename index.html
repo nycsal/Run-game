@@ -216,7 +216,7 @@
         }
 
         function positionObject(obj, size) {
-            const areaWidth = playArea.clientWidth - size - 30; // Increased padding to ensure visibility
+            const areaWidth = playArea.clientWidth - size - 30;
             const areaHeight = playArea.clientHeight - size - 30;
             const x = 15 + Math.random() * areaWidth;
             const y = 15 + Math.random() * areaHeight;
@@ -230,7 +230,7 @@
                 selected.push(obj);
                 obj.classList.add('pair-animation');
                 if (selected.length === 2) {
-                    setTimeout(checkMatch, 300); // Delay to show animation
+                    setTimeout(checkMatch, 300);
                 }
             }
         }
@@ -245,14 +245,20 @@
                 pairsFound++;
                 scoreDisplay.textContent = `Score: ${score}`;
                 powerBar.style.width = `${power}%`;
-                if (pairsFound === objects.length / 2) {
-                    if (level < 7) {
-                        clearInterval(timer);
-                        showLevelUp();
-                    } else {
-                        endGame();
+                // Remove matched objects after animation
+                setTimeout(() => {
+                    obj1.remove();
+                    obj2.remove();
+                    objects = objects.filter(o => o !== obj1 && o !== obj2);
+                    if (pairsFound === objects.length / 2) {
+                        if (level < 7) {
+                            clearInterval(timer);
+                            showLevelUp();
+                        } else {
+                            endGame();
+                        }
                     }
-                }
+                }, 500); // Match animation duration
             } else {
                 setTimeout(() => {
                     obj1.classList.remove('pair-animation');
