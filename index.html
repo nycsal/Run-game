@@ -46,17 +46,15 @@
             position: absolute;
             width: 50px;
             height: 50px;
-            background: linear-gradient(135deg, #fff, #aaa);
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
             border: 2px solid #ffd700;
-            border-radius: 10px;
             box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
             transition: transform 0.3s, opacity 0.3s;
             user-select: none;
             touch-action: none;
         }
-        .circle { border-radius: 50%; }
-        .triangle { clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
-        .diamond { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
         .matched {
             animation: match 0.5s forwards;
         }
@@ -107,8 +105,8 @@
         }
         @keyframes pair {
             0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+            50% { transform: scale(1.2); box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
         }
     </style>
 </head>
@@ -124,7 +122,7 @@
         </div>
         <div id="play-area"></div>
         <div id="start-screen">
-            <p>Tap matching gems to pair them. Complete all pairs to level up. 45 seconds per level. Difficulty increases each level!</p>
+            <p>Tap matching objects to pair them. Complete all pairs to level up. 45 seconds per level. Difficulty increases each level!</p>
             <button onclick="startGame()">Start</button>
         </div>
         <div id="game-over">
@@ -156,8 +154,15 @@
         let selected = [];
         let pairsFound = 0;
         let timer;
-        const shapes = ['square', 'circle', 'triangle', 'diamond'];
-        const colors = ['#ff4500', '#00ff7f', '#1e90ff', '#ffd700', '#ff69b4', '#00ffff'];
+        const objectsList = [
+            { name: 'pencil', image: 'url(https://via.placeholder.com/50/0000FF/FFFFFF?text=P) },
+            { name: 'eraser', image: 'url(https://via.placeholder.com/50/FF0000/FFFFFF?text=E)' },
+            { name: 'cup', image: 'url(https://via.placeholder.com/50/00FF00/FFFFFF?text=C)' },
+            { name: 'laptop', image: 'url(https://via.placeholder.com/50/FFA500/FFFFFF?text=L)' },
+            { name: 'banana', image: 'url(https://via.placeholder.com/50/FFFF00/FFFFFF?text=B)' },
+            { name: 'book', image: 'url(https://via.placeholder.com/50/800080/FFFFFF?text=Bo)' },
+            { name: 'phone', image: 'url(https://via.placeholder.com/50/00FFFF/FFFFFF?text=Ph)' }
+        ];
 
         function startGame() {
             startScreen.style.display = 'none';
@@ -176,29 +181,26 @@
         }
 
         function generateObjects() {
-            const baseCount = 20;
+            const baseCount = 14; // Adjusted to fit screen without overlap
             const objectCount = Math.floor(baseCount * (1 + 0.2 * (level - 1)));
             const size = Math.max(30, 50 - level * 3);
-            const shapeSimilarity = level > 3 ? shapes.slice(0, Math.max(1, shapes.length - level + 3)) : shapes;
-            const colorSimilarity = level > 3 ? colors.slice(0, Math.max(1, colors.length - level + 3)) : colors;
+            const availableObjects = objectsList.slice(0, Math.max(3, objectsList.length - level + 1));
 
             const pairs = [];
             for (let i = 0; i < objectCount / 2; i++) {
-                const shape = shapeSimilarity[Math.floor(Math.random() * shapeSimilarity.length)];
-                const color = colorSimilarity[Math.floor(Math.random() * colorSimilarity.length)];
-                pairs.push({ shape, color, pairId: i });
-                pairs.push({ shape, color, pairId: i });
+                const obj = availableObjects[Math.floor(Math.random() * availableObjects.length)];
+                pairs.push({ name: obj.name, image: obj.image, pairId: i });
+                pairs.push({ name: obj.name, image: obj.image, pairId: i });
             }
             pairs.sort(() => Math.random() - 0.5);
 
             pairs.forEach((pair, index) => {
                 const obj = document.createElement('div');
-                obj.classList.add('object', pair.shape);
+                obj.classList.add('object');
                 obj.style.width = `${size}px`;
                 obj.style.height = `${size}px`;
-                obj.style.background = `linear-gradient(135deg, ${pair.color}, ${adjustColor(pair.color)})`;
-                obj.dataset.shape = pair.shape;
-                obj.dataset.color = pair.color;
+                obj.style.backgroundImage = pair.image;
+                obj.dataset.name = pair.name;
                 obj.dataset.pairId = pair.pairId;
                 obj.dataset.id = index;
                 positionObject(obj, size);
@@ -208,18 +210,20 @@
             });
         }
 
-        function adjustColor(color) {
-            const r = parseInt(color.slice(1, 3), 16);
-            const g = parseInt(color.slice(3, 5), 16);
-            const b = parseInt(color.slice(5, 7), 16);
-            return `rgb(${Math.min(255, r + 50)}, ${Math.min(255, g + 50)}, ${Math.min(255, b + 50)})`;
-        }
-
         function positionObject(obj, size) {
             const areaWidth = playArea.clientWidth - size - 30;
             const areaHeight = playArea.clientHeight - size - 30;
-            const x = 15 + Math.random() * areaWidth;
-            const y = 15 + Math.random() * areaHeight;
+            let x, y;
+            let overlap;
+            do {
+                x = 15 + Math.random() * areaWidth;
+                y = 15 + Math.random() * areaHeight;
+                overlap = objects.some(o => {
+                    const ox = parseFloat(o.style.left);
+                    const oy = parseFloat(o.style.top);
+                    return Math.abs(ox - x) < size && Math.abs(oy - y) < size;
+                });
+            } while (overlap);
             obj.style.left = `${x}px`;
             obj.style.top = `${y}px`;
         }
@@ -237,7 +241,7 @@
 
         function checkMatch() {
             const [obj1, obj2] = selected;
-            if (obj1.dataset.pairId === obj2.dataset.pairId) {
+            if (obj1.dataset.name === obj2.dataset.name) {
                 obj1.classList.add('matched');
                 obj2.classList.add('matched');
                 score += 10;
@@ -245,7 +249,6 @@
                 pairsFound++;
                 scoreDisplay.textContent = `Score: ${score}`;
                 powerBar.style.width = `${power}%`;
-                // Remove matched objects after animation
                 setTimeout(() => {
                     obj1.remove();
                     obj2.remove();
@@ -258,7 +261,7 @@
                             endGame();
                         }
                     }
-                }, 500); // Match animation duration
+                }, 500);
             } else {
                 setTimeout(() => {
                     obj1.classList.remove('pair-animation');
