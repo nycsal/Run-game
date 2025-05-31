@@ -59,10 +59,10 @@
             border-radius: 5px;
         }
         .matched {
-            animation: match 0.7s forwards;
+            animation: match 0.8s forwards;
         }
         .pair-animation {
-            animation: pair 0.5s ease-in-out;
+            animation: pair 0.6s ease-in-out;
         }
         .power-bar-container {
             width: 100%;
@@ -103,15 +103,17 @@
         }
         @keyframes match {
             0% { transform: scale(1); opacity: 1; }
-            30% { transform: scale(1.5); opacity: 0.7; box-shadow: 0 0 20px #ffd700; }
-            70% { transform: scale(0.8); opacity: 0.3; }
+            20% { transform: scale(1.6); opacity: 0.8; box-shadow: 0 0 25px #ffd700; }
+            50% { transform: scale(0.9); opacity: 0.5; box-shadow: 0 0 15px #ffeb3b; }
+            80% { transform: scale(1.2); opacity: 0.3; }
             100% { transform: scale(0); opacity: 0; }
         }
         @keyframes pair {
             0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-            25% { transform: scale(1.3); box-shadow: 0 0 25px #ffd700; }
-            50% { transform: scale(1.1); box-shadow: 0 0 15px #ffeb3b; }
-            75% { transform: scale(1.2); box-shadow: 0 0 20px #ff9800; }
+            20% { transform: scale(1.4); box-shadow: 0 0 30px #ff9800; }
+            40% { transform: scale(1.1); box-shadow: 0 0 20px #ffeb3b; }
+            60% { transform: scale(1.3); box-shadow: 0 0 25px #ffd700; }
+            80% { transform: scale(1.2); box-shadow: 0 0 15px #ff5722; }
             100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
         }
     </style>
@@ -161,6 +163,7 @@
         let selected = [];
         let pairsFound = 0;
         let timer;
+        let initialPairCountValue;
 
         const objectsList = [
             { name: 'pencil', emoji: '✏️' },
@@ -176,7 +179,13 @@
             { name: 'camera', emoji: '📷' },
             { name: 'scissors', emoji: '✂️' },
             { name: 'hat', emoji: '🎩' },
-            { name: 'ball', emoji: '⚽' }
+            { name: 'ball', emoji: '⚽' },
+            { name: 'star', emoji: '⭐' },
+            { name: 'umbrella', emoji: '☂️' },
+            { name: 'glasses', emoji: '👓' },
+            { name: 'car', emoji: '🚗' },
+            { name: 'tree', emoji: '🌳' },
+            { name: 'sun', emoji: '☀️' }
         ];
 
         startButton.addEventListener('click', () => {
@@ -208,13 +217,24 @@
 
         function generateObjects() {
             console.log("generateObjects called");
-            const baseCount = 20; // Increased for more difficulty
-            const objectCount = Math.floor(baseCount * (1 + 0.2 * (level - 1)));
-            const size = Math.max(30, 50 - level * 3);
-            const availableObjects = objectsList.slice(0, Math.max(5, objectsList.length - level + 1));
+            const baseCount = 30; // Increased for a fuller screen
+            let objectCount;
+            switch (level) {
+                case 1: objectCount = 20; break; // 10 pairs
+                case 2: objectCount = 40; break; // 20 pairs
+                case 3: objectCount = 50; break; // 25 pairs
+                case 4: objectCount = 60; break; // 30 pairs
+                case 5: objectCount = 70; break; // 35 pairs
+                case 6: objectCount = 80; break; // 40 pairs
+                case 7: objectCount = 90; break; // 45 pairs, final level
+                default: objectCount = 20;
+            }
+            const size = Math.max(25, 50 - level * 3); // Smaller size for more objects
+            const availableObjects = objectsList.slice(0, Math.max(7, objectsList.length - level + 1));
 
             // Ensure objectCount is even
             const evenObjectCount = objectCount % 2 === 0 ? objectCount : objectCount + 1;
+            initialPairCountValue = evenObjectCount;
 
             const pairs = [];
             for (let i = 0; i < evenObjectCount / 2; i++) {
@@ -241,13 +261,13 @@
         }
 
         function positionObject(obj, size) {
-            const areaWidth = playArea.clientWidth - size - 40; // Increased padding
-            const areaHeight = playArea.clientHeight - size - 40;
+            const areaWidth = playArea.clientWidth - size - 20;
+            const areaHeight = playArea.clientHeight - size - 20;
             let x, y;
             let overlap;
             do {
-                x = 20 + Math.random() * areaWidth;
-                y = 20 + Math.random() * areaHeight;
+                x = 10 + Math.random() * areaWidth;
+                y = 10 + Math.random() * areaHeight;
                 overlap = objects.some(o => {
                     const ox = parseFloat(o.style.left);
                     const oy = parseFloat(o.style.top);
@@ -283,8 +303,8 @@
                     obj1.remove();
                     obj2.remove();
                     objects = objects.filter(o => o !== obj1 && o !== obj2);
-                    // Check for completion immediately
-                    if (pairsFound === (initialPairCount() / 2)) {
+                    // Check for completion based on initial pair count
+                    if (pairsFound === initialPairCountValue / 2) {
                         if (level < 7) {
                             const bonus = timeLeft * 2;
                             score += bonus;
@@ -298,20 +318,14 @@
                             endGame();
                         }
                     }
-                }, 700); // Match animation duration
+                }, 800); // Match animation duration
             } else {
                 setTimeout(() => {
                     obj1.classList.remove('pair-animation');
                     obj2.classList.remove('pair-animation');
-                }, 500);
+                }, 600);
             }
             selected = [];
-        }
-
-        function initialPairCount() {
-            const baseCount = 20;
-            const objectCount = Math.floor(baseCount * (1 + 0.2 * (level - 1)));
-            return objectCount % 2 === 0 ? objectCount : objectCount + 1;
         }
 
         function startTimer() {
