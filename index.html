@@ -12,7 +12,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: #222;
+            background: #1a1a1a;
             font-family: Arial, sans-serif;
             overflow: hidden;
             touch-action: manipulation;
@@ -22,14 +22,14 @@
             height: 100vh;
             max-width: 600px;
             position: relative;
-            background: #333;
+            background: #2c2c2c;
             display: flex;
             flex-direction: column;
         }
         #scoreboard {
             padding: 10px;
-            background: #444;
-            color: white;
+            background: #3a3a3a;
+            color: #fff;
             display: flex;
             justify-content: space-between;
             font-size: 1.2em;
@@ -39,18 +39,28 @@
             position: relative;
             overflow: hidden;
             touch-action: none;
+            padding: 10px;
         }
         .object {
             position: absolute;
             width: 50px;
             height: 50px;
+            background: linear-gradient(135deg, #fff, #aaa);
+            border: 2px solid #ffd700;
             border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
             transition: transform 0.3s, opacity 0.3s;
             user-select: none;
             touch-action: none;
         }
+        .circle { border-radius: 50%; }
+        .triangle { clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
+        .diamond { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
         .matched {
             animation: match 0.5s forwards;
+        }
+        .pair-animation {
+            animation: pair 0.5s forwards;
         }
         .power-bar-container {
             width: 100%;
@@ -60,7 +70,7 @@
         }
         .power-bar {
             height: 100%;
-            background: linear-gradient(to right, #ff0, #f00);
+            background: linear-gradient(to right, #ffd700, #ff4500);
             width: 0;
             transition: width 0.5s;
         }
@@ -70,19 +80,21 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: rgba(0, 0, 0, 0.8);
-            color: white;
+            color: #fff;
             padding: 20px;
             text-align: center;
             display: none;
             font-size: 1.5em;
+            border-radius: 10px;
         }
         button {
             padding: 10px 20px;
             font-size: 1em;
             margin-top: 10px;
-            background: #666;
-            color: white;
+            background: #ffd700;
+            color: #1a1a1a;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
         }
         @keyframes match {
@@ -90,9 +102,9 @@
             50% { transform: scale(1.5); opacity: 0.5; }
             100% { transform: scale(0); opacity: 0; }
         }
-        @keyframes pulse {
+        @keyframes pair {
             0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(1.2); }
             100% { transform: scale(1); }
         }
     </style>
@@ -136,8 +148,8 @@
         let selected = [];
         let pairsFound = 0;
         let timer;
-        const shapes = ['square', 'circle', 'triangle'];
-        const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
+        const shapes = ['square', 'circle', 'triangle', 'diamond'];
+        const colors = ['#ff4500', '#00ff7f', '#1e90ff', '#ffd700', '#ff69b4', '#00ffff'];
 
         function startGame() {
             objects = [];
@@ -165,23 +177,20 @@
             for (let i = 0; i < objectCount / 2; i++) {
                 const shape = shapeSimilarity[Math.floor(Math.random() * shapeSimilarity.length)];
                 const color = colorSimilarity[Math.floor(Math.random() * colorSimilarity.length)];
-                pairs.push({ shape, color });
-                pairs.push({ shape, color });
+                pairs.push({ shape, color, pairId: i });
+                pairs.push({ shape, color, pairId: i });
             }
             pairs.sort(() => Math.random() - 0.5);
 
             pairs.forEach((pair, index) => {
                 const obj = document.createElement('div');
-                obj.classList.add('object');
+                obj.classList.add('object', pair.shape);
                 obj.style.width = `${size}px`;
                 obj.style.height = `${size}px`;
-                obj.style.background = pair.color;
-                obj.style.borderRadius = pair.shape === 'circle' ? '50%' : pair.shape === 'triangle' ? '0' : '10px';
-                if (pair.shape === 'triangle') {
-                    obj.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)';
-                }
+                obj.style.background = `linear-gradient(135deg, ${pair.color}, ${adjustColor(pair.color)})`;
                 obj.dataset.shape = pair.shape;
                 obj.dataset.color = pair.color;
+                obj.dataset.pairId = pair.pairId;
                 obj.dataset.id = index;
                 positionObject(obj, size);
                 obj.addEventListener('touchstart', (e) => handleTap(e, obj));
@@ -190,11 +199,18 @@
             });
         }
 
+        function adjustColor(color) {
+            const r = parseInt(color.slice(1, 3), 16);
+            const g = parseInt(color.slice(3, 5), 16);
+            const b = parseInt(color.slice(5, 7), 16);
+            return `rgb(${Math.min(255, r + 50)}, ${Math.min(255, g + 50)}, ${Math.min(255, b + 50)})`;
+        }
+
         function positionObject(obj, size) {
-            const areaWidth = playArea.clientWidth;
-            const areaHeight = playArea.clientHeight;
-            const x = Math.random() * (areaWidth - size);
-            const y = Math.random() * (areaHeight - size);
+            const areaWidth = playArea.clientWidth - size;
+            const areaHeight = playArea.clientHeight - size;
+            const x = Math.random() * areaWidth;
+            const y = Math.random() * areaHeight;
             obj.style.left = `${x}px`;
             obj.style.top = `${y}px`;
         }
@@ -203,7 +219,7 @@
             e.preventDefault();
             if (selected.length < 2 && !selected.includes(obj)) {
                 selected.push(obj);
-                obj.style.transform = 'scale(1.1)';
+                obj.classList.add('pair-animation');
                 if (selected.length === 2) {
                     checkMatch();
                 }
@@ -212,7 +228,7 @@
 
         function checkMatch() {
             const [obj1, obj2] = selected;
-            if (obj1.dataset.shape === obj2.dataset.shape && obj1.dataset.color === obj2.dataset.color) {
+            if (obj1.dataset.pairId === obj2.dataset.pairId) {
                 obj1.classList.add('matched');
                 obj2.classList.add('matched');
                 score += 10;
@@ -229,8 +245,8 @@
                     }
                 }
             } else {
-                obj1.style.transform = 'scale(1)';
-                obj2.style.transform = 'scale(1)';
+                obj1.classList.remove('pair-animation');
+                obj2.classList.remove('pair-animation');
             }
             selected = [];
         }
