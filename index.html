@@ -2,411 +2,275 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Memory Match Game</title>
     <style>
-        /* Basic Reset & Body Styles */
         body {
             margin: 0;
-            font-family: 'Arial', sans-serif;
+            padding: 0;
             display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
+            justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background-color: #f0f0f0;
-            overflow: hidden; /* Prevent scrolling issues */
+            height: 100vh;
+            background: #222;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
         }
-
-        /* Game Container - Ensures everything is on screen */
-        .game-container {
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 600px;
+            position: relative;
+            background: #333;
             display: flex;
             flex-direction: column;
-            width: 95vw; /* Almost full width for phones */
-            max-width: 500px; /* Limit on larger screens */
-            height: 95vh; /* Almost full height */
-            box-sizing: border-box;
-            padding: 10px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-
-        /* Scoreboard and Timer */
-        .header-controls {
+        #scoreboard {
+            padding: 10px;
+            background: #444;
+            color: white;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
             font-size: 1.2em;
-            font-weight: bold;
-            color: #333;
         }
-
-        .score, .timer {
-            background-color: #eee;
-            padding: 5px 10px;
-            border-radius: 5px;
-            min-width: 80px;
-            text-align: center;
-        }
-
-        /* Game Board */
-        .game-board {
-            flex-grow: 1; /* Allows it to take up available space */
-            display: grid;
-            grid-template-columns: repeat(4, 1fr); /* Example 4 columns */
-            grid-gap: 8px;
-            padding: 10px;
-            perspective: 1000px; /* For 3D flip effect */
-            overflow-y: auto; /* In case content exceeds screen height */
-        }
-
-        /* Card Styles */
-        .card {
-            width: 100%;
-            height: 0;
-            padding-bottom: 100%; /* Makes cards square based on width */
+        #play-area {
+            flex-grow: 1;
             position: relative;
-            cursor: pointer;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            background-color: #4CAF50; /* Back of the card */
-            transition: transform 0.3s ease-in-out;
-            transform-style: preserve-3d;
+            overflow: hidden;
+            touch-action: none;
         }
-
-        .card.flipped {
-            transform: rotateY(180deg);
-        }
-
-        .card .card-inner {
+        .object {
             position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            transition: transform 0.3s, opacity 0.3s;
+            user-select: none;
+            touch-action: none;
+        }
+        .matched {
+            animation: match 0.5s forwards;
+        }
+        .power-bar-container {
             width: 100%;
+            height: 10px;
+            background: #555;
+            margin: 10px 0;
+        }
+        .power-bar {
             height: 100%;
-            transform-style: preserve-3d;
-            transition: transform 0.3s;
+            background: linear-gradient(to right, #ff0, #f00);
+            width: 0;
+            transition: width 0.5s;
         }
-
-        .card.flipped .card-inner {
-            transform: rotateY(180deg);
-        }
-
-        .card-face {
+        #game-over, #level-up {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2.5em; /* Emoji size */
-            border-radius: 8px;
-        }
-
-        .card-front {
-            background-color: #f9f9f9;
-            color: #333;
-            transform: rotateY(180deg);
-        }
-
-        .card-back {
-            background-color: #4CAF50;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
             color: white;
+            padding: 20px;
+            text-align: center;
+            display: none;
             font-size: 1.5em;
         }
-
-        .card.matched {
-            opacity: 0.5; /* Slightly fade matched cards */
-            pointer-events: none; /* Disable interaction on matched cards */
-            /* Add more exciting animation for matched cards here */
-            animation: pulse-and-fade 0.5s forwards; /* Example animation */
-        }
-
-        @keyframes pulse-and-fade {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-            100% { transform: scale(0.9); opacity: 0; }
-        }
-
-        /* Game Over/Level Complete Overlay */
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-size: 2em;
-            text-align: center;
-            z-index: 10;
-            display: none; /* Hidden by default */
-        }
-
-        .overlay button {
+        button {
             padding: 10px 20px;
-            font-size: 0.7em;
-            margin-top: 20px;
-            cursor: pointer;
-            background-color: #4CAF50;
+            font-size: 1em;
+            margin-top: 10px;
+            background: #666;
             color: white;
             border: none;
-            border-radius: 5px;
+            cursor: pointer;
         }
-
-        /* Power Balls Container (Placeholder) */
-        .power-balls-container {
-            width: 100%;
-            height: 20px;
-            background-color: #ddd;
-            border-radius: 10px;
-            margin-top: 10px;
-            overflow: hidden;
+        @keyframes match {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(0); opacity: 0; }
         }
-
-        .power-ball-fill {
-            height: 100%;
-            width: 0%; /* Fills up with JavaScript */
-            background-color: #FFD700; /* Gold color for power */
-            border-radius: 10px;
-            transition: width 0.3s ease-out;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
-
-        /* Responsive adjustments for smaller screens */
-        @media (max-width: 400px) {
-            .game-board {
-                grid-template-columns: repeat(3, 1fr); /* More manageable for very small screens */
-            }
-            .card-face {
-                font-size: 2em;
-            }
-        }
-
     </style>
 </head>
 <body>
-
-    <div class="game-container">
-        <div class="header-controls">
-            <div class="score">Score: <span id="score">0</span></div>
-            <div class="timer">Time: <span id="timer">45</span>s</div>
+    <div id="game-container">
+        <div id="scoreboard">
+            <span id="level">Level: 1</span>
+            <span id="time">Time: 45</span>
+            <span id="score">Score: 0</span>
         </div>
-
-        <div class="power-balls-container">
-            <div class="power-ball-fill" id="powerBallFill"></div>
+        <div class="power-bar-container">
+            <div class="power-bar" id="power-bar"></div>
         </div>
-
-        <div class="game-board" id="gameBoard">
-            </div>
-
-        <div class="overlay" id="overlay">
-            <div id="overlayMessage"></div>
-            <button id="restartButton">Play Again</button>
+        <div id="play-area"></div>
+        <div id="game-over">
+            Game Over! Score: <span id="final-score"></span><br>
+            <button onclick="restartGame()">Restart</button>
+        </div>
+        <div id="level-up">
+            Level Up! Level: <span id="next-level"></span><br>
+            <button onclick="startNextLevel()">Continue</button>
         </div>
     </div>
-
     <script>
-        const gameBoard = document.getElementById('gameBoard');
+        const playArea = document.getElementById('play-area');
+        const powerBar = document.getElementById('power-bar');
+        const levelDisplay = document.getElementById('level');
+        const timeDisplay = document.getElementById('time');
         const scoreDisplay = document.getElementById('score');
-        const timerDisplay = document.getElementById('timer');
-        const powerBallFill = document.getElementById('powerBallFill');
-        const overlay = document.getElementById('overlay');
-        const overlayMessage = document.getElementById('overlayMessage');
-        const restartButton = document.getElementById('restartButton');
+        const gameOverScreen = document.getElementById('game-over');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const levelUpScreen = document.getElementById('level-up');
+        const nextLevelDisplay = document.getElementById('next-level');
 
-        let cards = [];
-        let flippedCards = [];
-        let matchedPairs = 0;
-        let score = 0;
-        let timer;
-        let timeLeft = 45;
-        let gameActive = false;
         let level = 1;
-        const baseTime = 45; // seconds
-        const basePairs = 10; // 20 objects = 10 pairs
-        const difficultyIncrease = 0.20; // 20%
-
-        const emojis = ['🍎', '🍌', '🍇', '🍊', '🍓', '🍋', '🍐', '🥝', '🍉', '🍍']; // 10 unique emojis
-
-        function initializeGame() {
-            gameActive = false;
-            flippedCards = [];
-            matchedPairs = 0;
-            score = 0;
-            timeLeft = baseTime;
-            scoreDisplay.textContent = score;
-            timerDisplay.textContent = timeLeft;
-            powerBallFill.style.width = '0%';
-            overlay.style.display = 'none';
-            gameBoard.innerHTML = ''; // Clear previous cards
-
-            // Determine number of pairs for current level
-            let numPairs = Math.floor(basePairs * (1 + (level - 1) * difficultyIncrease));
-            if (numPairs > emojis.length) numPairs = emojis.length; // Don't exceed available emojis
-            let currentEmojis = emojis.slice(0, numPairs);
-
-            cards = shuffleArray([...currentEmojis, ...currentEmojis]); // Duplicate for pairs and shuffle
-
-            // Adjust grid columns based on number of cards
-            let numCols = 4;
-            // You can refine this logic to better suit various card counts
-            if (cards.length === 12) numCols = 3; // For 6 pairs
-            else if (cards.length === 16) numCols = 4; // For 8 pairs
-            else if (cards.length >= 20) numCols = 4; // Default for 10 or more pairs
-            else if (cards.length >= 24) numCols = 5; // For 12 pairs (24 cards)
-            else if (cards.length >= 30) numCols = 5; // For 15 pairs (30 cards)
-            gameBoard.style.gridTemplateColumns = `repeat(${numCols}, 1fr)`;
-
-
-            cards.forEach((emoji, index) => {
-                const cardElement = document.createElement('div');
-                cardElement.classList.add('card');
-                cardElement.dataset.emoji = emoji;
-                cardElement.dataset.index = index;
-
-                cardElement.innerHTML = `
-                    <div class="card-inner">
-                        <div class="card-face card-front">${emoji}</div>
-                        <div class="card-face card-back">?</div>
-                    </div>
-                `;
-                cardElement.addEventListener('click', flipCard);
-                gameBoard.appendChild(cardElement);
-            });
-
-            // Briefly show all cards at the start of a level
-            setTimeout(() => {
-                gameBoard.querySelectorAll('.card').forEach(card => {
-                    card.classList.add('flipped');
-                });
-                setTimeout(() => {
-                    gameBoard.querySelectorAll('.card').forEach(card => {
-                        card.classList.remove('flipped');
-                    });
-                    startGame(); // Start timer after cards are hidden
-                }, **3000**); // Show for 3 seconds
-            }, 500); // Small initial delay before showing cards
-        }
-
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
+        let score = 0;
+        let timeLeft = 45;
+        let power = 0;
+        let objects = [];
+        let selected = [];
+        let pairsFound = 0;
+        let timer;
+        const shapes = ['square', 'circle', 'triangle'];
+        const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
 
         function startGame() {
-            gameActive = true;
+            objects = [];
+            selected = [];
+            pairsFound = 0;
+            power = 0;
+            timeLeft = 45;
+            powerBar.style.width = '0%';
+            playArea.innerHTML = '';
+            levelDisplay.textContent = `Level: ${level}`;
+            scoreDisplay.textContent = `Score: ${score}`;
+            timeDisplay.textContent = `Time: ${timeLeft}`;
+            generateObjects();
             startTimer();
         }
 
-        function flipCard(event) {
-            if (!gameActive) return;
-            const clickedCard = event.currentTarget;
+        function generateObjects() {
+            const baseCount = 20;
+            const objectCount = Math.floor(baseCount * (1 + 0.2 * (level - 1)));
+            const size = Math.max(30, 50 - level * 3);
+            const shapeSimilarity = level > 3 ? shapes.slice(0, Math.max(1, shapes.length - level + 3)) : shapes;
+            const colorSimilarity = level > 3 ? colors.slice(0, Math.max(1, colors.length - level + 3)) : colors;
 
-            // Prevent flipping already matched or already flipped cards
-            if (clickedCard.classList.contains('flipped') || clickedCard.classList.contains('matched')) {
-                return;
+            const pairs = [];
+            for (let i = 0; i < objectCount / 2; i++) {
+                const shape = shapeSimilarity[Math.floor(Math.random() * shapeSimilarity.length)];
+                const color = colorSimilarity[Math.floor(Math.random() * colorSimilarity.length)];
+                pairs.push({ shape, color });
+                pairs.push({ shape, color });
             }
+            pairs.sort(() => Math.random() - 0.5);
 
-            if (flippedCards.length < 2) {
-                clickedCard.classList.add('flipped');
-                flippedCards.push(clickedCard);
+            pairs.forEach((pair, index) => {
+                const obj = document.createElement('div');
+                obj.classList.add('object');
+                obj.style.width = `${size}px`;
+                obj.style.height = `${size}px`;
+                obj.style.background = pair.color;
+                obj.style.borderRadius = pair.shape === 'circle' ? '50%' : pair.shape === 'triangle' ? '0' : '10px';
+                if (pair.shape === 'triangle') {
+                    obj.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)';
+                }
+                obj.dataset.shape = pair.shape;
+                obj.dataset.color = pair.color;
+                obj.dataset.id = index;
+                positionObject(obj, size);
+                obj.addEventListener('touchstart', (e) => handleTap(e, obj));
+                playArea.appendChild(obj);
+                objects.push(obj);
+            });
+        }
 
-                if (flippedCards.length === 2) {
-                    setTimeout(checkForMatch, 700); // Allow time for second card to flip and then check
+        function positionObject(obj, size) {
+            const areaWidth = playArea.clientWidth;
+            const areaHeight = playArea.clientHeight;
+            const x = Math.random() * (areaWidth - size);
+            const y = Math.random() * (areaHeight - size);
+            obj.style.left = `${x}px`;
+            obj.style.top = `${y}px`;
+        }
+
+        function handleTap(e, obj) {
+            e.preventDefault();
+            if (selected.length < 2 && !selected.includes(obj)) {
+                selected.push(obj);
+                obj.style.transform = 'scale(1.1)';
+                if (selected.length === 2) {
+                    checkMatch();
                 }
             }
         }
 
-        function checkForMatch() {
-            const [card1, card2] = flippedCards;
-
-            if (card1.dataset.emoji === card2.dataset.emoji) {
-                // Match found
+        function checkMatch() {
+            const [obj1, obj2] = selected;
+            if (obj1.dataset.shape === obj2.dataset.shape && obj1.dataset.color === obj2.dataset.color) {
+                obj1.classList.add('matched');
+                obj2.classList.add('matched');
                 score += 10;
-                matchedPairs++;
-                scoreDisplay.textContent = score;
-
-                card1.classList.add('matched');
-                card2.classList.add('matched');
-                // It's good practice to remove event listeners for matched cards
-                card1.removeEventListener('click', flipCard);
-                card2.removeEventListener('click', flipCard);
-
-                updatePowerBalls();
-
-                if (matchedPairs === cards.length / 2) {
-                    endLevel(true); // All pairs found
+                power += 20;
+                pairsFound++;
+                scoreDisplay.textContent = `Score: ${score}`;
+                powerBar.style.width = `${Math.min(power, 100)}%`;
+                if (pairsFound === objects.length / 2) {
+                    if (level < 7) {
+                        clearInterval(timer);
+                        showLevelUp();
+                    } else {
+                        endGame();
+                    }
                 }
             } else {
-                // No match, flip back
-                setTimeout(() => {
-                    card1.classList.remove('flipped');
-                    card2.classList.remove('flipped');
-                }, 500); // Short delay before flipping back
+                obj1.style.transform = 'scale(1)';
+                obj2.style.transform = 'scale(1)';
             }
-            flippedCards = []; // Reset flipped cards
-        }
-
-        function updatePowerBalls() {
-            const totalPairs = cards.length / 2;
-            const fillPercentage = (matchedPairs / totalPairs) * 100;
-            powerBallFill.style.width = `${fillPercentage}%`;
+            selected = [];
         }
 
         function startTimer() {
-            clearInterval(timer); // Clear any existing timer to prevent multiple timers
+            timeDisplay.textContent = `Time: ${timeLeft}`;
             timer = setInterval(() => {
                 timeLeft--;
-                timerDisplay.textContent = timeLeft;
-
+                timeDisplay.textContent = `Time: ${timeLeft}`;
                 if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    endLevel(false); // Time's up
+                    endGame();
                 }
-            }, 1000); // Decrement every second
+            }, 1000);
         }
 
-        function endLevel(levelComplete) {
-            gameActive = false;
-            clearInterval(timer); // Stop the timer
-
-            if (levelComplete) {
-                overlayMessage.innerHTML = `Level ${level} Complete! You found all pairs! <br>Score: ${score}`;
-                if (level < 7) { // Max 7 levels as per request
-                    level++;
-                    restartButton.textContent = `Start Level ${level}`;
-                } else {
-                    overlayMessage.innerHTML = `Congratulations! You beat all 7 levels! <br>Final Score: ${score}`;
-                    restartButton.textContent = `Play Again from Level 1`;
-                    level = 1; // Reset for next game if all levels completed
-                }
-            } else {
-                overlayMessage.innerHTML = `Time's Up! Game Over! <br>Score: ${score} <br>Try Level ${level} again?`;
-                restartButton.textContent = `Try Again (Level ${level})`;
-            }
-            overlay.style.display = 'flex'; // Show the overlay
+        function showLevelUp() {
+            levelUpScreen.style.display = 'block';
+            nextLevelDisplay.textContent = level + 1;
         }
 
-        restartButton.addEventListener('click', () => {
-            // If the message indicates all levels are completed, reset level to 1
-            if (overlayMessage.textContent.includes("Congratulations")) {
-                level = 1;
-            }
-            initializeGame(); // Restart the game (or next level)
-        });
+        function startNextLevel() {
+            level++;
+            levelUpScreen.style.display = 'none';
+            startGame();
+        }
 
+        function endGame() {
+            clearInterval(timer);
+            gameOverScreen.style.display = 'block';
+            finalScoreDisplay.textContent = score;
+        }
 
-        // Initial game setup when the page loads
-        initializeGame();
+        function restartGame() {
+            level = 1;
+            score = 0;
+            gameOverScreen.style.display = 'none';
+            startGame();
+        }
 
+        startGame();
     </script>
 </body>
 </html>
